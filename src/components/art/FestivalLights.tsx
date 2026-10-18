@@ -8,11 +8,13 @@ export function FestivalLights({
   className,
   kandils = true,
   lights = true,
+  toran = true,
   kandilAt,
 }: {
   className?: string;
   kandils?: boolean;
   lights?: boolean;
+  toran?: boolean;
   /** x positions (0-1440) for the kandils; keep them clear of headlines. */
   kandilAt?: number[];
 }) {
@@ -29,7 +31,11 @@ export function FestivalLights({
   });
   const bulbs = Array.from({ length: 18 }, (_, i) => {
     const t = i / 17;
-    return { x: 20 + t * 1400, y: 52 + Math.sin(t * Math.PI) * 58, d: (i % 5) * 0.55 };
+    return {
+      x: 20 + t * 1400,
+      y: 52 + Math.sin(t * Math.PI) * 58,
+      d: (i % 5) * 0.55,
+    };
   });
   const lens = [70, 104, 96, 66, 88, 78];
   const lanterns = (kandilAt ?? [150, 520, 930, 1290]).map((x, i) => ({
@@ -47,7 +53,15 @@ export function FestivalLights({
           <path d="M0 40 Q720 170 1440 40" stroke="#1a0c08" strokeWidth="2" fill="none" opacity="0.8" />
           {bulbs.map((b, i) => (
             <g key={i}>
-              <circle cx={b.x} cy={b.y + 6} r="17" fill="#ffd77a" opacity="0.18" className="twinkle" style={{ animationDelay: `${b.d}s` }} />
+              <circle
+                cx={b.x}
+                cy={b.y + 6}
+                r="17"
+                fill="#ffd77a"
+                opacity="0.18"
+                className="twinkle"
+                style={{ animationDelay: `${b.d}s` }}
+              />
               <circle cx={b.x} cy={b.y + 6} r="5" fill="#ffe7b0" />
             </g>
           ))}
@@ -75,23 +89,27 @@ export function FestivalLights({
         ))}
 
       {/* Marigold toran with mango leaves */}
-      <path d="M0 10 Q720 78 1440 10" stroke="#3a1f14" strokeWidth="3" fill="none" />
-      {leaves.map((l, i) => (
-        <path
-          key={i}
-          d={`M${l.x} ${l.y} q-9 14 0 30 q9 -16 0 -30z`}
-          fill={i % 2 ? "#3f7d3a" : "#4f9446"}
-          stroke="#1f3d1c"
-          strokeWidth="1.5"
-        />
-      ))}
-      {flowers.map((f, i) => (
-        <g key={i}>
-          <circle cx={f.x} cy={f.y} r="13" fill={f.c} />
-          <circle cx={f.x} cy={f.y} r="13" fill="none" stroke="#c4561a" strokeWidth="2" strokeDasharray="3 3" />
-          <circle cx={f.x} cy={f.y} r="4.5" fill="#c4561a" />
-        </g>
-      ))}
+      {toran && (
+        <>
+          <path d="M0 10 Q720 78 1440 10" stroke="#3a1f14" strokeWidth="3" fill="none" />
+          {leaves.map((l, i) => (
+            <path
+              key={i}
+              d={`M${l.x} ${l.y} q-9 14 0 30 q9 -16 0 -30z`}
+              fill={i % 2 ? "#3f7d3a" : "#4f9446"}
+              stroke="#1f3d1c"
+              strokeWidth="1.5"
+            />
+          ))}
+          {flowers.map((f, i) => (
+            <g key={i}>
+              <circle cx={f.x} cy={f.y} r="13" fill={f.c} />
+              <circle cx={f.x} cy={f.y} r="13" fill="none" stroke="#c4561a" strokeWidth="2" strokeDasharray="3 3" />
+              <circle cx={f.x} cy={f.y} r="4.5" fill="#c4561a" />
+            </g>
+          ))}
+        </>
+      )}
     </svg>
   );
 }

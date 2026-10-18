@@ -31,7 +31,7 @@ describe("menu configuration", () => {
     expect(screen.getByText("Crack it. Pour it. Devour it.")).toBeInTheDocument();
     expect(screen.getByText("Price to be announced")).toBeInTheDocument();
     expect(screen.getByText(AVAILABILITY_LABEL.coming_soon)).toBeInTheDocument();
-    expect(screen.getByText("Illustrative image")).toBeInTheDocument();
+    expect(screen.queryByText("Illustrative image")).not.toBeInTheDocument();
   });
 
   it("shows a drawn illustration for diyas until real photos exist, never a broken image", () => {

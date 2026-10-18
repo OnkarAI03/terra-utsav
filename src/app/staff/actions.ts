@@ -68,9 +68,10 @@ export async function recentRedemptions(): Promise<{ code: string; label: string
 
 const challengeSchema = z.object({
   participant: z.string().trim().max(40).optional().transform((v) => (v ? v : null)),
-  seconds: z.coerce.number().int().min(0).max(600),
+  // The attempt is 60 seconds; "completed" means the full 60.
+  seconds: z.coerce.number().int().min(0).max(60),
   completed: z.boolean(),
-});
+}).refine((v) => !v.completed || v.seconds === 60, { message: "A completed attempt is the full 60 seconds." });
 
 export type ChallengeState = { ok: boolean; message: string } | null;
 
@@ -81,7 +82,7 @@ export async function recordChallenge(_prev: ChallengeState, formData: FormData)
     seconds: formData.get("seconds"),
     completed: formData.get("completed") === "on",
   });
-  if (!parsed.success) return { ok: false, message: "Enter the seconds held (0 to 600)." };
+  if (!parsed.success) return { ok: false, message: "Enter the seconds held (0 to 60)." };
   try {
     const { supabase, user } = await requireRole("staff");
     const { error } = await supabase.from("challenge_results").insert({
@@ -91,7 +92,8 @@ export async function recordChallenge(_prev: ChallengeState, formData: FormData)
       recorded_by: user.id,
     });
     if (error) return { ok: false, message: "Could not save that result." };
-    return { ok: true, message: `Saved: ${parsed.data.seconds}s, ${parsed.data.completed ? "completed" : "not completed"}.` };
+    const who = parsed.data.participant ? `${parsed.data.participant}: ` : "";
+    return { ok: true, message: `Saved. ${who}${parsed.data.seconds} s, ${parsed.data.completed ? "completed" : "not completed"}.` };
   } catch (e) {
     return { ok: false, message: authMessage(e).message ?? "Not allowed." };
   }

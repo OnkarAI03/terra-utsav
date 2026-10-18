@@ -7,8 +7,9 @@ import { cn } from "@/lib/cn";
  * One shared manager for every scroll reveal on the page. It uses an IntersectionObserver when
  * the browser delivers its callbacks, and also checks positions on scroll, on resize and right
  * away when an element mounts, so content is shown even where observers are throttled (some
- * embedded or background browsers). Nothing is ever left hidden without script: the hidden state
- * only applies under `html.js`, and reduced motion shows everything in place.
+ * embedded or background browsers). Nothing is hidden before the page's script has run (slow
+ * phones see the content straight away), and only elements that start below the screen are
+ * hidden at all, so nothing on screen ever blinks out. Reduced motion shows everything in place.
  */
 const pending = new Set<HTMLElement>();
 let observer: IntersectionObserver | null = null;
@@ -60,10 +61,15 @@ function register(el: HTMLElement) {
       { rootMargin: "0px 0px -6% 0px", threshold: 0.01 },
     );
   }
+  // Already on screen: never hide it.
+  if (inView(el)) {
+    el.dataset.in = "true";
+    return;
+  }
+  el.dataset.pending = "";
   pending.add(el);
   observer?.observe(el);
   startListening();
-  if (inView(el)) show(el);
 }
 
 function unregister(el: HTMLElement) {

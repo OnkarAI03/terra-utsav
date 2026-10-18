@@ -1,5 +1,5 @@
 import { deleteProduct, saveProduct } from "@/app/admin/actions";
-import { AdminForm, Check, Field, Panel, Select, TextArea } from "@/components/admin/AdminForm";
+import { AdminForm, Check, Field, ImageField, Panel, Select, TextArea } from "@/components/admin/AdminForm";
 import { requirePageRole } from "@/lib/auth";
 import { mapProduct } from "@/lib/data/public";
 import { formatPrice } from "@/lib/format";
@@ -38,7 +38,7 @@ function ProductFields({ p }: { p?: Product }) {
       </div>
       <TextArea label="Description" name="description" defaultValue={p?.description} hint="No ingredient or allergy claims unless they are checked." />
       <div className="grid gap-4 md:grid-cols-2">
-        <Field label="Upload a photo" name="image" type="file" accept="image/webp,image/jpeg,image/png,image/avif" hint="WebP, JPEG, PNG or AVIF, up to 5 MB." />
+        <ImageField label="Upload a photo" name="image" hint="Any phone photo works: it is shrunk before it is sent." />
         <Field label="…or image URL" name="image_url" defaultValue={p?.imageUrl} />
       </div>
       <div className="flex flex-wrap gap-6">

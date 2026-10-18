@@ -3,8 +3,10 @@ import Image from "next/image";
 import { ButtonLink } from "@/components/ui/Button";
 import { Reveal } from "@/components/ui/Reveal";
 import type { GameSettings } from "@/lib/game/config";
+import { gameFacts } from "@/lib/game/copy";
 
-export function GameTeaser({ settings }: { settings: GameSettings }) {
+export function GameTeaser({ settings, prize = null }: { settings: GameSettings; prize?: string | null }) {
+  const facts = gameFacts(settings, prize);
   return (
     <section aria-labelledby="game-teaser-title" className="section-pad relative overflow-hidden bg-choc-900">
       <div className="shell grid items-center gap-12 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-16">
@@ -15,12 +17,12 @@ export function GameTeaser({ settings }: { settings: GameSettings }) {
             <span className="text-sticker-gold">Koochu Puchu.</span>
           </h2>
           <p className="mt-6 max-w-xl text-[1.15rem] font-semibold leading-relaxed text-cream-100">
-            Five levels, each faster and sneakier than the last. Practise as much as you like, then sign in and use your{" "}
-            {settings.maxRewardAttempts === 2 ? "two" : settings.maxRewardAttempts} reward attempts. Clear Level 5 and a coupon
-            lands in your wallet.
+            {facts.levelsWord[0].toUpperCase() + facts.levelsWord.slice(1)} quick levels, each faster and sneakier than the last.
+            Practise as much as you like, then sign in and use your {facts.attemptsWord} reward attempts. Clear Level{" "}
+            {facts.lastLevel} to win {facts.prize}.
           </p>
 
-          <ol className="mt-9 grid gap-2.5 sm:grid-cols-5" aria-label="The five levels">
+          <ol className="mt-9 grid gap-2.5 sm:grid-cols-3" aria-label="The levels">
             {settings.levels.map((l) => (
               <li
                 key={l.level}

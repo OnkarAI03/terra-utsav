@@ -82,7 +82,7 @@ create table public.team_groups (
   name text not null check (char_length(name) between 1 and 60),
   description text check (description is null or char_length(description) <= 240),
   mascot_variant text not null default 'generic'
-    check (mascot_variant in ('food', 'operations', 'marketing', 'finance', 'games', 'logistics', 'design', 'mentor', 'generic')),
+    check (mascot_variant in ('leader', 'food', 'operations', 'marketing', 'finance', 'games', 'logistics', 'design', 'sales', 'mentor', 'generic')),
   sort_order integer not null default 0,
   visible boolean not null default true,
   created_at timestamptz not null default now(),
@@ -103,7 +103,7 @@ create table public.team_members (
   photo_consent boolean not null default false,
   mascot_url text check (mascot_url is null or char_length(mascot_url) <= 500),
   mascot_variant text
-    check (mascot_variant is null or mascot_variant in ('food', 'operations', 'marketing', 'finance', 'games', 'logistics', 'design', 'mentor', 'generic')),
+    check (mascot_variant is null or mascot_variant in ('leader', 'food', 'operations', 'marketing', 'finance', 'games', 'logistics', 'design', 'sales', 'mentor', 'generic')),
   bio text check (bio is null or char_length(bio) <= 400),
   links jsonb not null default '[]'::jsonb check (jsonb_typeof(links) = 'array'),
   sort_order integer not null default 0,
@@ -192,7 +192,7 @@ create index coupon_redemptions_staff_idx on public.coupon_redemptions (redeemed
 create table public.challenge_results (
   id bigint generated always as identity primary key,
   participant_label text check (participant_label is null or char_length(participant_label) <= 40),
-  held_seconds smallint not null check (held_seconds between 0 and 600),
+  held_seconds smallint not null check (held_seconds between 0 and 60),
   completed boolean not null,
   recorded_by uuid references auth.users (id) on delete set null,
   recorded_at timestamptz not null default now()

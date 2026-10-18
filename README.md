@@ -4,20 +4,24 @@ Website for **TERRA UTSAV**, our stall at the **Eco-friendly Diwali Mandi 2026**
 S. B. Patil Institute of Management, Pradhikaran Road). Koochu Puchu is our original mascot.
 
 Chocolate Bomb, Chat Papdi, homemade Diwali diyas, the 60-second wet-brick challenge, and **Catch the Koochu Puchu**, a
-five-level game where winners get a coupon.
+three-level game where winners get a coupon.
 
 | Route | What it is |
 |---|---|
-| `/` | Homepage (approved design with a Diwali twist): hero, five attractions, "What's happening", Find us, food, diyas, challenge, game, close |
-| `/menu` | Food and homemade diyas, editable from admin |
-| `/challenge` | Hold the Wet Brick: steps, draft safety rules, spectator timer (records nothing) |
+| `/` | Homepage (approved design with a Diwali twist): hero with 3D akash kandils, five attractions, festive ribbon, "What's happening", Find us, food, 3D diyas, 3D brick challenge, game, close |
+| `/menu` | Food and homemade diyas, editable from admin, with a 3D chocolate bomb to crack open |
+| `/challenge` | Hold the Wet Brick: 3D brick, steps, draft safety rules, spectator timer (records nothing) |
 | `/game` | Catch the Koochu Puchu: free practice and server-checked reward attempts |
-| `/team` | Mentors and team, each card switching between a real photo and that person's Koochu Puchu |
+| `/team` | The 17 students in their 7 teams, each card switching between a real photo and that person's Koochu Puchu, and a row for our 3 mentors (Ankush, Jidnyesh, Sairaj). Kept out of search engines (`noindex`, and team photos send `X-Robots-Tag`), with a line on how to get a photo taken down |
 | `/rules` | Event, game, coupon and challenge rules, and how data is used |
-| `/login`, `/auth/callback`, `/auth/signout` | Passwordless sign-in (email link or 6-digit code; Google optional) |
+| `/login`, `/auth/callback`, `/auth/signout` | Passwordless sign-in: a 6-digit code by email (the email's link works too, on the same browser); Google optional |
 | `/rewards` | A student's coupon wallet with QR codes |
 | `/staff/redeem` | Staff console: scan or type a code, verify, redeem once, record brick results |
 | `/admin` | Admin dashboard: stats, event, menu, team, game tuning, rewards, roles, coupons, audit log |
+
+**Koochu Puchu, the chat helper**: the kitten button at the bottom right of the site's pages (not the game or sign-in) answers questions about the
+stall (date and place, menu, the game and its coupon, the brick challenge, the team and mentors) from the site's own
+content. See section 4.
 
 Stack: Next.js 15 (App Router) · TypeScript (strict) · Tailwind CSS 4 · Framer Motion · Supabase (Auth, Postgres, RLS,
 Storage) · Vitest + PGlite · Vercel.
@@ -50,16 +54,32 @@ Useful scripts:
 | `npm run check` | lint + typecheck + tests + build |
 | `npm run assets:build` | Rebuilds web images from `design/` (needs Python with Pillow and numpy) |
 
+### 3D, motion and the mystery eggs
+
+- **3D scenes** (three.js, `src/components/three/`): akash kandils in the homepage hero, three clay diyas on a rangoli
+  (tap to light or blow out), the wet brick on the homepage and `/challenge` (drag to turn it), and the chocolate bomb
+  on `/menu` (tap, or press "Crack it open"). Each scene sits on top of a drawn version of the same picture. three.js is
+  only downloaded when a scene comes near the screen, and it renders only while visible. Reduced motion, data saver,
+  low-memory or low-core phones and browsers without WebGL 2 keep the drawings. The kandils run on screens 1024px and
+  wider.
+- **Smooth scrolling** (Lenis) on public pages with a mouse or trackpad. Touch, the game, staff, admin and sign-in keep
+  native scrolling; so does reduced motion.
+- **Mystery eggs**: four hidden surprises (hints in the footer). They are for fun only and never touch the game,
+  coupons or the database; progress is kept in the visitor's browser.
+
 ## 2. Connect Supabase
 
 1. **Create a project** at supabase.com (region: Mumbai `ap-south-1` is closest).
 2. **Apply the migrations** in `supabase/migrations/`, in filename order. Either:
    - Supabase CLI: `npx supabase login`, `npx supabase link --project-ref <ref>`, `npx supabase db push`, or
-   - Dashboard > SQL Editor: paste and run each file in order (`...0100` to `...0500`).
+   - Dashboard > SQL Editor: paste and run each file in order (`...0100` to `...0600`). `...0500` sets the default
+     settings (coupon value "50% off a Chocolate Bomb"; reward play stays closed until you tick "terms confirmed").
+     `...0600` seeds the 17 students, their 7 groups and the 3 mentors.
 3. **Auth settings** (Dashboard > Authentication):
    - URL configuration: Site URL = your production URL. Redirect URLs: `https://<your-domain>/auth/callback`,
      `http://localhost:3000/auth/callback`, and your Vercel preview pattern, e.g. `https://*-<team>.vercel.app/auth/callback`.
-   - Email templates > Magic Link: add the code so students can type it on another device, e.g.
+   - Email templates > **Confirm signup** and **Magic Link**: the sign-in page asks for the 6-digit code, so add it to
+     both templates (someone signing in for the first time gets the Confirm signup email), e.g.
      `<p>Your TERRA UTSAV sign-in code: <strong>{{ .Token }}</strong></p>` next to the existing link.
    - For an event day, set up custom SMTP (Auth > SMTP) so sign-in emails are not limited by the built-in sender.
    - Optional: enable the Google provider and set `NEXT_PUBLIC_AUTH_GOOGLE=true`.
@@ -109,6 +129,17 @@ Everything that changes before the event is in `/admin`, not in code: event deta
 items, prices, photos and availability, team groups, people, photos (published only with consent) and mascot outfits,
 game difficulty, reward value, expiry, stock and terms, staff roles, extra attempts, cancelling coupons.
 
+- Dates and times in admin are entered in India time (IST) with date pickers.
+- Photos chosen in admin are shrunk in the browser (longest side 1600 px, WebP) before they upload, so phone photos fit.
+- **Reward play stays closed until you open it**: in `/admin/rewards`, check the coupon terms, keep coupons switched on
+  and tick "terms confirmed". Until then the game page says "Reward play opens closer to the Mandi" (before anyone signs in) and practice stays open.
+- The "Image is illustrative" tick in `/admin/menu` no longer puts a tag on the picture. While any item is ticked, the
+  footer says so once, and the admin checklist keeps "Real photos of the food and diyas" open.
+- The chat helper reads the same content as the pages. It picks up admin edits within about a minute (saving in
+  admin refreshes it straight away). It uses no AI service: answers are matched from the site's facts in
+  `src/lib/koochu/answer.ts`, and a question the site doesn't answer gets an honest "can't find that on this website"
+  with the Instagram link, never a guess. It stays off the game, sign-in, staff and admin pages.
+
 Two things live in code: the brick challenge rules (`src/content/challenge.ts`, set `rulesApproved: true` after the
 organisers approve them) and the default content used when the database is unreachable (`src/content/`, `src/lib/settings.ts`).
 
@@ -119,10 +150,16 @@ organisers approve them) and the default content used when the database is unrea
 - The database checks that levels are played in order, once each, by the attempt's owner, and that a pass did not
   finish faster than the server clock allows. Taps faster than 140 ms after a kitten appears, rapid-fire spam and
   oversized logs do not count.
-- Two reward attempts per student (configurable), enforced in Postgres with a row lock and a unique index. Starting a
+- Two reward attempts per player (configurable), enforced in Postgres with a row lock and a unique index. Starting a
   level and leaving counts as a loss. Admins can grant extra attempts.
-- A Level 5 win issues at most one coupon (unique per attempt), with an unpredictable code from the database's
-  cryptographic random generator. Redemption is a single atomic update; a second phone cannot redeem the same coupon.
+- Reward play needs a confirmed email address (anonymous sessions are refused), and a reward attempt can only start
+  while coupons are switched on and confirmed in admin.
+- **One coupon per player**: an account that has already won cannot start another reward attempt.
+- Clearing the last level (Level 3 by default) issues at most one coupon (unique per attempt), with an unpredictable
+  code from the database's cryptographic random generator. Redemption is a single atomic update; a second phone cannot
+  redeem the same coupon.
+- Tap logs whose times run backwards, and passes that took far longer on the server clock than the level allows
+  (countdown + play time + 25 s, a slow-motion trick), do not count.
 - Limitations (honest): it is a client-side game. Someone who reverse-engineers the engine could script plausible taps.
   The checks above make that slow, visible in the admin stats ("Rejected results") and limited to two attempts per
   account. Staff can cancel suspicious coupons. See `docs/SECURITY.md`.
@@ -132,16 +169,22 @@ Difficulty targets roughly 20 to 30% of players winning across two attempts. The
 
 ## 6. Tests
 
-`npm test` runs 105 tests:
+`npm test` runs 133 tests:
 
 - **Game engine and tuning**: determinism, hit testing, bot-speed and spam rejection, level progression, modelled win rate.
 - **Database** (real migrations in PGlite with a Supabase auth/storage shim): attempt limits, resume, abandoned levels, clock
-  checks, coupon issuance (one per win, stock, expiry, disabled rewards), atomic redemption, row level security for
-  students, staff, admins and the public, audit logging, seed data matching the code defaults.
-- **Security**: API routes ignore client scores, refuse cross-site and malformed requests and other players' attempts;
+  checks (too fast, too slow, rewound), coupon issuance (one per win, one per player, stock, expiry, rewards closed or
+  unconfirmed), atomic redemption, row level security for students, staff, admins and the public, audit logging, seed
+  data matching the code defaults.
+- **Security**: API routes ignore client scores, refuse cross-site and malformed requests, unconfirmed or anonymous
+  accounts and other players' attempts;
   admin and staff actions refuse the wrong roles; middleware protects private pages; robots and structured data rules.
 - **Components and pages**: team card switching (timing, pausing, off-screen, reduced motion, image fallbacks),
-  navigation and mobile menu, menu cards and prices, and every public route rendering without a database.
+  navigation and mobile menu, menu cards and prices, 3D scene fallbacks, the mystery eggs, the chat widget (opens,
+  answers, copes with being offline, stays off private pages), and every public route rendering without a database.
+- **Chat answers**: date, place, menu (never an invented price), dishes by name with typos and Hindi or Marathi words,
+  game and coupon numbers from the live settings, team, roles, people and mentors, and honest "the site doesn't say"
+  replies.
 
 PGlite has one connection, so true parallel transactions are not reproduced; concurrency safety comes from row locks
 and unique constraints, which the tests exercise by replaying the same request.
@@ -150,9 +193,11 @@ and unique constraints, which the tests exercise by replaying the same request.
 
 - **Sign-in email never arrives**: check Auth > Logs in Supabase; the built-in email sender has a low hourly limit. Use custom SMTP.
 - **"Sign-in is not switched on yet"**: `NEXT_PUBLIC_SUPABASE_URL` / key missing in this environment. Redeploy after adding them.
-- **Reward play says "not configured"**: `SUPABASE_SECRET_KEY` is missing on the server.
+- **Game says "Reward play opens closer to the Mandi"**: coupons are not switched on and confirmed in `/admin/rewards`,
+  or `SUPABASE_SECRET_KEY` is missing on the server.
 - **Staff page sends me to sign in**: your account needs the staff role (admin > People & coupons).
 - **Team photo not showing**: tick "agreed to their photo being published" for that person.
+- **Chat gives an old answer**: it caches site content for up to a minute; saving anything in admin refreshes it.
 - **Images from Supabase Storage do not load**: `NEXT_PUBLIC_SUPABASE_URL` must be set at build time (it allows the image host).
 - **Port 3000 busy on Windows**: another `next` process is still running; stop it before `npm run build`.
 

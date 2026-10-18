@@ -25,7 +25,7 @@ insert into public.site_settings (key, value) values
   '{
     "rewardsEnabled": true,
     "couponLabel": "TERRA UTSAV winner''s coupon",
-    "couponValueText": null,
+    "couponValueText": "50% off a Chocolate Bomb",
     "maxRedemptions": 1,
     "expiresAfterHours": null,
     "expiresAt": null,
@@ -36,7 +36,7 @@ insert into public.site_settings (key, value) values
 ),
 (
   'game',
-  '{"version":1,"maxRewardAttempts":2,"practiceEnabled":true,"minReactionMs":140,"minTapGapMs":90,"maxTapsPerLevel":160,"countdownMs":3000,"levels":[{"level":1,"name":"Warm-up Whiskers","blurb":"Koochu Puchu pops out of the Diwali gift boxes. Tap to catch.","durationMs":30000,"targetCatches":8,"lives":3,"spawnGapMs":[850,1250],"visibleMs":[1300,1700],"dashMs":[1800,2200],"decoyChance":0,"dashChance":0,"maxActive":2,"catRadius":0.11,"decoyRadius":0.09},{"level":2,"name":"Decoy Drama","blurb":"Snacks pop up too. Tapping a snack costs a heart.","durationMs":30000,"targetCatches":12,"lives":3,"spawnGapMs":[700,1050],"visibleMs":[940,1240],"dashMs":[1700,2100],"decoyChance":0.3,"dashChance":0,"maxActive":3,"catRadius":0.1,"decoyRadius":0.09},{"level":3,"name":"Diya Dash","blurb":"Now the kitten sprints between the diyas. Catch it mid-run.","durationMs":30000,"targetCatches":15,"lives":3,"spawnGapMs":[620,950],"visibleMs":[840,1100],"dashMs":[1450,1800],"decoyChance":0.32,"dashChance":0.34,"maxActive":3,"catRadius":0.095,"decoyRadius":0.09},{"level":4,"name":"Chocolate Rush","blurb":"Faster, busier, sneakier. Two hearts only.","durationMs":30000,"targetCatches":16,"lives":2,"spawnGapMs":[520,820],"visibleMs":[720,940],"dashMs":[1250,1600],"decoyChance":0.4,"dashChance":0.36,"maxActive":4,"catRadius":0.09,"decoyRadius":0.09},{"level":5,"name":"Diwali Finale","blurb":"Koochu Puchu at full Diwali speed. Catch 18 to win.","durationMs":30000,"targetCatches":18,"lives":2,"spawnGapMs":[440,720],"visibleMs":[620,830],"dashMs":[1050,1350],"decoyChance":0.4,"dashChance":0.4,"maxActive":4,"catRadius":0.085,"decoyRadius":0.09}]}'::jsonb
+  '{"version":1,"maxRewardAttempts":2,"practiceEnabled":true,"minReactionMs":140,"minTapGapMs":90,"maxTapsPerLevel":160,"countdownMs":3000,"levels":[{"level":1,"name":"Warm-up Whiskers","blurb":"Koochu Puchu pops out of the Diwali gift boxes. Tap to catch.","durationMs":25000,"targetCatches":8,"lives":3,"spawnGapMs":[850,1250],"visibleMs":[1300,1700],"dashMs":[1800,2200],"decoyChance":0,"dashChance":0,"maxActive":2,"catRadius":0.11,"decoyRadius":0.09},{"level":2,"name":"Diya Dash","blurb":"Snacks pop up too, and the kitten starts to sprint. Two hearts: tapping a snack costs one.","durationMs":30000,"targetCatches":15,"lives":2,"spawnGapMs":[600,900],"visibleMs":[800,1050],"dashMs":[1300,1650],"decoyChance":0.35,"dashChance":0.3,"maxActive":3,"catRadius":0.095,"decoyRadius":0.09},{"level":3,"name":"Diwali Finale","blurb":"Koochu Puchu at full Diwali speed. Catch 21 to win.","durationMs":30000,"targetCatches":21,"lives":2,"spawnGapMs":[460,740],"visibleMs":[640,860],"dashMs":[1100,1400],"decoyChance":0.4,"dashChance":0.38,"maxActive":4,"catRadius":0.088,"decoyRadius":0.09}]}'::jsonb
 )
 on conflict (key) do nothing;
 

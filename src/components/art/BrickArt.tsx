@@ -11,7 +11,7 @@ export function BrickArt({ className, title = "A single wet clay brick" }: { cla
     [150, 70, 1.6], [176, 84, 1.3], [208, 66, 1.8], [120, 96, 1.4], [240, 92, 1.2],
   ] as const;
   return (
-    <svg viewBox="0 0 320 260" className={cn("overflow-visible", className)} role="img" aria-label={title}>
+    <svg viewBox="0 0 320 260" className={cn("overflow-visible", className)} role={title ? "img" : undefined} aria-label={title || undefined} aria-hidden={title ? undefined : true}>
       <defs>
         <linearGradient id="brick-front" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor="#b5512f" />

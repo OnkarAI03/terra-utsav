@@ -1,12 +1,12 @@
 import { fail, isSameOriginJson, json, readJson } from "@/lib/api";
-import { gameContext, judgeLevel, parseSnapshot, submitLevelBody, withinRateLimit } from "@/lib/game/server";
+import { gameContext, judgeLevel, parseSnapshot, submitLevelBody, tapsRewound, withinRateLimit } from "@/lib/game/server";
 
 export const dynamic = "force-dynamic";
 
 /**
  * Finish a level. The body carries only the raw taps (time, x, y). The server replays them against
  * the level generated from the stored seed; the database then checks the order of play and the
- * clock, records the result and, after a Level 5 win, issues at most one coupon.
+ * clock, records the result and, after a win on the final level, issues at most one coupon.
  */
 export async function POST(request: Request) {
   if (!isSameOriginJson(request)) return fail("bad_request", 400);
@@ -53,7 +53,7 @@ export async function POST(request: Request) {
     p_decoy_hits: result.decoyHits,
     p_taps: result.tapsCounted,
     p_game_time_ms: Math.round(result.endedAt),
-    p_flags: { tooFast: result.tooFast, ignored: result.ignored, submittedTaps: body.taps.length },
+    p_flags: { tooFast: result.tooFast, ignored: result.ignored, submittedTaps: body.taps.length, rewound: tapsRewound(body.taps) },
   });
   if (error || !data) return fail("server_error", 500);
   if (data.error) return fail(data.error, 409);

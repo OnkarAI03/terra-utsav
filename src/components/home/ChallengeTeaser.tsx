@@ -1,5 +1,5 @@
 import { ArrowRight } from "lucide-react";
-import { BrickArt } from "@/components/art/BrickArt";
+import { BrickScene3D } from "@/components/three/BrickScene3D";
 import { ButtonLink } from "@/components/ui/Button";
 import { Reveal } from "@/components/ui/Reveal";
 
@@ -15,7 +15,7 @@ export function ChallengeTeaser() {
             >
               60
             </span>
-            <BrickArt className="absolute bottom-[4%] left-1/2 w-[72%] -translate-x-1/2 drop-shadow-[0_24px_30px_rgb(0_0_0/0.55)]" />
+            <BrickScene3D className="absolute inset-0" />
           </div>
         </Reveal>
         <Reveal delay={90} className="order-1 lg:order-2">

@@ -6,15 +6,19 @@ import { as, backdateLevel, createTestDb, createUser, grantRole, serviceCall, us
 type Json = Record<string, unknown>;
 
 let db: PGlite;
+const LAST = DEFAULT_GAME_SETTINGS.levels.length;
+const LAST_TARGET = DEFAULT_GAME_SETTINGS.levels[LAST - 1].targetCatches;
 
 beforeEach(async () => {
   db = await createTestDb();
+  // Reward play is closed until the organisers switch coupons on and confirm the terms.
+  await setRewards({ rewardsEnabled: true, confirmed: true });
 });
 
 const startAttempt = (user: string) => serviceCall<Json>(db, "public.game_start_attempt($1)", [user]);
 const startLevel = (user: string, attempt: string, level: number, seed = 1234) =>
   serviceCall<Json>(db, "public.game_start_level($1, $2, $3, $4)", [user, attempt, level, seed]);
-const submit = (user: string, attempt: string, level: number, outcome: string, catches: number, gameTimeMs = 0) =>
+const submit = (user: string, attempt: string, level: number, outcome: string, catches: number, gameTimeMs = 0, flags: Json = {}) =>
   serviceCall<Json>(db, "public.game_submit_level($1, $2, $3, $4, $5, $6, $7, $8, $9)", [
     user,
     attempt,
@@ -24,7 +28,7 @@ const submit = (user: string, attempt: string, level: number, outcome: string, c
     0,
     catches,
     gameTimeMs,
-    {},
+    flags,
   ]);
 
 /** Pass a level honestly: the level "took" 20 s on the server clock and 19 s in the game. */
@@ -38,7 +42,7 @@ async function winAttempt(user: string) {
   const a = await startAttempt(user);
   const id = a.attemptId as string;
   let last: Json = {};
-  for (let l = 1; l <= 5; l++) last = await passLevel(user, id, l);
+  for (let l = 1; l <= LAST; l++) last = await passLevel(user, id, l);
   return { attemptId: id, result: last };
 }
 
@@ -152,6 +156,43 @@ describe("reward attempts", () => {
     expect(old.rows[0].status).toBe("lost");
   });
 
+  it("keeps reward play closed until coupons are on and the terms confirmed", async () => {
+    const u = await createUser(db, "closed@student.test");
+    await setRewards({ confirmed: false });
+    expect((await startAttempt(u)).error).toBe("rewards_closed");
+    await setRewards({ confirmed: true, rewardsEnabled: false });
+    expect((await startAttempt(u)).error).toBe("rewards_closed");
+    const n = await db.query<{ n: number }>("select count(*)::int as n from public.game_attempts where user_id = $1", [u]);
+    expect(n.rows[0].n).toBe(0);
+  });
+
+  it("gives each player one coupon at most", async () => {
+    const u = await createUser(db, "once@student.test");
+    expect((await winAttempt(u)).result.reward).toBe("issued");
+    expect((await startAttempt(u)).error).toBe("already_won");
+  });
+
+  it("rejects a pass whose tap clock went backwards", async () => {
+    const u = await createUser(db, "rewind@student.test");
+    const a = await startAttempt(u);
+    const id = a.attemptId as string;
+    await startLevel(u, id, 1);
+    await backdateLevel(db, id, 1, 20_000);
+    const r = await submit(u, id, 1, "passed", 8, 19_000, { rewound: true });
+    expect(r.outcome).toBe("invalid");
+  });
+
+  it("rejects a pass played on a slowed-down clock", async () => {
+    const u = await createUser(db, "slow@student.test");
+    const a = await startAttempt(u);
+    const id = a.attemptId as string;
+    await startLevel(u, id, 1);
+    // 19 s of game time cannot take 70 s of real time (countdown 3 s + 25 s grace).
+    await backdateLevel(db, id, 1, 70_000);
+    const r = await submit(u, id, 1, "passed", 8, 19_000);
+    expect(r.outcome).toBe("invalid");
+  });
+
   it("ignores a second submission for the same level", async () => {
     const u = await createUser(db, "i@student.test");
     const a = await startAttempt(u);
@@ -163,7 +204,7 @@ describe("reward attempts", () => {
 });
 
 describe("coupon issuance", () => {
-  it("issues exactly one coupon for a level 5 win", async () => {
+  it("issues exactly one coupon for a win on the final level", async () => {
     const u = await createUser(db, "win@student.test");
     const { attemptId, result } = await winAttempt(u);
     expect(result.attemptStatus).toBe("won");
@@ -171,7 +212,7 @@ describe("coupon issuance", () => {
     const coupon = result.coupon as Json;
     expect(coupon.code).toMatch(/^TU-[0-9A-HJKMNP-TV-Z]{5}-[0-9A-HJKMNP-TV-Z]{5}$/);
 
-    const replay = await submit(u, attemptId, 5, "passed", 18, 19_000);
+    const replay = await submit(u, attemptId, LAST, "passed", LAST_TARGET, 19_000);
     expect(replay.error).toBe("attempt_finished");
     const n = await db.query<{ n: number }>("select count(*)::int as n from public.coupons where attempt_id = $1", [attemptId]);
     expect(n.rows[0].n).toBe(1);
@@ -188,13 +229,23 @@ describe("coupon issuance", () => {
     ).rejects.toThrow(/duplicate key/);
   });
 
-  it("does not issue coupons while rewards are switched off", async () => {
-    await setRewards({ rewardsEnabled: false });
+  it("does not issue a coupon if rewards are switched off during an attempt", async () => {
     const u = await createUser(db, "off@student.test");
-    const { result } = await winAttempt(u);
+    const a = await startAttempt(u);
+    const id = a.attemptId as string;
+    for (let l = 1; l < LAST; l++) await passLevel(u, id, l);
+    await setRewards({ rewardsEnabled: false });
+    const result = await passLevel(u, id, LAST);
     expect(result.attemptStatus).toBe("won");
     expect(result.reward).toBe("rewards_disabled");
     expect(result.coupon).toBeNull();
+  });
+
+  it("issues the coupon even if the fixed expiry cannot be read", async () => {
+    await setRewards({ expiresAt: "27 Oct 2026, 3 pm IST" });
+    const u = await createUser(db, "badexpiry@student.test");
+    const { result } = await winAttempt(u);
+    expect(result.reward).toBe("issued");
   });
 
   it("stops issuing when the coupon stock runs out", async () => {

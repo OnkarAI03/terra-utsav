@@ -35,7 +35,7 @@ export default async function AdminGamePage() {
 
       <Panel title="Edit game settings">
         <p className="mb-4 text-[0.98rem]">
-          Edit the JSON and save. It is checked before saving: five levels, sensible ranges, and every field present. Attempts already in
+          Edit the JSON and save. It is checked before saving: one to five levels numbered in order (three by default), sensible ranges, and every field present. Attempts already in
           progress keep the settings they started with. Field guide: <code>targetCatches</code> kittens to catch, <code>lives</code> hearts,{" "}
           <code>visibleMs</code> how long a pop-up stays, <code>dashMs</code> how long a dash takes, <code>decoyChance</code> share of snacks,{" "}
           <code>catRadius</code> how forgiving a tap is.

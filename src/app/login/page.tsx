@@ -25,6 +25,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   const next = safeNextPath(typeof params.next === "string" ? params.next : null, "/rewards");
   const denied = typeof params.denied === "string" ? DENIED[params.denied] : null;
   const linkError = params.error === "link";
+  const browserError = params.error === "browser";
   const session = await getSession();
 
   return (
@@ -34,7 +35,12 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         <div className="shell grid items-start gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.8fr)]">
           <div className="max-w-lg rounded-[var(--radius-panel)] bg-cream-100 p-7 shadow-[var(--shadow-card)] md:p-9">
             {denied && <p className="mb-5 rounded-2xl bg-gold-300 p-4 font-bold">{denied}</p>}
-            {linkError && <p className="mb-5 rounded-2xl bg-gold-300 p-4 font-bold">That sign-in link has expired or was already used. Ask for a new one.</p>}
+            {linkError && <p className="mb-5 rounded-2xl bg-gold-300 p-4 font-bold">That sign-in link has expired or was already used. Type the 6-digit code from the email instead, or ask for a new one.</p>}
+            {browserError && (
+              <p className="mb-5 rounded-2xl bg-gold-300 p-4 font-bold">
+                The link opened in a different browser from the one you started in. Go back to that one (Instagram, for example) and type the 6-digit code from the email.
+              </p>
+            )}
             {session ? (
               <div className="flex flex-col gap-4">
                 <p className="text-[1.05rem]">

@@ -1,7 +1,7 @@
 import "server-only";
 import { cache } from "react";
 import { DEFAULT_PRODUCTS } from "@/content/products";
-import { previewTeam } from "@/content/team";
+import { defaultTeam } from "@/content/team";
 import { DEFAULT_GAME_SETTINGS, parseGameSettings, type GameSettings } from "@/lib/game/config";
 import { DEFAULT_EVENT, DEFAULT_REWARDS, parseEventSettings, parseRewardSettings, type EventSettings, type RewardSettings } from "@/lib/settings";
 import { createSupabasePublicClient } from "@/lib/supabase/public";
@@ -109,13 +109,13 @@ function asLinks(v: unknown): TeamLink[] {
 
 export const getTeam = cache(async (): Promise<TeamData> => {
   const supabase = createSupabasePublicClient();
-  if (!supabase) return previewTeam();
+  if (!supabase) return defaultTeam();
   try {
     const [groupsRes, membersRes] = await Promise.all([
       supabase.from("team_groups").select("id, slug, name, description, mascot_variant, sort_order").eq("visible", true).order("sort_order"),
       supabase.from("team_members_public").select("*").order("sort_order"),
     ]);
-    if (groupsRes.error || membersRes.error) return previewTeam();
+    if (groupsRes.error || membersRes.error) return defaultTeam();
 
     const groups: TeamGroup[] = (groupsRes.data ?? []).map((g) => ({
       id: g.id,
@@ -141,14 +141,19 @@ export const getTeam = cache(async (): Promise<TeamData> => {
       sortOrder: m.sort_order,
     }));
 
-    if (members.length === 0) return previewTeam();
+    if (members.length === 0) return defaultTeam();
+    const fallback = defaultTeam();
+    const mentors = members.filter((m) => m.kind === "mentor");
+    const students = members.filter((m) => m.kind === "student");
     return {
       groups,
-      mentors: members.filter((m) => m.kind === "mentor"),
-      students: members.filter((m) => m.kind === "student"),
-      isPreview: false,
+      // Mentors not entered yet keep their labelled preview slots.
+      mentors: mentors.length ? mentors : fallback.mentors,
+      students,
+      mentorsArePreview: mentors.length === 0,
+      studentsArePreview: false,
     };
   } catch {
-    return previewTeam();
+    return defaultTeam();
   }
 });

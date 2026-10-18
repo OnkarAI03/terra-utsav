@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { MapPin } from "lucide-react";
-import { Wordmark } from "@/components/brand/Wordmark";
 import { MAIN_NAV } from "@/lib/nav";
 import { HeaderShell } from "./HeaderShell";
+import { LogoLink } from "./LogoLink";
 import { MobileMenu } from "./MobileMenu";
 import { NavLinks } from "./NavLinks";
 
@@ -10,21 +10,20 @@ export function SiteHeader() {
   return (
     <HeaderShell>
       <div className="shell flex h-[var(--header-h)] items-center justify-between gap-4">
-        <Link href="/" aria-label="TERRA UTSAV home" className="relative z-[60] shrink-0 rounded-lg">
-          <Wordmark size="md" />
-        </Link>
+        <LogoLink />
 
-        <nav aria-label="Main" className="hidden lg:block">
+        <nav aria-label="Main" className="hidden xl:block">
           <NavLinks items={MAIN_NAV} />
         </nav>
 
         <div className="flex items-center gap-2">
           <Link
             href="/#find-us"
-            className="hidden items-center gap-2 rounded-full border-2 border-cream-100/80 px-4 py-2 text-[0.95rem] font-extrabold text-cream-100 transition-colors duration-150 hover:bg-cream-100 hover:text-ink sm:inline-flex"
+            className="inline-flex min-h-11 items-center gap-2 whitespace-nowrap rounded-full bg-cream-100 px-3.5 py-2 text-[0.95rem] font-extrabold text-ink shadow-[0_4px_0_var(--color-cream-300)] transition-transform duration-150 hover:-translate-y-0.5 sm:px-4"
           >
             <MapPin aria-hidden className="h-4 w-4" />
-            Find Our Stall
+            <span className="hidden min-[400px]:inline">Find Our Stall</span>
+            <span className="min-[400px]:hidden">Find us</span>
           </Link>
           <MobileMenu items={MAIN_NAV} />
         </div>

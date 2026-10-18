@@ -35,8 +35,18 @@ export async function gameContext(): Promise<GameContext> {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { ok: false, code: "unauthenticated", status: 401 };
+  // Reward play needs a real, verified email: no anonymous or half-finished sign-ups.
+  if (!user || user.is_anonymous || !user.email_confirmed_at) return { ok: false, code: "unauthenticated", status: 401 };
   return { ok: true, user, service };
+}
+
+/**
+ * The board records taps in the order they happen, so an honest log never goes back in time.
+ * A log that does means the level clock was restarted mid-level.
+ */
+export function tapsRewound(rawTaps: [number, number, number][]): boolean {
+  for (let i = 1; i < rawTaps.length; i++) if (rawTaps[i][0] < rawTaps[i - 1][0]) return true;
+  return false;
 }
 
 export async function withinRateLimit(service: SupabaseClient, key: string, limit: number, windowSeconds: number): Promise<boolean> {

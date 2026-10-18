@@ -1,10 +1,11 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { z } from "zod";
 import { AuthError, requireRole, type Session } from "@/lib/auth";
 import { gameSettingsSchema } from "@/lib/game/config";
-import { eventSettingsSchema, rewardSettingsSchema } from "@/lib/settings";
+import { formatDateTime } from "@/lib/format";
+import { eventSettingsSchema, fromIstInput, rewardSettingsSchema } from "@/lib/settings";
 import { MASCOT_VARIANTS } from "@/lib/types";
 
 export type ActionState = { ok: boolean; message: string } | null;
@@ -37,6 +38,8 @@ function int(fd: FormData, key: string): number | null {
 
 function refresh() {
   revalidatePath("/", "layout");
+  // The Koochu Puchu chat caches the same content separately.
+  revalidateTag("site-content");
 }
 
 async function saveSetting(session: Session, key: "event" | "rewards" | "game", value: unknown) {
@@ -62,12 +65,16 @@ async function uploadImage(session: Session, file: FormDataEntryValue | null, fo
 export async function saveEvent(_: ActionState, fd: FormData): Promise<ActionState> {
   try {
     const session = await admin();
+    const startsAt = fromIstInput(text(fd, "startsAt"));
+    const endsAt = fromIstInput(text(fd, "endsAt"));
+    if (startsAt === "invalid" || endsAt === "invalid") return fail("Pick the start and end with the calendar (India time).");
+    if (startsAt && endsAt && Date.parse(endsAt) <= Date.parse(startsAt)) return fail("The end is before the start.");
     const parsed = eventSettingsSchema.safeParse({
       festivalName: text(fd, "festivalName"),
       dateText: text(fd, "dateText"),
       timeText: text(fd, "timeText"),
-      startsAt: text(fd, "startsAt"),
-      endsAt: text(fd, "endsAt"),
+      startsAt,
+      endsAt,
       venue: text(fd, "venue"),
       stallLocation: text(fd, "stallLocation"),
       mapUrl: text(fd, "mapUrl"),
@@ -88,22 +95,34 @@ export async function saveEvent(_: ActionState, fd: FormData): Promise<ActionSta
 export async function saveRewards(_: ActionState, fd: FormData): Promise<ActionState> {
   try {
     const session = await admin();
+    const expiresAt = fromIstInput(text(fd, "expiresAt"));
+    if (expiresAt === "invalid") return fail("Pick the expiry date and time with the calendar (India time).");
+    if (expiresAt && Date.parse(expiresAt) <= Date.now()) return fail("That expiry is in the past. Coupons would be born expired.");
+    const expiresAfterHours = int(fd, "expiresAfterHours");
+    if (expiresAt && expiresAfterHours !== null) return fail("Use either a fixed expiry or hours, not both.");
     const parsed = rewardSettingsSchema.safeParse({
       rewardsEnabled: fd.get("rewardsEnabled") === "on",
       couponLabel: text(fd, "couponLabel") ?? "",
       couponValueText: text(fd, "couponValueText"),
       maxRedemptions: int(fd, "maxRedemptions") ?? 1,
-      expiresAfterHours: int(fd, "expiresAfterHours"),
-      expiresAt: text(fd, "expiresAt"),
+      expiresAfterHours,
+      expiresAt,
       maxCouponsTotal: int(fd, "maxCouponsTotal"),
       confirmed: fd.get("confirmed") === "on",
       redemptionInstructions: text(fd, "redemptionInstructions") ?? "",
     });
     if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "Check the fields and try again.");
+    if (parsed.data.maxCouponsTotal === 0) return fail("Total coupons is 0, so every winner would be told they have run out. Leave it empty for no limit.");
     const { error } = await saveSetting(session, "rewards", parsed.data);
     if (error) return fail("Could not save the reward rules.");
     refresh();
-    return ok("Reward rules saved. They apply to coupons issued from now on.");
+    const expiry = parsed.data.expiresAt
+      ? ` Coupons expire ${formatDateTime(parsed.data.expiresAt)} (India time).`
+      : parsed.data.expiresAfterHours
+        ? ` Each coupon expires ${parsed.data.expiresAfterHours} hours after it is won.`
+        : " Coupons have no expiry.";
+    const live = parsed.data.rewardsEnabled && parsed.data.confirmed ? " Reward play is open." : " Reward play stays closed until coupons are switched on and the terms are confirmed.";
+    return ok(`Reward rules saved and live.${expiry}${live}`);
   } catch (e) {
     return authFail(e);
   }

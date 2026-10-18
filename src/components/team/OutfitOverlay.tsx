@@ -142,6 +142,34 @@ export function OutfitOverlay({ variant, className }: { variant: MascotVariant; 
           </>
         )}
 
+        {variant === "leader" && (
+          <>
+            {/* Blazer lapels with a gold star badge */}
+            <path d="M318 600 L408 540 L452 556 L430 700 L360 790 L320 760 Z" fill="#3a0f17" stroke={ink} strokeWidth="6" />
+            <path d="M622 600 L532 540 L488 556 L510 700 L580 790 L620 760 Z" fill="#3a0f17" stroke={ink} strokeWidth="6" />
+            <path d="M408 540 L452 556 L436 650" stroke="#d99a3c" strokeWidth="5" fill="none" />
+            <path d="M532 540 L488 556 L504 650" stroke="#d99a3c" strokeWidth="5" fill="none" />
+            <polygon
+              points="384,612 392,632 414,633 397,646 403,667 384,655 365,667 371,646 354,633 376,632"
+              fill={`url(#gold-${uid})`}
+              stroke={ink}
+              strokeWidth="4"
+            />
+          </>
+        )}
+
+        {variant === "sales" && (
+          <>
+            <Neckerchief fill={`url(#cloth-${uid})`} trim={`url(#gold-${uid})`} ink={ink} />
+            {/* Megaphone held at the chest */}
+            <path d="M486 676 L612 616 L628 742 Z" fill="#fbefdb" stroke={ink} strokeWidth="6" />
+            <path d="M486 676 L612 616" stroke="#931f33" strokeWidth="10" />
+            <rect x="466" y="660" width="34" height="40" rx="8" fill="#931f33" stroke={ink} strokeWidth="6" />
+            <ellipse cx="620" cy="679" rx="14" ry="64" fill="#d99a3c" stroke={ink} strokeWidth="6" />
+            <path d="M656 640 q22 39 0 78 M680 620 q34 59 0 118" stroke="#f7d58c" strokeWidth="6" fill="none" strokeLinecap="round" />
+          </>
+        )}
+
         {variant === "generic" && <Neckerchief fill={`url(#cloth-${uid})`} trim={`url(#gold-${uid})`} ink={ink} />}
       </g>
     </svg>
@@ -171,13 +199,15 @@ function Paw({ x, y, scale, fill }: { x: number; y: number; scale: number; fill:
 }
 
 export const VARIANT_LABEL: Record<MascotVariant, string> = {
-  food: "Kitchen crew",
+  leader: "Team leadership",
+  food: "Food and products",
   operations: "Operations",
-  marketing: "Marketing and media",
+  marketing: "Digital marketing and media",
   finance: "Finance",
   games: "Games and activities",
-  logistics: "Logistics",
-  design: "Design and creative",
+  logistics: "Purchase and inventory",
+  design: "Decor and design",
+  sales: "Sales",
   mentor: "Mentor",
   generic: "TERRA crew",
 };

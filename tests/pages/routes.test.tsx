@@ -58,23 +58,29 @@ describe("public routes render without a database", () => {
   it("rules: attempts, coupons, privacy", async () => {
     const { default: Page } = await import("@/app/rules/page");
     render(await Page());
-    expect(screen.getByText(/Each student gets 2 reward attempts/)).toBeInTheDocument();
+    expect(screen.getByText(/Each player gets 2 reward attempts/)).toBeInTheDocument();
     expect(screen.getByText(/Practice mode is free and unlimited. It never awards coupons./)).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Your data" })).toBeInTheDocument();
   });
 
-  it("team: preview slots for 3 mentors and 20 students, clearly labelled", async () => {
+  it("team: the 17 students by group, and the 3 mentors in a compact row", async () => {
     const { default: Page } = await import("@/app/team/page");
     render(await Page());
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("The people behind TERRA UTSAV.");
-    expect(screen.getAllByText("Preview slot")).toHaveLength(23);
-    expect(screen.getByText(/Preview: the line-up is on its way/)).toBeInTheDocument();
+    expect(screen.getByText(/17 students, 7 teams/)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Saniya Bhor" })).toBeInTheDocument();
+    expect(screen.getByAltText("Photo of Sanket Wakale")).toBeInTheDocument();
+    expect(screen.queryByText("Preview slot")).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Our mentors" })).toBeInTheDocument();
+    for (const name of ["Ankush", "Jidnyesh", "Sairaj"]) expect(screen.getByAltText(`Photo of ${name}`)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Pause the photo switching" })).toBeInTheDocument();
+    expect(screen.getByText(/Want your photo changed or removed/)).toBeInTheDocument();
   });
 
-  it("game: practice available, reward play explains it needs sign-in to be switched on", async () => {
+  it("game: practice available, reward play says when it opens", async () => {
     const { default: Page } = await import("@/app/game/page");
     render(await Page());
-    expect(screen.getByRole("button", { name: "Practise" })).toBeInTheDocument();
-    expect(await screen.findByText(/Reward play opens once the stall's sign-in is switched on/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Practise level 1" })).toBeInTheDocument();
+    expect(await screen.findByText(/Reward play opens closer to the Mandi/)).toBeInTheDocument();
   });
 });

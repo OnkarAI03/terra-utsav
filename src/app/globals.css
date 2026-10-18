@@ -39,8 +39,9 @@
   --color-rangoli-teal: #1fa5a0;
   --color-leaf: #3f7d3a;
 
-  --color-success: #7bd69c;
-  --color-success-ink: #1f5e37;
+  /* Teal, not green: it stays distinct from the reds for red-green colour blindness. */
+  --color-success: #5fd3cf;
+  --color-success-ink: #0b5f6b;
   --color-danger: #ff8a80;
   --color-danger-ink: #8c1d18;
 
@@ -48,8 +49,11 @@
   --radius-card: 24px;
   --radius-panel: 32px;
 
-  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
-  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  /* Strong custom curves: ease-out for things entering or answering a press, ease-in-out for
+     things moving on screen. Built-in CSS easings are too weak to feel intentional. */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
 
   --shadow-card: 0 22px 44px -22px rgb(18 4 6 / 0.75);
   --shadow-lift: 0 30px 60px -26px rgb(18 4 6 / 0.85);
@@ -58,7 +62,8 @@
 @theme inline {
   --font-display: var(--font-lilita), "Arial Rounded MT Bold", ui-rounded, system-ui, sans-serif;
   --font-sans: var(--font-nunito), ui-rounded, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-hand: var(--font-kalam), "Segoe Print", "Comic Sans MS", cursive;
+  /* Marathi text falls back to the phone's own Devanagari font (no 50 KB download for one greeting). */
+  --font-hand: var(--font-kalam), "Segoe Print", "Comic Sans MS", "Noto Sans Devanagari", "Nirmala UI", cursive;
 }
 
 :root {
@@ -88,6 +93,7 @@
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
     scroll-padding-top: calc(var(--header-h) + 16px);
+    scrollbar-color: var(--color-maroon-600) var(--color-night);
   }
 
   body {
@@ -122,9 +128,11 @@
     color: var(--color-ink);
   }
 
+  /* Two-tone ring: a dark line and a gold halo, so focus shows on cream (14:1) and on dark (10:1) alike. */
   :focus-visible {
-    outline: 3px solid var(--color-gold-400);
-    outline-offset: 3px;
+    outline: 3px solid var(--color-choc-950);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 6px var(--color-gold-400);
     border-radius: 6px;
   }
 
@@ -139,6 +147,7 @@
   textarea {
     /* 16px stops iOS from zooming the page when a field gets focus. */
     font-size: max(16px, 1rem);
+    caret-color: var(--color-maroon-600);
   }
 
   img {
@@ -321,20 +330,19 @@
   animation: tu-rise 600ms var(--ease-out) both;
 }
 
-/* Scroll reveal (see components/ui/Reveal.tsx). Hidden only when script is running. */
-.js [data-reveal] {
-  opacity: 0;
-  transform: translate3d(0, 24px, 0);
+/* Scroll reveal (see components/ui/Reveal.tsx). Only elements that started below the screen are
+   ever hidden, and only after the page's script has run. */
+[data-reveal] {
   transition:
     opacity var(--dur-slow) var(--ease-out),
     transform var(--dur-slow) var(--ease-out);
 }
-.js [data-reveal][data-in="true"] {
-  opacity: 1;
-  transform: none;
+[data-reveal][data-pending]:not([data-in="true"]) {
+  opacity: 0;
+  transform: translate3d(0, 24px, 0);
 }
 @media (prefers-reduced-motion: reduce) {
-  .js [data-reveal] {
+  [data-reveal][data-pending] {
     opacity: 1;
     transform: none;
   }
@@ -446,6 +454,430 @@
 
 .drip {
   animation: tu-drip 1.8s var(--ease-in-out) infinite;
+}
+
+/* Hero art panel. The edges melt into the festival ground with linear fades: down into the
+   headline on phones, right into the headline and down into the cards on large screens. */
+.hero-art {
+  -webkit-mask-image: linear-gradient(to bottom, #000 64%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 64%, transparent 100%);
+}
+@media (min-width: 1024px) {
+  .hero-art {
+    -webkit-mask-image:
+      linear-gradient(to right, #000 58%, transparent 100%),
+      linear-gradient(to bottom, #000 72%, transparent 100%);
+    -webkit-mask-composite: source-in;
+    mask-image:
+      linear-gradient(to right, #000 58%, transparent 100%),
+      linear-gradient(to bottom, #000 72%, transparent 100%);
+    mask-composite: intersect;
+  }
+}
+
+/* The art swings in from the left edge. Transform only: it is the largest image on the page. */
+@keyframes tu-art-in {
+  from {
+    transform: translate3d(-4%, 0, 0) rotate(-1.5deg) scale(1.05);
+  }
+  to {
+    transform: none;
+  }
+}
+.anim-art-in {
+  animation: tu-art-in 1100ms var(--ease-out) both;
+  transform-origin: 20% 60%;
+}
+
+/* Embers drifting up from the diyas. Constant motion, so linear. */
+@keyframes tu-ember {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  12% {
+    opacity: 1;
+  }
+  65% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--drift, 24px), -72vh, 0) scale(0.35);
+  }
+}
+.ember {
+  opacity: 0;
+  background: radial-gradient(circle, #fff3b0 0%, #ffb703 45%, rgb(242 140 40 / 0) 72%);
+  box-shadow: 0 0 10px 3px rgb(242 140 40 / 0.45);
+  animation: tu-ember 10s linear infinite;
+}
+.ember:nth-child(3n) {
+  --drift: -30px;
+}
+.ember:nth-child(3n + 1) {
+  --drift: 12px;
+}
+
+/* Festive ribbon: two identical runs side by side, the track slides by exactly one run. */
+@keyframes tu-marquee {
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+.ribbon-track {
+  animation: tu-marquee 80s linear infinite;
+}
+@media (hover: hover) {
+  .ribbon:hover .ribbon-track {
+    animation-play-state: paused;
+  }
+}
+
+/* Hero diyas: a tap makes the flame flare and the clay glow. */
+.diya-btn {
+  transition:
+    transform 160ms var(--ease-out),
+    filter 320ms ease;
+}
+.diya-btn:active {
+  transform: scale(0.94);
+}
+.diya-btn .flicker {
+  transition: scale 320ms var(--ease-out);
+}
+.diya-btn.is-lit {
+  filter: drop-shadow(0 0 12px rgb(255 201 60 / 0.75));
+}
+.diya-btn.is-lit .flicker {
+  scale: 1.35;
+}
+
+/* Mystery egg effects (components/eggs). */
+@keyframes tu-petal {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  8% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.85;
+    transform: translate3d(var(--sway, 36px), 108vh, 0) rotate(var(--spin, 420deg));
+  }
+}
+.petal {
+  animation: tu-petal 3s linear both;
+}
+.petal:nth-child(2n) {
+  --spin: -380deg;
+}
+.petal:nth-child(3n) {
+  --sway: -44px;
+}
+.petal:nth-child(5n) {
+  --sway: 70px;
+}
+
+@keyframes tu-peek-in {
+  from {
+    transform: translate3d(0, 140%, 0);
+  }
+  to {
+    transform: translate3d(0, 6%, 0);
+  }
+}
+@keyframes tu-peek-out {
+  from {
+    transform: translate3d(0, 6%, 0);
+  }
+  to {
+    transform: translate3d(0, 140%, 0);
+  }
+}
+.egg-peek {
+  animation:
+    tu-peek-in 520ms var(--ease-out) both,
+    tu-peek-out 380ms var(--ease-in-out) 2300ms forwards;
+}
+
+@keyframes tu-dash {
+  from {
+    transform: translate3d(-110%, 0, 0);
+  }
+  to {
+    transform: translate3d(calc(100vw + 10%), 0, 0);
+  }
+}
+.egg-dash {
+  animation: tu-dash 1.8s cubic-bezier(0.45, 0.05, 0.55, 0.95) both;
+}
+@keyframes tu-blink {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+.egg-run-a,
+.egg-run-b {
+  animation: tu-blink 220ms steps(1, end) infinite;
+}
+.egg-run-b {
+  animation-delay: -110ms;
+}
+
+@keyframes tu-toast-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes tu-toast-out {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0) scale(0.98);
+  }
+}
+.egg-toast {
+  animation:
+    tu-toast-in 320ms var(--ease-out) both,
+    tu-toast-out 260ms var(--ease-in-out) 4100ms forwards;
+}
+
+/* The footer name is ticklish: each letter hops in turn. Two names so every tap restarts it. */
+@keyframes tu-tickle-a {
+  0%,
+  100% {
+    transform: none;
+  }
+  35% {
+    transform: translate3d(0, -0.16em, 0) rotate(-7deg);
+  }
+  70% {
+    transform: translate3d(0, 0.02em, 0) rotate(2deg);
+  }
+}
+@keyframes tu-tickle-b {
+  0%,
+  100% {
+    transform: none;
+  }
+  35% {
+    transform: translate3d(0, -0.16em, 0) rotate(7deg);
+  }
+  70% {
+    transform: translate3d(0, 0.02em, 0) rotate(-2deg);
+  }
+}
+.ticklish[data-jump="a"] .tl {
+  animation: tu-tickle-a 560ms var(--ease-out) both;
+  animation-delay: calc(var(--i) * 35ms);
+}
+.ticklish[data-jump="b"] .tl {
+  animation: tu-tickle-b 560ms var(--ease-out) both;
+  animation-delay: calc(var(--i) * 35ms);
+}
+
+/* Game result screens (components/game/ResultKitten.tsx): a hop with squash and stretch for a
+   win, a wobble for a miss. The rise eases out and the fall eases in, like a real jump. */
+@keyframes tu-hop {
+  0% {
+    transform: none;
+    animation-timing-function: cubic-bezier(0.33, 1, 0.68, 1);
+  }
+  14% {
+    transform: scale(1.07, 0.9);
+    animation-timing-function: cubic-bezier(0.33, 1, 0.68, 1);
+  }
+  42% {
+    transform: translate3d(0, -30px, 0) scale(0.96, 1.05);
+    animation-timing-function: cubic-bezier(0.32, 0, 0.67, 0);
+  }
+  66% {
+    transform: scale(1.06, 0.92);
+    animation-timing-function: cubic-bezier(0.33, 1, 0.68, 1);
+  }
+  82%,
+  100% {
+    transform: none;
+  }
+}
+@keyframes tu-wobble {
+  0%,
+  100% {
+    transform: none;
+  }
+  20% {
+    transform: rotate(-7deg);
+  }
+  45% {
+    transform: rotate(5deg);
+  }
+  70% {
+    transform: rotate(-3deg);
+  }
+  88% {
+    transform: rotate(1deg);
+  }
+}
+@keyframes tu-trophy {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0) rotate(-6deg) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(8deg);
+  }
+}
+.result-kitten .kitten {
+  transform-origin: 50% 100%;
+}
+.result-kitten.is-cheer .kitten,
+.result-kitten.is-win .kitten {
+  animation: tu-hop 820ms 120ms 2 both;
+}
+.result-kitten.is-oops .kitten {
+  animation: tu-wobble 900ms var(--ease-in-out) 150ms both;
+}
+.result-kitten .trophy {
+  transform-origin: 50% 100%;
+  animation: tu-trophy 600ms var(--ease-out) 450ms both;
+}
+
+/* The stall sign (components/brand/LogoSign.tsx) sways a little on its cords, like a banner outdoors. */
+@keyframes tu-sign-sway {
+  0%,
+  100% {
+    transform: rotate(-2deg);
+  }
+  50% {
+    transform: rotate(1deg);
+  }
+}
+.logo-sign {
+  transform-origin: 50% 0;
+  animation: tu-sign-sway 6s ease-in-out infinite;
+}
+
+/* In-page link targets take focus (so screen readers land there) without drawing a ring round a whole section. */
+.anchor-target:focus,
+.anchor-target:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+/* Koochu Puchu chat (components/chat/KoochuChat.tsx): the panel grows from the launcher's corner,
+   messages rise in, three dots while it thinks, and a one-time hello note. */
+@keyframes tu-panel-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.koochu-panel {
+  transform-origin: 100% 100%;
+  animation: tu-panel-in 240ms var(--ease-out) both;
+}
+@keyframes tu-msg-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.koochu-msg {
+  animation: tu-msg-in 220ms var(--ease-out) both;
+}
+@keyframes tu-dot {
+  0%,
+  80%,
+  100% {
+    transform: none;
+    opacity: 0.45;
+  }
+  40% {
+    transform: translate3d(0, -4px, 0);
+    opacity: 1;
+  }
+}
+.koochu-typing span {
+  display: block;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--color-maroon-600);
+  animation: tu-dot 1s ease-in-out infinite;
+}
+.koochu-typing span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.koochu-typing span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+@keyframes tu-nudge {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.koochu-nudge {
+  transform-origin: 90% 100%;
+  animation: tu-nudge 360ms var(--ease-out) both;
+}
+
+/* Smooth scrolling (components/ui/SmoothScroll.tsx, Lenis): the rules Lenis needs. */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis:not(.lenis-autoToggle).lenis-stopped {
+  overflow: clip;
+}
+.lenis [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+
+/* 3D tilt (components/ui/Tilt.tsx): marked layers float towards the viewer while a card leans. */
+.tilt [data-depth="mid"] {
+  transform: translateZ(14px);
+}
+.tilt [data-depth="near"] {
+  transform: translateZ(28px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .embers {
+    display: none;
+  }
+  .ribbon-track {
+    animation: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

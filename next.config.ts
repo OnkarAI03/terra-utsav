@@ -34,6 +34,13 @@ const nextConfig: NextConfig = {
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns: supabase ? [{ protocol: "https", hostname: supabase, pathname: "/storage/v1/object/public/**" }] : [],
+    // Pictures change rarely; don't make phones re-download them every minute.
+    minimumCacheTTL: 60 * 60 * 24,
+  },
+  experimental: {
+    // Admin photo uploads go through server actions (default limit 1 MB). The admin form shrinks
+    // photos in the browser first; this leaves room under Vercel's 4.5 MB request cap.
+    serverActions: { bodySizeLimit: "4mb" },
   },
   async headers() {
     return [
@@ -48,6 +55,11 @@ const nextConfig: NextConfig = {
           { key: "Permissions-Policy", value: "camera=(self), microphone=(), geolocation=(), payment=()" },
           { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains" },
         ],
+      },
+      {
+        // Team photos: on the team page, but kept out of search engines and image search.
+        source: "/images/team/:path*",
+        headers: [{ key: "X-Robots-Tag", value: "noindex, noimageindex" }],
       },
     ];
   },

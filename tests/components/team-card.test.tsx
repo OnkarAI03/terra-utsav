@@ -84,7 +84,7 @@ describe("TeamCard photo-to-mascot switching", () => {
     installDomMocks();
     render(<TeamCard member={member} />);
     expect(screen.getByAltText("Photo of Asha Example")).toBeInTheDocument();
-    expect(screen.getByAltText(/Illustration: Asha Example as Koochu Puchu, dressed for kitchen crew/)).toBeInTheDocument();
+    expect(screen.getByAltText(/Illustration: Asha Example as Koochu Puchu, dressed for food and products/)).toBeInTheDocument();
   });
 });
 
@@ -98,9 +98,14 @@ describe("TeamCard missing images", () => {
     installDomMocks();
     const { container } = render(<TeamCard member={{ ...member, photoUrl: null }} />);
     expect(showing(container)).toBe("mascot");
-    fireEvent.click(screen.getByRole("button", { name: "Show Asha Example's photo" }));
-    expect(screen.getByRole("img", { name: "Photo of Asha Example coming soon" })).toBeInTheDocument();
+    const toggle = screen.getByRole("button", { name: "Show Asha Example as Koochu Puchu" });
+    expect(toggle).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(toggle);
+    expect(toggle).toHaveAttribute("aria-pressed", "false");
     expect(screen.getByText("Photo coming soon")).toBeInTheDocument();
+    // The accessible picture stays put while the card flips, so a screen reader hears one stable image.
+    expect(screen.getByRole("img", { name: /Illustration: Asha Example as Koochu Puchu/ })).toBeInTheDocument();
+    expect(screen.queryByRole("img", { name: "Photo of Asha Example coming soon" })).not.toBeInTheDocument();
   });
 
   it("falls back to the placeholder when the photo fails to load", () => {

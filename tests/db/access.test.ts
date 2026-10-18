@@ -1,5 +1,6 @@
 import type { PGlite } from "@electric-sql/pglite";
 import { beforeAll, describe, expect, it } from "vitest";
+import { DEFAULT_GAME_SETTINGS } from "@/lib/game/config";
 import { as, backdateLevel, createTestDb, createUser, grantRole, serviceCall, userCall } from "./harness";
 
 type Json = Record<string, unknown>;
@@ -20,12 +21,14 @@ beforeAll(async () => {
   await grantRole(db, staff, "staff");
   await grantRole(db, admin, "admin");
 
-  // Alice wins a coupon.
+  // Alice wins a coupon (reward play is open once the organisers confirm the coupon terms).
+  await db.query("update public.site_settings set value = value || $1::jsonb where key = 'rewards'", [{ rewardsEnabled: true, confirmed: true }]);
   const a = await serviceCall<Json>(db, "public.game_start_attempt($1)", [alice]);
-  for (let l = 1; l <= 5; l++) {
+  const levels = DEFAULT_GAME_SETTINGS.levels;
+  for (let l = 1; l <= levels.length; l++) {
     await serviceCall(db, "public.game_start_level($1, $2, $3, $4)", [alice, a.attemptId, l, 99]);
     await backdateLevel(db, a.attemptId as string, l, 20_000);
-    const target = [8, 12, 15, 16, 18][l - 1];
+    const target = levels[l - 1].targetCatches;
     const r = await serviceCall<Json>(db, "public.game_submit_level($1, $2, $3, $4, $5, $6, $7, $8, $9)", [
       alice,
       a.attemptId,
@@ -37,10 +40,13 @@ beforeAll(async () => {
       19_000,
       {},
     ]);
-    if (l === 5) aliceCoupon = (r.coupon as Json).code as string;
+    if (l === levels.length) aliceCoupon = (r.coupon as Json).code as string;
   }
-  // Team data: one visible member without photo consent, one hidden member.
+  // Team data: one visible member without photo consent, one hidden member. The seeded roster
+  // is cleared first so the counts below only see these two fixtures.
   await db.exec(`
+    delete from public.team_members;
+    delete from public.team_groups;
     insert into public.team_groups (slug, name, mascot_variant) values ('kitchen', 'Kitchen', 'food');
     insert into public.team_members (slug, name, title, group_id, photo_url, photo_consent, visible)
       select 'real-person', 'Real Person', 'Cook', id, '/photo.webp', false, true from public.team_groups where slug = 'kitchen';
@@ -59,7 +65,7 @@ describe("students", () => {
     expect(await select("authenticated", bob, "select code from public.coupons")).toHaveLength(0);
     expect(await select("authenticated", bob, "select id from public.game_attempts")).toHaveLength(0);
     expect(await select("authenticated", bob, "select level from public.game_attempt_levels")).toHaveLength(0);
-    expect((await select("authenticated", alice, "select level from public.game_attempt_levels")).length).toBe(5);
+    expect((await select("authenticated", alice, "select level from public.game_attempt_levels")).length).toBe(DEFAULT_GAME_SETTINGS.levels.length);
   });
 
   it("cannot create or change coupons, attempts or roles", async () => {

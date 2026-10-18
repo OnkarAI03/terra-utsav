@@ -217,6 +217,7 @@ declare
   v_attempt public.game_attempts;
   v_level public.game_attempt_levels;
   v_limit_ms int;
+  v_rewards jsonb;
 begin
   if p_user is null then
     raise exception 'not_authenticated' using errcode = '28000';
@@ -264,6 +265,20 @@ begin
         'settings', v_attempt.settings_snapshot
       );
     end if;
+  end if;
+
+  -- Reward play opens only when the organisers have switched coupons on and confirmed the terms,
+  -- so nobody spends an attempt on a reward that cannot be issued.
+  select value into v_rewards from public.site_settings where key = 'rewards';
+  if v_rewards is null
+    or coalesce((v_rewards ->> 'rewardsEnabled')::boolean, false) = false
+    or coalesce((v_rewards ->> 'confirmed')::boolean, false) = false then
+    return jsonb_build_object('error', 'rewards_closed');
+  end if;
+
+  -- One coupon per player: a win ends reward play for that account.
+  if exists (select 1 from public.game_attempts where user_id = p_user and status = 'won') then
+    return jsonb_build_object('error', 'already_won');
   end if;
 
   select count(*) into v_used from public.game_attempts where user_id = p_user and status <> 'void';
@@ -329,7 +344,7 @@ $$;
 
 -- The Next.js server replays the player's taps with the shared engine and passes the result here.
 -- This function re-checks the order of play and the clock, records the level, advances or ends
--- the attempt, and issues at most one coupon for a Level 5 win.
+-- the attempt, and issues at most one coupon for a win on the final level.
 create or replace function public.game_submit_level(
   p_user uuid,
   p_attempt uuid,
@@ -360,6 +375,7 @@ declare
   v_max_total int;
   v_expires timestamptz;
   v_tries int := 0;
+  v_last_level int;
 begin
   if p_outcome not in ('passed', 'failed_time', 'failed_lives') then
     raise exception 'bad_outcome' using errcode = '22023';
@@ -387,6 +403,8 @@ begin
   end if;
 
   v_cfg := v_attempt.settings_snapshot -> 'levels' -> (p_level - 1);
+  -- The final level is whatever the attempt's own settings say (3 by default).
+  v_last_level := greatest(1, jsonb_array_length(v_attempt.settings_snapshot -> 'levels'));
   v_outcome := p_outcome::public.level_outcome;
   v_elapsed_ms := floor(extract(epoch from (now() - v_level.started_at)) * 1000)::int;
   v_limit_ms := coalesce((v_attempt.settings_snapshot ->> 'countdownMs')::int, 3000)
@@ -402,6 +420,19 @@ begin
   if v_outcome = 'passed' and coalesce(p_catches, 0) < coalesce((v_cfg ->> 'targetCatches')::int, 1) then
     v_outcome := 'invalid';
     v_flags := v_flags || jsonb_build_object('catches', 'below_target');
+  end if;
+  -- Tap times that go backwards mean the level clock was restarted mid-level (the server checks
+  -- the order in which the taps were recorded and sets this flag).
+  if v_outcome = 'passed' and coalesce((v_flags ->> 'rewound')::boolean, false) then
+    v_outcome := 'invalid';
+    v_flags := v_flags || jsonb_build_object('clock', 'rewound');
+  end if;
+  -- A pass must also arrive soon after the game says it ended: countdown + game time + 25 s for
+  -- the network and one retry. A slowed-down game clock shows up here.
+  if v_outcome = 'passed'
+    and v_elapsed_ms > coalesce((v_attempt.settings_snapshot ->> 'countdownMs')::int, 3000) + coalesce(p_game_time_ms, 0) + 25000 then
+    v_outcome := 'invalid';
+    v_flags := v_flags || jsonb_build_object('clock', 'slower_than_real_time');
   end if;
   -- Results that arrive long after the level could have ended are not accepted.
   if v_elapsed_ms > v_limit_ms then
@@ -425,12 +456,12 @@ begin
     return jsonb_build_object('outcome', v_outcome, 'attemptStatus', 'lost', 'level', p_level);
   end if;
 
-  if p_level < 5 then
+  if p_level < v_last_level then
     update public.game_attempts set current_level = p_level + 1 where id = p_attempt;
     return jsonb_build_object('outcome', v_outcome, 'attemptStatus', 'in_progress', 'level', p_level, 'nextLevel', p_level + 1);
   end if;
 
-  -- Level 5 passed: the attempt is won.
+  -- Final level passed: the attempt is won.
   update public.game_attempts set status = 'won', finished_at = now() where id = p_attempt;
   perform public.write_audit(p_user, 'game.won', 'game_attempt', p_attempt::text, jsonb_build_object('attempt', v_attempt.attempt_number));
 
@@ -444,13 +475,16 @@ begin
     if v_max_total is not null and (select count(*) from public.coupons where status <> 'void') >= v_max_total then
       v_reward_status := 'stock_exhausted';
     else
-      v_expires := coalesce(
-        nullif(v_rewards ->> 'expiresAt', '')::timestamptz,
-        case
-          when nullif(v_rewards ->> 'expiresAfterHours', '') is not null
-          then now() + make_interval(hours => (v_rewards ->> 'expiresAfterHours')::int)
-        end
-      );
+      -- Admin saves expiresAt as ISO with +05:30; an unreadable value must never stop a winner's
+      -- coupon from being issued, so it falls back to "no fixed expiry".
+      begin
+        v_expires := nullif(v_rewards ->> 'expiresAt', '')::timestamptz;
+      exception when others then
+        v_expires := null;
+      end;
+      if v_expires is null and nullif(v_rewards ->> 'expiresAfterHours', '') is not null then
+        v_expires := now() + make_interval(hours => (v_rewards ->> 'expiresAfterHours')::int);
+      end if;
       loop
         begin
           insert into public.coupons (code, user_id, attempt_id, label, value_text, max_redemptions, expires_at)

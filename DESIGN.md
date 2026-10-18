@@ -19,7 +19,7 @@ the homepage follows:
 2. Hero on a deep burgundy festival backdrop. Koochu Puchu leaps in from the left with a
    chocolate-covered paw over a cracked chocolate bomb; a torn paper note says "CAN YOU CATCH
    ME?". Centre: "Came for the **Food.** Stayed for the **Chaos.**" stacked, the two nouns huge.
-   One supporting sentence, then a maroon primary pill ("Catch Koochu Puchu", sub-line "5 levels ·
+   One supporting sentence, then a maroon primary pill ("Catch Koochu Puchu", sub-line "3 levels ·
    2 attempts · win a coupon") and a cream secondary pill ("Explore Menu"). Right: a wooden
    signpost with planks linking to the attractions. "Scroll to explore" below.
 3. A cream card strip overlapping the hero's bottom edge with four attractions (Chocolate Bomb,
@@ -120,13 +120,19 @@ shadow below. Used only on display sizes.
 - **Chocolate drip divider:** inline SVG path between dark and cream sections.
 - **Icon badge:** 64–88px circle, 2px gold-500 outline, cream line icon (lucide, 1.75 stroke).
 - **Coupon ticket:** cream ticket with notched sides, code in Lilita One, QR on the right.
+- **Koochu Puchu chat:** a round cream button with the kitten's face and a maroon ring, fixed bottom right
+  (56px, 64px from `sm`), above the page and below the menu. It opens a panel (full height on phones, a
+  card on larger screens) with a burgundy header, cream answer bubbles, outlined question chips and
+  a cream input. On the homepage a paper note ("Ask me anything!") appears once after 9 s. Not shown
+  on the game, sign-in, staff or admin pages, where the bottom right is needed.
 
 ## 6. Motion
 
 | Token | Value |
 |---|---|
-| `--ease-out` | `cubic-bezier(0.22, 1, 0.36, 1)` |
-| `--ease-in-out` | `cubic-bezier(0.65, 0, 0.35, 1)` |
+| `--ease-out` | `cubic-bezier(0.23, 1, 0.32, 1)` (entering, answering a press) |
+| `--ease-in-out` | `cubic-bezier(0.77, 0, 0.175, 1)` (moving on screen) |
+| `--ease-drawer` | `cubic-bezier(0.32, 0.72, 0, 1)` (sheets) |
 | `--dur-fast` | 160ms (press, hover) |
 | `--dur-base` | 280ms (menus, cards) |
 | `--dur-slow` | 600ms (section entrances) |
@@ -136,8 +142,51 @@ shadow below. Used only on display sizes.
 - Section entrances: heading, text, picture, staggered 70ms, rise 24px with opacity, once.
 - Team cards: photo ↔ mascot crossfade 700ms with 1.04 → 1 scale, every 4 s while visible.
 - Buttons: press scale 0.97 and the 3D edge collapses; hover lifts 2px.
+- Chat: the panel grows from the button's corner (rise 14px, scale 0.97 to 1, 240ms ease-out);
+  each message rises 8px as it arrives, with three bouncing dots while Koochu Puchu "thinks".
 - `prefers-reduced-motion: reduce`: no travel, no loops; content appears in place; team cards
-  switch only when the visitor presses the switch button.
+  switch only when the visitor presses the switch button; no 3D, no smooth scrolling, no embers,
+  the ribbon stands still.
+
+### The logo (supplied 2026-10-18)
+
+The team's logo (`public/images/brand/terra-utsav-logo.webp`) is used where it does a job, not as
+page chrome, as the team asked:
+
+- **Find us card (homepage):** "Find us at" + the logo as a cream banner hanging on two cords, with
+  "Look for this sign at the Mandi": visitors learn what to look for on the day.
+- **Coupon tickets:** printed on the ticket's scan column, so a coupon looks official at the counter
+  (`mix-blend-mode: multiply` drops its cream ground into the ticket).
+- **Share image:** the link preview on WhatsApp and Instagram.
+
+Not used in the header, the footer or the browser-tab icon; those keep the Lilita One wordmark with
+the paw. Always shown on its own cream ground (never recoloured or cut out on dark).
+
+### 3D and motion layer (2026-10-18)
+
+- **Akash kandils (hero, 3D):** faceted two-paper stars with gold edging and fringe tassels, lit from
+  inside with a slight diya flicker, hanging from the toran. A pointer passing near one sets it
+  swinging (damped spring). Laid out with the same maths as the toran SVG, so strings start on the
+  garland. Large screens only.
+- **Diyas on a rangoli (3D):** lathe-turned clay bowls with a pinched spout and a painted band; each
+  flame is a small shader with its own flickering light that lights the powder around it. They light
+  one by one when the scene first appears; tap to blow out or relight.
+- **Wet brick (3D):** rounded clay brick with TU in the frog, a wet clearcoat and clear refracting
+  drips. Drag to turn it; it keeps some momentum, then settles back.
+- **Chocolate bomb (3D, menu):** tap and hot chocolate pours on; the top half blooms open in eight
+  petals like a lotus, the bowl fills and the marshmallows pop up. Tap again to close.
+- **Rules:** every scene sits on its drawn poster, loads three.js only near the viewport, renders only
+  while visible, caps the pixel ratio, and fades in after its first frame.
+- **Festive ribbon:** a slow linear marquee (Food, Diyas, शुभ दीपावली ...) tilted -1.5 degrees, paused
+  under the pointer. **Embers** drift up through the hero (CSS, linear).
+- **Tilt:** attraction cards, team cards and coupons lean towards the pointer in 3D (mouse only),
+  with the card image floating forward.
+- **Smooth scroll:** Lenis on public pages with a mouse or trackpad (lerp 0.12); anchors stop below
+  the header.
+- **Mystery eggs:** five hero diyas to light, the "Can you catch me?" dare (the kitten dashes
+  across), five quick taps on the header name (the kitten peeks), and the ticklish footer
+  wordmark. Effects: marigold petal shower, peek, dash, and a toast in English with a Marathi
+  greeting.
 
 ## 7. House rules we keep (from the website skill) and where the brand overrides them
 

@@ -1,23 +1,27 @@
-import { ArrowDown, ArrowRight, CalendarDays, Gamepad2, MapPin, UtensilsCrossed } from "lucide-react";
+import { ArrowRight, CalendarDays, Gamepad2, MapPin, UtensilsCrossed } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { DiyaRow } from "@/components/art/DiyaArt";
+import { Embers } from "@/components/art/Embers";
 import { FestivalLights } from "@/components/art/FestivalLights";
 import { TwinkleStars } from "@/components/art/Sparkles";
 import { PawIcon } from "@/components/brand/PawIcon";
+import { CatchMeNote, HeroDiyas } from "@/components/eggs/Triggers";
 import { ButtonLink } from "@/components/ui/Button";
-import { PaperNote } from "@/components/ui/PaperNote";
+import type { GameSettings } from "@/lib/game/config";
+import { gameFacts } from "@/lib/game/copy";
 import type { EventSettings } from "@/lib/settings";
-import { HeroKitten } from "./HeroKitten";
+import { HeroKandils } from "@/components/three/HeroKandils";
+import { HeroArt } from "./HeroArt";
 import { Signpost } from "./Signpost";
 
 /**
- * The approved hero with a Diwali twist: Koochu Puchu leaping in from the left under a marigold
- * toran and kandils, the "Came for the Food. Stayed for the Chaos." lockup, two actions, a row of
- * lit diyas, and the wooden signpost. The headline lands word by word with CSS keyframes (they
- * run without JavaScript and collapse under reduced motion).
+ * The approved hero with a Diwali twist. Koochu Puchu bleeds in from the left edge of the window,
+ * a marigold toran and kandils hang above, embers drift up from the diyas, and the
+ * "Came for the Food. Stayed for the Chaos." lockup lands word by word (CSS keyframes: no script
+ * needed, collapses under reduced motion). The date and place are on the first screen.
  */
-export function Hero({ event }: { event: EventSettings }) {
+export function Hero({ event, game, prize = null }: { event: EventSettings; game: GameSettings; prize?: string | null }) {
+  const facts = gameFacts(game, prize);
   const venueShort = event.venue?.split(",")[0] ?? null;
   return (
     <section aria-labelledby="hero-title" className="festival-ground relative isolate overflow-hidden">
@@ -27,35 +31,33 @@ export function Hero({ event }: { event: EventSettings }) {
         className="absolute inset-0 -z-10 bg-[radial-gradient(120%_80%_at_70%_40%,transparent_0%,rgb(30_7_9/0.55)_60%,rgb(30_7_9/0.9)_100%)]"
       />
       <TwinkleStars className="absolute inset-x-0 top-[calc(var(--header-h)+40px)] -z-10 h-[260px] w-full md:h-[380px]" />
+      <Embers className="absolute inset-0 -z-10" />
+
+      {/* Art: in the flow on phones, bleeding from the left edge on large screens. */}
+      <HeroArt>
+        <div className="absolute left-[4%] top-[calc(var(--header-h)+36px)] z-10 lg:left-[8%] lg:top-[26%]">
+          <CatchMeNote className="text-[1.1rem] md:text-[1.45rem]">
+            Can you
+            {" "}<br />
+            catch me?
+          </CatchMeNote>
+        </div>
+      </HeroArt>
+
+      {/* Kandils hang behind the toran, so the strings start on the garland. */}
+      <HeroKandils />
       <FestivalLights
         lights={false}
-        kandilAt={[60, 300, 1150, 1390]}
-        className="absolute inset-x-0 top-[calc(var(--header-h)-6px)] -z-10 h-[130px] w-full md:h-[210px]"
+        kandils={false}
+        className="pointer-events-none absolute inset-x-0 top-[calc(var(--header-h)-6px)] z-[1] h-[130px] w-full md:h-[max(210px,16.667vw)]"
       />
 
-      <div className="shell relative grid min-h-[min(100svh,1000px)] grid-cols-1 items-center gap-6 pb-40 pt-[calc(var(--header-h)+84px)] md:pb-48 md:pt-[calc(var(--header-h)+120px)] lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-6 lg:pb-56 lg:pt-[calc(var(--header-h)+96px)] xl:grid-cols-[minmax(0,0.82fr)_minmax(0,1.1fr)_auto]">
-        <HeroKitten>
-          <div className="relative aspect-[660/790] w-full [mask-image:radial-gradient(92%_86%_at_48%_44%,#000_64%,transparent_100%)]">
-            <Image
-              src="/images/scenes/koochu-chocolate-bomb.webp"
-              alt="Koochu Puchu, a calico kitten in a festive headband, winking with a chocolate-covered paw over a cracked chocolate bomb"
-              fill
-              priority
-              sizes="(min-width: 1280px) 34vw, (min-width: 1024px) 40vw, 78vw"
-              className="object-cover"
-            />
-          </div>
-          <div className="absolute -left-3 top-[4%] hidden sm:block lg:-left-8">
-            <PaperNote rotate={-8} className="text-[1.15rem] md:text-[1.45rem]">
-              Can you
-              {" "}<br />
-              catch me?
-            </PaperNote>
-          </div>
-        </HeroKitten>
+      <div className="shell relative z-10 -mt-24 grid grid-cols-1 items-center gap-6 pb-44 md:-mt-32 md:pb-48 lg:mt-0 lg:min-h-[min(100svh,980px)] lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-6 lg:pb-56 lg:pt-[calc(var(--header-h)+96px)] xl:grid-cols-[minmax(0,0.78fr)_minmax(0,1.1fr)_auto]">
+        <div aria-hidden className="hidden lg:block" />
 
-        <div className="relative z-10 text-center lg:text-left">
-          <h1 id="hero-title" className="font-display leading-[0.86]">
+        {/* Phones read: headline, when and where, the buttons, then the story. Desktop keeps the approved order. */}
+        <div className="relative flex flex-col text-center lg:block lg:text-left">
+          <h1 id="hero-title" className="order-1 font-display leading-[0.86]">
             <span className="anim-rise text-sticker block text-[clamp(1.6rem,3.4vw,2.5rem)]" style={{ animationDelay: "120ms" }}>
               Came for the
             </span>{" "}
@@ -75,75 +77,70 @@ export function Hero({ event }: { event: EventSettings }) {
           </h1>
 
           <p
-            className="anim-rise mx-auto mt-6 max-w-[34rem] text-[1.08rem] font-semibold leading-relaxed text-cream-100 md:text-[1.18rem] lg:mx-0"
+            className="anim-rise order-4 mx-auto mt-6 max-w-[34rem] text-[1.08rem] font-semibold leading-relaxed text-cream-100 md:text-[1.18rem] lg:mx-0"
             style={{ animationDelay: "860ms" }}
           >
-            This Diwali: Chocolate Bombs, Chat Papdi, homemade diyas and a 60-second wet-brick challenge. Plus one
-            mischievous kitten you probably won&apos;t catch.
+            This Diwali: Chocolate Bombs, Chat Papdi, homemade diyas and a 60-second wet-brick challenge. Plus one mischievous kitten
+            you probably won&apos;t catch.
           </p>
 
           {(event.dateText || event.festivalName || venueShort) && (
             <p
-              className="anim-rise mx-auto mt-5 inline-flex max-w-full flex-wrap items-center justify-center gap-x-4 gap-y-1.5 rounded-[18px] bg-cream-100 px-4 py-2.5 text-[0.98rem] font-extrabold text-ink shadow-[0_4px_0_var(--color-cream-300)] lg:mx-0 lg:justify-start"
-              style={{ animationDelay: "900ms" }}
+              className="anim-rise order-2 mx-auto mt-5 inline-flex max-w-full flex-col items-start gap-1.5 rounded-[18px] bg-cream-100 px-4 py-3 text-left text-[0.98rem] font-extrabold text-ink shadow-[0_4px_0_var(--color-cream-300)] lg:mx-0"
+              style={{ animationDelay: "380ms" }}
             >
               {event.dateText && (
-                <span className="inline-flex items-center gap-1.5">
-                  <CalendarDays aria-hidden className="h-4 w-4 text-maroon-600" />
+                <span className="inline-flex items-center gap-2">
+                  <CalendarDays aria-hidden className="h-4 w-4 shrink-0 text-maroon-600" />
                   {[event.dateText, event.timeText].filter(Boolean).join(", ")}
                 </span>
               )}
               {(event.festivalName || venueShort) && (
-                <span className="inline-flex items-center gap-1.5">
-                  <MapPin aria-hidden className="h-4 w-4 text-maroon-600" />
+                <span className="inline-flex items-start gap-2">
+                  <MapPin aria-hidden className="mt-0.5 h-4 w-4 shrink-0 text-maroon-600" />
                   {[event.festivalName, venueShort].filter(Boolean).join(", ")}
                 </span>
+              )}
+              {event.mapUrl && (
+                <a
+                  href={event.mapUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-1 inline-flex min-h-11 items-center gap-1.5 font-extrabold text-maroon-600 underline decoration-2 underline-offset-4"
+                >
+                  Get directions
+                  <span className="sr-only"> (opens Google Maps in a new tab)</span>
+                </a>
               )}
             </p>
           )}
 
           <div
-            className="anim-rise mt-8 flex flex-col flex-wrap items-stretch gap-4 sm:flex-row sm:items-center sm:justify-center lg:justify-start"
-            style={{ animationDelay: "960ms" }}
+            className="anim-rise order-3 mt-7 flex flex-col flex-wrap items-stretch gap-4 sm:flex-row sm:items-center sm:justify-center lg:justify-start"
+            style={{ animationDelay: "420ms" }}
           >
-            <ButtonLink
-              href="/game"
-              size="lg"
-              icon={<Gamepad2 />}
-              trailing={<ArrowRight />}
-              subline="5 levels · 2 attempts · win a coupon"
-              className="whitespace-nowrap"
-            >
+            <ButtonLink href="/game" size="lg" icon={<Gamepad2 />} trailing={<ArrowRight />} subline={facts.subline} className="w-full text-balance sm:w-auto">
               Catch Koochu Puchu
             </ButtonLink>
-            <ButtonLink href="/menu" variant="secondary" size="lg" icon={<UtensilsCrossed />} className="whitespace-nowrap">
+            <ButtonLink href="/menu" variant="secondary" size="lg" icon={<UtensilsCrossed />} className="w-full text-balance sm:w-auto">
               Explore Menu
             </ButtonLink>
           </div>
 
-          <DiyaRow count={5} className="anim-rise mx-auto mt-7 w-full max-w-[300px] lg:mx-0 lg:justify-start" />
-
-          <p className="anim-rise mt-4 text-[1rem] font-bold text-cream-100" style={{ animationDelay: "1040ms" }}>
-            Or{" "}
-            <Link href="/challenge" className="underline decoration-gold-400 decoration-2 underline-offset-4 hover:text-gold-300">
-              take the 60-second brick challenge
-            </Link>
-          </p>
+          <div className="anim-rise order-5 mt-7 flex flex-col items-center gap-3 lg:items-start" style={{ animationDelay: "1040ms" }}>
+            <HeroDiyas className="w-full max-w-[300px] justify-center lg:justify-start" />
+            <p className="text-[1rem] font-bold text-cream-100">
+              Or{" "}
+              <Link href="/challenge" className="underline decoration-gold-400 decoration-2 underline-offset-4 hover:text-gold-300">
+                take the 60-second brick challenge
+              </Link>
+            </p>
+          </div>
         </div>
 
         <div className="hidden xl:block">
           <Signpost />
         </div>
-
-        <a
-          href="#attractions"
-          className="absolute bottom-28 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-1.5 text-[0.8125rem] font-extrabold uppercase tracking-[0.12em] text-cream-100/90 md:flex lg:hidden"
-        >
-          <span className="grid h-10 w-10 place-items-center rounded-full border-2 border-cream-100/70">
-            <ArrowDown aria-hidden className="h-4 w-4" />
-          </span>
-          Scroll to explore
-        </a>
       </div>
     </section>
   );

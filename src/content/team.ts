@@ -1,37 +1,103 @@
-import type { TeamData, TeamMember } from "@/lib/types";
+import type { MascotVariant, TeamData, TeamGroup, TeamMember } from "@/lib/types";
 
 /**
- * The real team roster lives in the database (/admin/team). Until it has been entered, the team
- * page shows clearly labelled preview slots so the layout and the photo-to-mascot switching can be
- * reviewed. These are not people: no names, roles or groups are invented.
+ * The TERRA UTSAV team, as supplied by the team on 2026-10-18 (names, roles and groups from the
+ * roster; photos from the team's PDF, page N = person N in roster order). Mirrored by
+ * supabase/migrations/20261018000600_seed_team.sql. Once Supabase is connected the team is edited
+ * from /admin/team and this file is only the fallback.
+ *
+ * Mentors were not supplied yet, so three clearly labelled preview slots remain for them.
  */
-export const PREVIEW_MENTOR_COUNT = 3;
-export const PREVIEW_STUDENT_COUNT = 20;
 
-function slot(kind: "student" | "mentor", n: number): TeamMember {
-  const label = kind === "mentor" ? `Mentor ${n}` : `Team member ${String(n).padStart(2, "0")}`;
-  return {
-    id: `preview-${kind}-${n}`,
-    slug: `preview-${kind}-${n}`,
-    name: label,
-    title: kind === "mentor" ? "Name and designation to be added" : "Name and role to be added",
-    groupId: null,
-    kind,
-    photoUrl: null,
-    mascotUrl: null,
-    mascotVariant: kind === "mentor" ? "mentor" : "generic",
-    bio: null,
-    links: [],
-    sortOrder: n,
-    isPlaceholder: true,
-  };
+interface GroupSeed {
+  slug: string;
+  name: string;
+  title: string;
+  outfit: MascotVariant;
+  members: string[];
 }
 
-export function previewTeam(): TeamData {
+const GROUPS: GroupSeed[] = [
+  { slug: "group-leader", name: "Group Leader", title: "Group Leader", outfit: "leader", members: ["Saniya Bhor"] },
+  { slug: "financial-managers", name: "Financial Managers", title: "Financial Manager", outfit: "finance", members: ["Vivek Avhad", "Remanshu Chobi"] },
+  { slug: "purchase-inventory", name: "Purchase and Inventory", title: "Purchase and Inventory", outfit: "logistics", members: ["Bhakti Gagare", "Ojaswi Bhoi"] },
+  { slug: "product-managers", name: "Product Managers", title: "Product Manager", outfit: "food", members: ["Sushant Bodke", "Sushrut Gajbhiye", "Arati Gandale"] },
+  { slug: "decor-team", name: "Decor Team", title: "Decor Team", outfit: "design", members: ["Kushal Bhalerao", "Shreya Desai", "Adkine Tejaswini"] },
+  {
+    slug: "digital-marketing",
+    name: "Digital Marketing, Social Media and Graphics",
+    title: "Digital Marketing, Social Media and Graphics",
+    outfit: "marketing",
+    members: ["Rohan Andhalkar", "Satish Diwate", "Shraddha Autade", "Supriya Danole"],
+  },
+  { slug: "sales-marketing", name: "Sales and Marketing", title: "Sales and Marketing", outfit: "sales", members: ["Rushikesh Bhalerao", "Sanket Wakale"] },
+];
+
+const slugify = (s: string) =>
+  s
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+export const TEAM_GROUPS: TeamGroup[] = GROUPS.map((g, i) => ({
+  id: `group-${g.slug}`,
+  slug: g.slug,
+  name: g.name,
+  description: null,
+  mascotVariant: g.outfit,
+  sortOrder: i + 1,
+}));
+
+export const TEAM_MEMBERS: TeamMember[] = (() => {
+  let n = 0;
+  return GROUPS.flatMap((g) =>
+    g.members.map((name) => {
+      n += 1;
+      return {
+        id: `member-${String(n).padStart(2, "0")}`,
+        slug: slugify(name),
+        name,
+        title: g.title,
+        groupId: `group-${g.slug}`,
+        kind: "student" as const,
+        photoUrl: `/images/team/member-${String(n).padStart(2, "0")}-real.webp`,
+        mascotUrl: null,
+        mascotVariant: g.outfit,
+        bio: null,
+        links: [],
+        sortOrder: n,
+      };
+    }),
+  );
+})();
+
+// Mentors supplied on 2026-10-18 (first names as given), with photos from the team's PDF in the
+// same order (page N = mentor N). Shown as a compact row at the bottom of the team.
+const MENTORS = ["Ankush", "Jidnyesh", "Sairaj"];
+
+export const TEAM_MENTORS: TeamMember[] = MENTORS.map((name, i) => ({
+  id: `mentor-${String(i + 1).padStart(2, "0")}`,
+  slug: slugify(name),
+  name,
+  title: "Mentor",
+  groupId: null,
+  kind: "mentor",
+  photoUrl: `/images/team/mentor-${String(i + 1).padStart(2, "0")}.webp`,
+  mascotUrl: null,
+  mascotVariant: "mentor",
+  bio: null,
+  links: [],
+  sortOrder: i + 1,
+}));
+
+/** The built-in team: the real roster and mentors. */
+export function defaultTeam(): TeamData {
   return {
-    groups: [],
-    mentors: Array.from({ length: PREVIEW_MENTOR_COUNT }, (_, i) => slot("mentor", i + 1)),
-    students: Array.from({ length: PREVIEW_STUDENT_COUNT }, (_, i) => slot("student", i + 1)),
-    isPreview: true,
+    groups: TEAM_GROUPS,
+    mentors: TEAM_MENTORS,
+    students: TEAM_MEMBERS,
+    mentorsArePreview: false,
+    studentsArePreview: false,
   };
 }

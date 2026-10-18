@@ -1,17 +1,26 @@
 "use client";
 
-import { ArrowRight, KeyRound, Mail } from "lucide-react";
+import { ArrowRight, KeyRound, Mail, TriangleAlert } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 const EMAIL = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
 /**
- * Passwordless sign-in. Supabase emails a magic link and (if the email template includes
- * {{ .Token }}) a 6-digit code; either works. We only ever store the email address.
+ * Passwordless sign-in. Supabase emails a 6-digit code (and a link). The code is the main path:
+ * it works in any browser, including Instagram's built-in one, where an emailed link opens in a
+ * different browser and cannot finish the sign-in. The step survives a reload. We only ever
+ * store the email address.
  */
+const STEP_KEY = "tu-login-step";
+
+/** Instagram, Facebook and other in-app browsers: Google refuses to sign in there. */
+function inAppBrowser(): boolean {
+  if (typeof navigator === "undefined") return false;
+  return /Instagram|FBAN|FBAV|FB_IAB|Snapchat|Line\/|MicroMessenger/i.test(navigator.userAgent);
+}
 export function LoginForm({ next, googleEnabled }: { next: string; googleEnabled: boolean }) {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -19,12 +28,34 @@ export function LoginForm({ next, googleEnabled }: { next: string; googleEnabled
   const [step, setStep] = useState<"email" | "code">("email");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<{ tone: "error" | "info"; text: string } | null>(null);
+  const [inApp, setInApp] = useState(false);
   const supabase = getSupabaseBrowserClient();
+
+  useEffect(() => {
+    setInApp(inAppBrowser());
+    // Back from the email app (or a reload): pick up at the code step.
+    try {
+      const saved = JSON.parse(sessionStorage.getItem(STEP_KEY) ?? "null") as { email: string; at: number } | null;
+      if (saved && Date.now() - saved.at < 30 * 60_000) {
+        setEmail(saved.email);
+        setStep("code");
+        setMessage({ tone: "info", text: `Type the 6-digit code we sent to ${saved.email}.` });
+      }
+    } catch {
+      /* private mode */
+    }
+    // Coming back from a page that started a redirect: never leave the button stuck on "Sending…".
+    const onShow = (e: PageTransitionEvent) => {
+      if (e.persisted) setBusy(false);
+    };
+    window.addEventListener("pageshow", onShow);
+    return () => window.removeEventListener("pageshow", onShow);
+  }, []);
 
   if (!supabase) {
     return (
       <p className="rounded-2xl bg-gold-300 p-4 font-bold text-ink">
-        Sign-in is not switched on yet. The stall team needs to connect Supabase (see the README). You can still practise the game.
+        Signing in opens closer to the Mandi. You can practise the game already, no sign-in needed.
       </p>
     );
   }
@@ -45,13 +76,23 @@ export function LoginForm({ next, googleEnabled }: { next: string; googleEnabled
     if (error) {
       setMessage({
         tone: "error",
-        text: error.status === 429 ? "Too many sign-in emails. Wait a minute and try again." : "We could not send the email. Check the address and try again.",
+        text: error.status === 429 ? "Too many sign-in emails just now. Wait a few minutes and try again." : "We could not send the email. Check the address and try again.",
       });
       return;
     }
     setEmail(value);
     setStep("code");
-    setMessage({ tone: "info", text: `We sent a sign-in email to ${value}. Tap the link in it, or type the 6-digit code here.` });
+    try {
+      sessionStorage.setItem(STEP_KEY, JSON.stringify({ email: value, at: Date.now() }));
+    } catch {
+      /* private mode */
+    }
+    setMessage({
+      tone: "info",
+      text: inApp
+        ? `We sent a 6-digit code to ${value}. Type it here: inside Instagram, don't tap the link in the email.`
+        : `We sent a 6-digit code to ${value}. Type it here (or tap the link in the email on this phone).`,
+    });
   };
 
   const verify = async (e: React.FormEvent) => {
@@ -68,8 +109,20 @@ export function LoginForm({ next, googleEnabled }: { next: string; googleEnabled
       setMessage({ tone: "error", text: "That code did not work. It may have expired; ask for a new email." });
       return;
     }
+    try {
+      sessionStorage.removeItem(STEP_KEY);
+    } catch {
+      /* private mode */
+    }
     router.replace(next);
     router.refresh();
+  };
+
+  const resend = async () => {
+    setBusy(true);
+    const { error } = await supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: redirectTo(), shouldCreateUser: true } });
+    setBusy(false);
+    setMessage(error ? { tone: "error", text: "Could not send another email. Wait a few minutes and try again." } : { tone: "info", text: `A new code is on its way to ${email}.` });
   };
 
   const google = async () => {
@@ -107,10 +160,10 @@ export function LoginForm({ next, googleEnabled }: { next: string; googleEnabled
             />
           </div>
           <p id="email-help" className="text-[0.92rem] text-ink-soft">
-            No password needed. We only use your email to sign you in and keep your coupons safe.
+            No password needed. We email you a 6-digit code. We only use your email to sign you in and keep your coupon safe.
           </p>
           <Button type="submit" size="lg" disabled={busy} trailing={<ArrowRight />}>
-            {busy ? "Sending…" : "Email me a sign-in link"}
+            {busy ? "Sending…" : "Email me a code"}
           </Button>
         </form>
       ) : (
@@ -136,27 +189,43 @@ export function LoginForm({ next, googleEnabled }: { next: string; googleEnabled
           <Button type="submit" size="lg" disabled={busy} trailing={<ArrowRight />}>
             {busy ? "Checking…" : "Sign in"}
           </Button>
-          <button
-            type="button"
-            onClick={() => {
-              setStep("email");
-              setCode("");
-              setMessage(null);
-            }}
-            className="text-[0.95rem] font-extrabold text-maroon-600 underline underline-offset-4"
-          >
-            Use a different email
-          </button>
+          <div className="flex flex-wrap gap-x-6 gap-y-2">
+            <button type="button" onClick={() => void resend()} disabled={busy} className="min-h-11 text-[0.95rem] font-extrabold text-maroon-600 underline underline-offset-4">
+              Send a new code
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setStep("email");
+                setCode("");
+                setMessage(null);
+                try {
+                  sessionStorage.removeItem(STEP_KEY);
+                } catch {
+                  /* private mode */
+                }
+              }}
+              className="min-h-11 text-[0.95rem] font-extrabold text-maroon-600 underline underline-offset-4"
+            >
+              Use a different email
+            </button>
+          </div>
         </form>
       )}
 
-      {googleEnabled && step === "email" && (
+      {googleEnabled && step === "email" && !inApp && (
         <>
           <p className="text-center text-[0.9rem] font-bold text-ink-soft">or</p>
           <Button variant="secondary" size="md" onClick={() => void google()} disabled={busy}>
             Continue with Google
           </Button>
         </>
+      )}
+      {inApp && step === "email" && (
+        <p className="flex items-start gap-2 rounded-2xl bg-cream-200 p-3 text-[0.95rem] font-bold text-ink">
+          <TriangleAlert aria-hidden className="mt-0.5 h-4 w-4 shrink-0" />
+          Opened from Instagram? Use the email code here{googleEnabled ? ": Google sign-in doesn't work in Instagram's browser" : ""}. Or tap ••• and open this page in your browser.
+        </p>
       )}
 
       <p role={message?.tone === "error" ? "alert" : "status"} className={message ? (message.tone === "error" ? "font-bold text-danger-ink" : "font-bold text-ink") : "sr-only"}>

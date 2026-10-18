@@ -3,9 +3,10 @@ import { z } from "zod";
 /**
  * Difficulty settings for Catch the Koochu Puchu.
  *
- * These defaults are a tuning starting point, not a promise. The modelled win rate across two
- * reward attempts is checked by tests/game/tuning.test.ts (target 20-30%) and must be confirmed
- * with real playtests before the event. Administrators can edit every value from /admin/game.
+ * Three levels (about a minute and a half of play). These defaults are a tuning starting point, not
+ * a promise: the modelled win rate across two reward attempts (target 20-30%, roughly 2 or 3 players
+ * in 10) is checked by tests/game/tuning.test.ts and must be confirmed with real playtests before
+ * the event. Administrators can edit every value from /admin/game.
  */
 
 const range = z
@@ -38,9 +39,9 @@ export const gameSettingsSchema = z
     minTapGapMs: z.number().int().min(0).max(500),
     maxTapsPerLevel: z.number().int().min(20).max(600),
     countdownMs: z.number().int().min(0).max(10_000),
-    levels: z.array(levelConfigSchema).length(5),
+    levels: z.array(levelConfigSchema).min(1).max(5),
   })
-  .refine((s) => s.levels.every((l, i) => l.level === i + 1), "Levels must be numbered 1 to 5 in order");
+  .refine((s) => s.levels.every((l, i) => l.level === i + 1), "Levels must be numbered from 1 in order");
 
 export type LevelConfig = z.infer<typeof levelConfigSchema>;
 export type GameSettings = z.infer<typeof gameSettingsSchema>;
@@ -58,7 +59,7 @@ export const DEFAULT_GAME_SETTINGS: GameSettings = {
       level: 1,
       name: "Warm-up Whiskers",
       blurb: "Koochu Puchu pops out of the Diwali gift boxes. Tap to catch.",
-      durationMs: 30_000,
+      durationMs: 25_000,
       targetCatches: 8,
       lives: 3,
       spawnGapMs: [850, 1250],
@@ -72,66 +73,34 @@ export const DEFAULT_GAME_SETTINGS: GameSettings = {
     },
     {
       level: 2,
-      name: "Decoy Drama",
-      blurb: "Snacks pop up too. Tapping a snack costs a heart.",
-      durationMs: 30_000,
-      targetCatches: 12,
-      lives: 3,
-      spawnGapMs: [700, 1050],
-      visibleMs: [940, 1240],
-      dashMs: [1700, 2100],
-      decoyChance: 0.3,
-      dashChance: 0,
-      maxActive: 3,
-      catRadius: 0.1,
-      decoyRadius: 0.09,
-    },
-    {
-      level: 3,
       name: "Diya Dash",
-      blurb: "Now the kitten sprints between the diyas. Catch it mid-run.",
+      blurb: "Snacks pop up too, and the kitten starts to sprint. Two hearts: tapping a snack costs one.",
       durationMs: 30_000,
       targetCatches: 15,
-      lives: 3,
-      spawnGapMs: [620, 950],
-      visibleMs: [840, 1100],
-      dashMs: [1450, 1800],
-      decoyChance: 0.32,
-      dashChance: 0.34,
+      lives: 2,
+      spawnGapMs: [600, 900],
+      visibleMs: [800, 1050],
+      dashMs: [1300, 1650],
+      decoyChance: 0.35,
+      dashChance: 0.3,
       maxActive: 3,
       catRadius: 0.095,
       decoyRadius: 0.09,
     },
     {
-      level: 4,
-      name: "Chocolate Rush",
-      blurb: "Faster, busier, sneakier. Two hearts only.",
-      durationMs: 30_000,
-      targetCatches: 16,
-      lives: 2,
-      spawnGapMs: [520, 820],
-      visibleMs: [720, 940],
-      dashMs: [1250, 1600],
-      decoyChance: 0.4,
-      dashChance: 0.36,
-      maxActive: 4,
-      catRadius: 0.09,
-      decoyRadius: 0.09,
-    },
-    {
-      level: 5,
+      level: 3,
       name: "Diwali Finale",
-      blurb: "Koochu Puchu at full Diwali speed. Catch 18 to win.",
+      blurb: "Koochu Puchu at full Diwali speed. Catch 21 to win.",
       durationMs: 30_000,
-      targetCatches: 18,
+      targetCatches: 21,
       lives: 2,
-      spawnGapMs: [440, 720],
-      visibleMs: [620, 830],
-      dashMs: [1050, 1350],
+      spawnGapMs: [460, 740],
+      visibleMs: [640, 860],
+      dashMs: [1100, 1400],
       decoyChance: 0.4,
-      dashChance: 0.4,
+      dashChance: 0.38,
       maxActive: 4,
-      catRadius: 0.085,
+      catRadius: 0.088,
       decoyRadius: 0.09,
     },
   ],

@@ -5,6 +5,7 @@ import { Reveal } from "@/components/ui/Reveal";
 import { CHALLENGE } from "@/content/challenge";
 import { getEventSettings, getGameSettings, getRewardSettings } from "@/lib/data/public";
 import { formatDateTime } from "@/lib/format";
+import { gameFacts } from "@/lib/game/copy";
 import { pageMetadata } from "@/lib/seo";
 
 export const revalidate = 60;
@@ -17,10 +18,10 @@ export const metadata = pageMetadata({
 
 function Block({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
   return (
-    <Reveal as="section" className="scroll-mt-28">
-      <div id={id} className="scroll-mt-28 rounded-[var(--radius-panel)] bg-cream-100 p-7 text-ink shadow-[var(--shadow-card)] md:p-10">
+    <Reveal as="section">
+      <div id={id} tabIndex={-1} className="anchor-target rounded-[var(--radius-panel)] bg-cream-100 p-7 text-ink shadow-[var(--shadow-card)] md:p-10">
         <h2 className="display-m text-choc-900">{title}</h2>
-        <div className="mt-6 flex flex-col gap-4 text-[1.05rem] leading-relaxed [&_li]:flex [&_li]:gap-3 [&_ul]:flex [&_ul]:flex-col [&_ul]:gap-3">
+        <div className="mt-6 flex max-w-[68ch] flex-col gap-4 text-[1.05rem] leading-relaxed [&_li]:relative [&_li]:pl-6 [&_ul]:flex [&_ul]:flex-col [&_ul]:gap-3">
           {children}
         </div>
       </div>
@@ -29,12 +30,13 @@ function Block({ id, title, children }: { id: string; title: string; children: R
 }
 
 function Dot() {
-  return <span aria-hidden className="mt-2.5 h-2 w-2 shrink-0 rounded-full bg-maroon-600" />;
+  return <span aria-hidden className="absolute left-0 top-[0.62em] h-2 w-2 rounded-full bg-maroon-600" />;
 }
 
 export default async function RulesPage() {
   const [event, game, rewards] = await Promise.all([getEventSettings(), getGameSettings(), getRewardSettings()]);
   const attempts = game.maxRewardAttempts;
+  const facts = gameFacts(game);
   const expiry = rewards.expiresAt
     ? `Coupons expire on ${formatDateTime(rewards.expiresAt)}.`
     : rewards.expiresAfterHours
@@ -83,12 +85,13 @@ export default async function RulesPage() {
               </li>
               <li>
                 <Dot />
-                Reward play needs you to sign in. Each student gets {attempts} reward {attempts === 1 ? "attempt" : "attempts"}. The
+                Reward play needs you to sign in. Each player gets {attempts} reward {attempts === 1 ? "attempt" : "attempts"}. The
                 organisers may add an extra attempt if something went wrong on our side.
               </li>
               <li>
                 <Dot />
-                An attempt is five levels played in order. Fail a level and that attempt ends. Clear Level 5 to win.
+                An attempt is {facts.levelsWord} levels played in order. Fail a level and that attempt ends. Clear Level{" "}
+                {facts.lastLevel} to win.
               </li>
               <li>
                 <Dot />
@@ -106,7 +109,7 @@ export default async function RulesPage() {
               </li>
               <li>
                 <Dot />
-                It is meant to be hard. We expect only some players to clear Level 5, so practise first.
+                It is meant to be hard: we expect roughly 2 or 3 players in 10 to win across their attempts, so practise first.
               </li>
             </ul>
           </Block>
@@ -130,8 +133,8 @@ export default async function RulesPage() {
                 {rewards.maxRedemptions === 1
                   ? "Each coupon can be redeemed once."
                   : `Each coupon can be redeemed ${rewards.maxRedemptions} times.`}{" "}
-                A team member redeems it by scanning or typing the code. Showing a screenshot of someone else&apos;s coupon will not
-                work; codes are tied to the account that won them.
+                A team member redeems it by scanning or typing the code. Keep your code to yourself: a coupon works once, for
+                whoever shows it first. One coupon per player.
               </li>
               <li>
                 <Dot />

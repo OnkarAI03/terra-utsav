@@ -1,8 +1,11 @@
 import type { Metadata, Viewport } from "next";
 import { Kalam, Lilita_One, Nunito } from "next/font/google";
+import { KoochuChat } from "@/components/chat/KoochuChat";
+import { EggLayer } from "@/components/eggs/EggLayer";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { MotionProvider } from "@/components/ui/MotionProvider";
+import { SmoothScroll } from "@/components/ui/SmoothScroll";
 import { allowIndexing, siteUrl, SITE_NAME } from "@/lib/env";
 import "./globals.css";
 
@@ -11,7 +14,7 @@ const nunito = Nunito({ subsets: ["latin"], variable: "--font-nunito", display: 
 const kalam = Kalam({ weight: "700", subsets: ["latin"], variable: "--font-kalam", display: "swap" });
 
 const description =
-  "TERRA UTSAV is our college Diwali stall: Chocolate Bombs, Chat Papdi, homemade Diwali diyas, a 60-second wet-brick challenge and Catch the Koochu Puchu, a five-level game with a coupon for winners.";
+  "TERRA UTSAV is our college Diwali stall: Chocolate Bombs, Chat Papdi, homemade Diwali diyas, a 60-second wet-brick challenge and Catch the Koochu Puchu, a three-level game with a coupon for winners.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl()),
@@ -62,6 +65,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             {children}
           </main>
           <SiteFooter />
+          <EggLayer />
+          <KoochuChat />
+          <SmoothScroll />
         </MotionProvider>
       </body>
     </html>

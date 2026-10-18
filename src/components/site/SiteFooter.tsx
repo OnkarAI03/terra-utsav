@@ -1,12 +1,15 @@
 import Link from "next/link";
 import { InstagramGlyph, instagramHandle } from "@/components/brand/InstagramLink";
-import { Wordmark } from "@/components/brand/Wordmark";
-import { getEventSettings } from "@/lib/data/public";
+import { EggCounter } from "@/components/eggs/EggCounter";
+import { TicklishWordmark } from "@/components/eggs/Triggers";
+import { getEventSettings, getProducts } from "@/lib/data/public";
 import { MAIN_NAV, SECONDARY_NAV } from "@/lib/nav";
 
 /** A designed close: the name returns at full width. */
 export async function SiteFooter() {
-  const event = await getEventSettings();
+  const [event, products] = await Promise.all([getEventSettings(), getProducts()]);
+  // Said once here instead of a tag on every picture, and only while some picture is still not a real photo.
+  const illustrative = products.filter((p) => p.imageIsIllustrative);
   const year = new Date().getFullYear();
   const eventLine = [event.festivalName, event.dateText, event.venue].filter(Boolean).join(" · ");
   return (
@@ -67,13 +70,21 @@ export async function SiteFooter() {
           </div>
         </div>
 
-        <div className="mt-14 overflow-hidden pb-2" aria-hidden>
-          <Wordmark size="xl" className="w-full justify-center" />
+        <div className="mt-14 overflow-hidden pb-2 pt-4">
+          <TicklishWordmark />
+        </div>
+
+        <div className="mt-6">
+          <EggCounter />
         </div>
 
         <div className="flex flex-col gap-2 pb-8 pt-4 text-[0.88rem] text-cream-100/85 md:flex-row md:justify-between">
           <p>© {year} TERRA UTSAV. Happy Diwali! Koochu Puchu is our original mascot.</p>
-          <p>Food pictures are illustrative until real photos are added.</p>
+          {illustrative.length > 0 && (
+            <p>
+              {illustrative.length === products.length ? "Food and diya pictures are" : "Some food pictures are"} illustrations of what we serve.
+            </p>
+          )}
         </div>
       </div>
     </footer>

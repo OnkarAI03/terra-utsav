@@ -21,10 +21,13 @@
       .bg { position: absolute; inset: 0; background: url("../../public/images/hero/festival-bokeh.webp") center / cover; opacity: 0.95; }
       .shade { position: absolute; inset: 0; background: radial-gradient(110% 90% at 72% 45%, rgba(30, 7, 9, 0.15), rgba(30, 7, 9, 0.85) 75%); }
       .kitten {
-        position: absolute; left: 34px; top: 74px; width: 452px; height: 540px;
-        background: url("../../public/images/scenes/koochu-chocolate-bomb.webp") center 30% / cover;
-        -webkit-mask-image: radial-gradient(92% 86% at 48% 44%, #000 62%, transparent 100%);
-        mask-image: radial-gradient(92% 86% at 48% 44%, #000 62%, transparent 100%);
+        position: absolute; left: 0; top: 40px; width: 520px; height: 590px;
+        background: url("../../public/images/scenes/koochu-chocolate-bomb.webp") 40% 30% / cover;
+        /* Bleeds in from the left edge and fades into the backdrop, like the site's hero. */
+        -webkit-mask-image: linear-gradient(to right, #000 62%, transparent 100%), linear-gradient(to bottom, #000 78%, transparent 100%);
+        -webkit-mask-composite: source-in;
+        mask-image: linear-gradient(to right, #000 62%, transparent 100%), linear-gradient(to bottom, #000 78%, transparent 100%);
+        mask-composite: intersect;
       }
       .note {
         position: absolute; left: 22px; top: 96px; transform: rotate(-8deg);
@@ -32,7 +35,7 @@
         padding: 14px 20px; text-transform: uppercase; box-shadow: 0 14px 24px -14px rgba(10, 3, 2, 0.9);
         clip-path: polygon(0 5%, 8% 0, 22% 4%, 40% 0, 60% 4%, 80% 0, 100% 4%, 98% 30%, 100% 60%, 98% 100%, 70% 96%, 45% 100%, 20% 96%, 2% 100%, 0 70%, 2% 35%);
       }
-      .copy { position: absolute; left: 520px; top: 104px; width: 640px; }
+      .copy { position: absolute; left: 520px; top: 96px; width: 640px; }
       .brand { font-family: "Lilita One"; font-size: 34px; letter-spacing: 0.01em; color: var(--cream); display: flex; align-items: center; gap: 10px; }
       .sticker {
         font-family: "Lilita One"; color: var(--cream);
@@ -50,8 +53,14 @@
       }
       .strip .sub { font-size: 19px; font-weight: 700; color: #5b3a2b; }
       .toran { position: absolute; left: 0; top: 0; width: 1200px; height: 90px; }
-      .diyas { position: absolute; right: 52px; top: 352px; display: flex; gap: 10px; align-items: flex-end; }
+      .diyas { position: absolute; right: 44px; top: 318px; display: flex; gap: 10px; align-items: flex-end; }
       .paw { width: 26px; height: 26px; }
+      .sign { position: absolute; right: 44px; top: 70px; width: 262px; transform: rotate(3deg); transform-origin: 50% 0; }
+      .sign .cord { position: absolute; top: -26px; width: 3px; height: 30px; border-radius: 2px; background: #e9cfa6; }
+      .sign .cord.l { left: 17%; transform: rotate(18deg); }
+      .sign .cord.r { right: 17%; transform: rotate(-18deg); }
+      .sign .board { background: #f8ebd8; padding: 8px; border-radius: 18px; box-shadow: 0 0 0 2px rgba(237, 185, 92, 0.7), 0 26px 40px -22px rgba(10, 3, 2, 0.9); }
+      .sign img { display: block; width: 100%; border-radius: 12px; }
     </style>
   </head>
   <body>
@@ -67,10 +76,6 @@
     <div class="note">Can you<br />catch me?</div>
 
     <div class="copy">
-      <div class="brand">
-        <span class="sticker">TERRA UTSAV</span>
-        <svg class="paw" viewBox="0 0 64 64" fill="#f7d58c"><ellipse cx="32" cy="42" rx="15" ry="13"/><ellipse cx="14" cy="27" rx="6.5" ry="8.5"/><ellipse cx="25" cy="16" rx="6.5" ry="9"/><ellipse cx="39" cy="16" rx="6.5" ry="9"/><ellipse cx="50" cy="27" rx="6.5" ry="8.5"/></svg>
-      </div>
       <h1>
         <span class="sticker small">Came for the</span>
         <span class="sticker gold big">Food.</span>
@@ -81,6 +86,11 @@
         <span>Tue 27 Oct 2026 · 9 am to 3 pm</span>
         <span class="sub">Eco-friendly Diwali Mandi 2026 · S. B. Patil Institute of Management</span>
       </div>
+    </div>
+
+    <div class="sign">
+      <span class="cord l"></span><span class="cord r"></span>
+      <div class="board"><img src="../../public/images/brand/terra-utsav-logo.webp" alt="TERRA UTSAV" /></div>
     </div>
 
     <div class="diyas" id="diyas"></div>

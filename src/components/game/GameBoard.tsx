@@ -44,6 +44,9 @@ const BOX_COLOURS = [
   { body: "#fbefdb", lid: "#fff8ec", ribbon: "#c4561a" },
 ];
 
+/** The submit route accepts at most this many raw taps per level (src/lib/game/server.ts). */
+const MAX_RAW_TAPS = 600;
+
 const KEYS: Record<string, number> = {
   "7": 0, "8": 1, "9": 2, "4": 3, "5": 4, "6": 5, "1": 6, "2": 7, "3": 8,
   q: 0, w: 1, e: 2, a: 3, s: 4, d: 5, z: 6, x: 7, c: 8,
@@ -118,12 +121,20 @@ export function GameBoard({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // The parent passes a new onFinish on every render (pressing Sound re-renders it). Keep it in a
+  // ref so `finish`, and with it the game loop below, stays the same for the whole level: the loop
+  // must never restart mid-level, or the level clock would restart with it.
+  const onFinishRef = useRef(onFinish);
+  useEffect(() => {
+    onFinishRef.current = onFinish;
+  }, [onFinish]);
+
   const finish = useCallback(
     (aborted: boolean) => {
       if (finished.current) return;
       finished.current = true;
       const st = finishLevel(stateRef.current, config);
-      onFinish({
+      onFinishRef.current({
         taps: tapsRef.current,
         outcome: st.outcome ?? "failed_time",
         catches: st.catches,
@@ -131,7 +142,7 @@ export function GameBoard({
         aborted,
       });
     },
-    [config, onFinish],
+    [config],
   );
 
   const burst = useCallback(
@@ -159,6 +170,8 @@ export function GameBoard({
   const handleTap = useCallback(
     (x: number, y: number) => {
       if (finished.current || stateRef.current.ended) return;
+      // The server accepts up to 600 raw taps; past that a frantic tapper would lose the level.
+      if (tapsRef.current.length >= MAX_RAW_TAPS) return;
       const t = Math.round(performance.now() - startRef.current);
       const tap = { t, x: Math.round(x * 10000) / 10000, y: Math.round(y * 10000) / 10000 };
       tapsRef.current.push([tap.t, tap.x, tap.y]);
@@ -193,7 +206,8 @@ export function GameBoard({
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-    startRef.current = performance.now();
+    // Set once per level (the board remounts for every level), never reset by a re-run.
+    if (!startRef.current) startRef.current = performance.now();
     let last = performance.now();
     let raf = 0;
     let endedAt: number | null = null;
@@ -383,6 +397,8 @@ export function GameBoard({
     const idx = KEYS[e.key.toLowerCase()];
     if (idx === undefined) return;
     e.preventDefault();
+    // A held key auto-repeats about 30 times a second; only real presses count.
+    if (e.repeat) return;
     handleTap(SPOTS[idx].x, SPOTS[idx].y);
   };
 

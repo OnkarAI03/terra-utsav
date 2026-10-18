@@ -27,7 +27,7 @@ function perfectTaps(seed: number, n: number, delay = 300): Tap[] {
 
 describe("level schedule", () => {
   it("is identical for the same seed (browser and server agree)", () => {
-    for (let n = 1; n <= 5; n++) {
+    for (let n = 1; n <= settings.levels.length; n++) {
       expect(generateSchedule(12345, level(n))).toEqual(generateSchedule(12345, level(n)));
     }
   });
@@ -38,7 +38,7 @@ describe("level schedule", () => {
   });
 
   it("offers more cats than the level asks for", () => {
-    for (let n = 1; n <= 5; n++) {
+    for (let n = 1; n <= settings.levels.length; n++) {
       for (let seed = 1; seed <= 40; seed++) {
         const cats = generateSchedule(seed, level(n)).filter((s) => s.kind === "cat").length;
         expect(cats).toBeGreaterThan(level(n).targetCatches);
@@ -52,12 +52,12 @@ describe("level schedule", () => {
     expect(decoys(1)).toBe(0);
     expect(dashes(1)).toBe(0);
     expect(decoys(2)).toBeGreaterThan(0);
-    expect(dashes(2)).toBe(0);
-    expect(dashes(3)).toBeGreaterThan(0);
+    expect(dashes(2)).toBeGreaterThan(0);
+    expect(decoys(3)).toBeGreaterThan(decoys(2) * 0.8);
   });
 
   it("never exceeds the number of things on screen at once", () => {
-    for (let n = 1; n <= 5; n++) {
+    for (let n = 1; n <= settings.levels.length; n++) {
       const cfg = level(n);
       const sched = generateSchedule(4242, cfg);
       for (const s of sched) {
@@ -70,7 +70,7 @@ describe("level schedule", () => {
 
 describe("tap resolution", () => {
   it("passes a level when a human-paced player catches enough cats", () => {
-    for (let n = 1; n <= 5; n++) {
+    for (let n = 1; n <= settings.levels.length; n++) {
       const result = resolveLevel(777, level(n), settings, perfectTaps(777, n));
       expect(result.outcome).toBe("passed");
       expect(result.catches).toBe(level(n).targetCatches);
@@ -149,12 +149,18 @@ describe("tap resolution", () => {
 });
 
 describe("settings validation", () => {
-  it("accepts the defaults", () => {
+  it("accepts the defaults: three levels", () => {
     expect(gameSettingsSchema.safeParse(DEFAULT_GAME_SETTINGS).success).toBe(true);
+    expect(DEFAULT_GAME_SETTINGS.levels).toHaveLength(3);
+  });
+
+  it("rejects levels that are out of order", () => {
+    const shuffled = { ...DEFAULT_GAME_SETTINGS, levels: [DEFAULT_GAME_SETTINGS.levels[1], DEFAULT_GAME_SETTINGS.levels[0]] };
+    expect(gameSettingsSchema.safeParse(shuffled).success).toBe(false);
   });
 
   it("rejects broken settings and falls back to defaults", () => {
-    const broken = { ...DEFAULT_GAME_SETTINGS, levels: DEFAULT_GAME_SETTINGS.levels.slice(0, 3) };
+    const broken = { ...DEFAULT_GAME_SETTINGS, levels: [] };
     expect(gameSettingsSchema.safeParse(broken).success).toBe(false);
     expect(parseGameSettings(broken)).toEqual(DEFAULT_GAME_SETTINGS);
     expect(parseGameSettings(null)).toEqual(DEFAULT_GAME_SETTINGS);

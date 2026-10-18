@@ -1,5 +1,5 @@
 import { Hand, ShieldCheck, TriangleAlert, Users } from "lucide-react";
-import { BrickArt } from "@/components/art/BrickArt";
+import { BrickScene3D } from "@/components/three/BrickScene3D";
 import { SpectatorTimer } from "@/components/challenge/SpectatorTimer";
 import { PageHero } from "@/components/ui/PageHero";
 import { Reveal } from "@/components/ui/Reveal";
@@ -26,11 +26,11 @@ export default function ChallengePage() {
         }
         intro="One wet brick, in one hand, for sixty seconds. It sounds easy until the clay starts to slip."
         art={
-          <div className="relative mx-auto aspect-[5/4] w-full max-w-[460px]">
-            <span aria-hidden className="text-sticker-gold absolute right-0 top-0 font-display text-[7rem] leading-none md:text-[9rem]">
+          <div className="relative mx-auto aspect-square w-full max-w-[440px]">
+            <span aria-hidden className="text-sticker-gold absolute right-0 top-[4%] font-display text-[7rem] leading-none md:text-[9rem]">
               60s
             </span>
-            <BrickArt className="absolute bottom-0 left-0 w-[86%] drop-shadow-[0_24px_30px_rgb(0_0_0/0.55)]" />
+            <BrickScene3D className="absolute inset-0" />
           </div>
         }
       />

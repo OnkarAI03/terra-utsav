@@ -64,7 +64,28 @@ export const rewardSettingsSchema = z.object({
 export type EventSettings = z.infer<typeof eventSettingsSchema>;
 export type RewardSettings = z.infer<typeof rewardSettingsSchema>;
 
-export const VENUE_ADDRESS = "S. B. Patil Institute of Management, Pradhikaran Road, Haveli, Maharashtra 411044";
+/**
+ * Dates in admin forms are picked as India time with <input type="datetime-local"> ("2026-10-27T15:00")
+ * and stored as ISO with +05:30, so Postgres and every browser read the same moment.
+ */
+export function fromIstInput(value: string | null): string | null | "invalid" {
+  if (!value) return null;
+  const m = value.trim().match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::\d{2})?$/);
+  if (!m) return "invalid";
+  const iso = `${m[1]}-${m[2]}-${m[3]}T${m[4]}:${m[5]}:00+05:30`;
+  return Number.isNaN(Date.parse(iso)) ? "invalid" : iso;
+}
+
+/** The value for a datetime-local input, in India time, from a stored ISO date. */
+export function toIstInput(iso: string | null | undefined): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const ist = new Date(d.getTime() + 330 * 60_000);
+  return ist.toISOString().slice(0, 16);
+}
+
+export const VENUE_ADDRESS ="S. B. Patil Institute of Management, Pradhikaran Road, Haveli, Maharashtra 411044";
 
 export const INSTAGRAM_URL = "https://www.instagram.com/pcet_terra_utsav";
 
@@ -87,7 +108,8 @@ export const DEFAULT_EVENT: EventSettings = {
 export const DEFAULT_REWARDS: RewardSettings = {
   rewardsEnabled: true,
   couponLabel: "TERRA UTSAV winner's coupon",
-  couponValueText: null,
+  // Supplied by the team on 2026-10-18 ("50% off on chocolate ball": the Chocolate Bomb).
+  couponValueText: "50% off a Chocolate Bomb",
   maxRedemptions: 1,
   expiresAfterHours: null,
   expiresAt: null,

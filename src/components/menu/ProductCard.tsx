@@ -13,8 +13,9 @@ export function ProductCard({ product, priority = false, headingLevel = 3 }: { p
   return (
     <article
       id={product.slug}
+      tabIndex={-1}
       aria-labelledby={`${product.slug}-name`}
-      className="group scroll-mt-28 overflow-hidden rounded-[var(--radius-panel)] bg-cream-100 text-ink shadow-[var(--shadow-card)]"
+      className="anchor-target group overflow-hidden rounded-[var(--radius-panel)] bg-cream-100 text-ink shadow-[var(--shadow-card)]"
     >
       <figure className="relative aspect-[4/5] w-full overflow-hidden bg-choc-900 sm:aspect-[5/4] lg:aspect-[4/5]">
         {product.imageUrl ? (
@@ -55,18 +56,16 @@ export function ProductCard({ product, priority = false, headingLevel = 3 }: { p
             {availability}
           </span>
         </div>
-        {(product.imageUrl ? product.imageIsIllustrative : product.category === "diyas") && (
-          <figcaption className="absolute bottom-3 left-3 rounded-full bg-choc-900/85 px-3 py-1 text-[0.8125rem] font-bold text-cream-100">
-            {product.imageUrl ? "Illustrative image" : "Illustration, photos coming soon"}
-          </figcaption>
-        )}
       </figure>
       <div className="flex flex-col gap-3 p-6 md:p-8">
         <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
           <Heading id={`${product.slug}-name`} className="display-m text-choc-900">
             {product.name}
           </Heading>
-          <p className="font-display text-[1.6rem] text-maroon-600">{formatPrice(product.pricePaise, product.priceNote)}</p>
+          {/* A missing price is said plainly, not in display type. */}
+          <p className={product.pricePaise === null ? "text-[1rem] font-bold text-ink-soft" : "font-display text-[1.6rem] text-maroon-600"}>
+            {formatPrice(product.pricePaise, product.priceNote)}
+          </p>
         </div>
         {product.tagline && <p className="hand text-[1.45rem] text-maroon-600">{product.tagline}</p>}
         {product.description && <p className="max-w-prose text-[1.05rem] leading-relaxed text-ink">{product.description}</p>}

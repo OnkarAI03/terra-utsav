@@ -1,5 +1,5 @@
 import { deleteGroup, deleteMember, saveGroup, saveMember } from "@/app/admin/actions";
-import { AdminForm, Check, Field, Panel, Select, TextArea } from "@/components/admin/AdminForm";
+import { AdminForm, Check, Field, ImageField, Panel, Select, TextArea } from "@/components/admin/AdminForm";
 import { VARIANT_LABEL } from "@/components/team/OutfitOverlay";
 import { requirePageRole } from "@/lib/auth";
 import { MASCOT_VARIANTS } from "@/lib/types";
@@ -76,9 +76,9 @@ function MemberFields({ m, groups }: { m?: MemberRow; groups: GroupRow[] }) {
         <Field label="Order" name="sort_order" type="number" defaultValue={m?.sort_order ?? 0} />
       </div>
       <div className="grid gap-4 md:grid-cols-2">
-        <Field label="Upload real photo" name="photo" type="file" accept="image/webp,image/jpeg,image/png,image/avif" hint="Square or 4:5 portrait works best." />
+        <ImageField label="Upload real photo" name="photo" hint="Square or 4:5 portrait works best. It is shrunk before it is sent." />
         <Field label="…or photo URL" name="photo_url" defaultValue={m?.photo_url} />
-        <Field label="Upload personal mascot art (optional)" name="mascot" type="file" accept="image/webp,image/jpeg,image/png,image/avif" />
+        <ImageField label="Upload personal mascot art (optional)" name="mascot" />
         <Field label="…or mascot art URL" name="mascot_url" defaultValue={m?.mascot_url} />
       </div>
       <TextArea label="Short bio (optional)" name="bio" defaultValue={m?.bio} />

@@ -2,6 +2,8 @@
 
 import QRCode from "qrcode";
 import { useEffect, useState } from "react";
+import Image from "next/image";
+import { LOGO } from "@/components/brand/LogoSign";
 import { PawIcon } from "@/components/brand/PawIcon";
 import { cn } from "@/lib/cn";
 import { formatDateTime } from "@/lib/format";
@@ -94,7 +96,9 @@ export function CouponTicket({
         </dl>
       </div>
 
-      <div className="col-span-2 flex items-center justify-center border-t-2 border-dashed border-choc-900/25 p-4 sm:col-span-1 sm:border-l-2 sm:border-t-0">
+      <div className="col-span-2 flex items-center justify-center gap-4 border-t-2 border-dashed border-choc-900/25 p-4 sm:col-span-1 sm:flex-col sm:gap-2 sm:border-l-2 sm:border-t-0">
+        {/* The stall's logo, as on a printed ticket. Multiply drops its cream ground into the ticket. */}
+        <Image src={LOGO.src} alt="" width={LOGO.width} height={LOGO.height} sizes="132px" className="h-auto w-[112px] mix-blend-multiply sm:w-[132px]" />
         {qr && usable ? (
           <div
             className="h-[132px] w-[132px] [&>svg]:h-full [&>svg]:w-full"

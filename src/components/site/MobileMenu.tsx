@@ -55,7 +55,7 @@ export function MobileMenu({ items }: { items: NavItem[] }) {
   }, [open]);
 
   return (
-    <div className="lg:hidden">
+    <div className="xl:hidden">
       <button
         ref={buttonRef}
         type="button"
@@ -82,6 +82,17 @@ export function MobileMenu({ items }: { items: NavItem[] }) {
             exit={{ opacity: 0, y: -12 }}
             transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
           >
+            {/* A screen reader can't reach the header's X while this dialog is open, so the dialog has its own. */}
+            <button
+              type="button"
+              onClick={() => {
+                setOpen(false);
+                buttonRef.current?.focus();
+              }}
+              className="sr-only self-end rounded-full bg-cream-100 px-4 py-2 font-extrabold text-ink focus:not-sr-only"
+            >
+              Close menu
+            </button>
             <nav aria-label="Main">
               <ul className="flex flex-col gap-1">
                 {items.map((item, i) => {

@@ -1,7 +1,7 @@
 /** A playful, clearly illustrative stall map. Not a real location. */
 export function MapArt({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 320 240" className={className} role="img" aria-label="Illustrated map with a pin marking the TERRA UTSAV stall">
+    <svg viewBox="0 0 320 240" className={className} aria-hidden>
       <defs>
         <clipPath id="map-clip">
           <path d="M14 18 Q20 8 40 10 L288 6 Q310 8 308 30 L312 206 Q310 230 286 230 L36 234 Q12 232 12 210 Z" />

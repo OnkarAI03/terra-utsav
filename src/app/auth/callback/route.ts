@@ -15,7 +15,8 @@ export async function GET(request: NextRequest) {
   const url = request.nextUrl;
   const next = safeNextPath(url.searchParams.get("next"), "/rewards");
   const supabase = await createSupabaseServerClient();
-  const fail = NextResponse.redirect(new URL(`/login?error=link&next=${encodeURIComponent(next)}`, url.origin));
+  const failWith = (kind: string) => NextResponse.redirect(new URL(`/login?error=${kind}&next=${encodeURIComponent(next)}`, url.origin));
+  const fail = failWith("link");
   if (!supabase) return fail;
 
   const code = url.searchParams.get("code");
@@ -24,7 +25,7 @@ export async function GET(request: NextRequest) {
 
   if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (error) return fail;
+    if (error) return /verifier/i.test(`${error.code ?? ""} ${error.message}`) ? failWith("browser") : fail;
   } else if (tokenHash && type && OTP_TYPES.includes(type)) {
     const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type });
     if (error) return fail;

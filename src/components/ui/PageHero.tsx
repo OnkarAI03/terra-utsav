@@ -17,7 +17,11 @@ export function PageHero({
 }) {
   return (
     <section className={cn("festival-ground relative isolate overflow-hidden", className)}>
-      <FestivalLights className="absolute inset-x-0 top-[calc(var(--header-h)-6px)] -z-10 h-[130px] w-full opacity-90 md:h-[190px]" />
+      {/* Tall enough on wide screens that the kandils are never cut off; they hang in the side margins, clear of the title and the art. */}
+      <FestivalLights
+        kandilAt={[70, 1390]}
+        className="absolute inset-x-0 top-[calc(var(--header-h)-6px)] -z-10 h-[130px] w-full opacity-90 md:h-[max(190px,16.667vw)]"
+      />
       <div className="shell grid items-end gap-8 pb-14 pt-[calc(var(--header-h)+110px)] md:pb-20 md:pt-[calc(var(--header-h)+160px)] lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
         <div>
           <h1 className="display-l anim-rise text-sticker">{title}</h1>

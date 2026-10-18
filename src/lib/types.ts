@@ -22,6 +22,7 @@ export interface Product {
 }
 
 export const MASCOT_VARIANTS = [
+  "leader",
   "food",
   "operations",
   "marketing",
@@ -29,6 +30,7 @@ export const MASCOT_VARIANTS = [
   "games",
   "logistics",
   "design",
+  "sales",
   "mentor",
   "generic",
 ] as const;
@@ -71,7 +73,8 @@ export interface TeamData {
   groups: TeamGroup[];
   mentors: TeamMember[];
   students: TeamMember[];
-  isPreview: boolean;
+  mentorsArePreview: boolean;
+  studentsArePreview: boolean;
 }
 
 export type CouponStatus = "valid" | "redeemed" | "expired" | "void" | "invalid" | "rate_limited";

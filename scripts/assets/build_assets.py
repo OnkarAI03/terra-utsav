@@ -325,10 +325,11 @@ def build_board_poses() -> None:
     board = Image.open(os.path.join(REF, "asset-board-a.webp")).convert("RGB")
     row = board.crop((598, 28, 1498, 198))
     cut = cutout_studio(row, hi=12.0, block=1, choke=1, feather=0.6, shadow_from=0.88, flat_bg=True)
+    # Only the "oops" pose is still used (404 page). The excited and trophy poses were retired:
+    # their white fur is the same colour as the board's cream background, so the cut-out leaked
+    # into the face. The game's result screens now use the full-resolution mascot instead.
     poses = {
-        "koochu-excited": (500, 632),
         "koochu-oops": (632, 755),
-        "koochu-win": (755, 900),
     }
     for name, (x0, x1) in poses.items():
         piece = trim(keep_largest(cut.crop((x0, 0, x1, cut.height))), pad=3)
@@ -362,9 +363,28 @@ def build_food() -> None:
     save_webp(upscale(papdi, 2.0), out("food", "chat-papdi.webp"), 82)
 
 
+def build_logo() -> None:
+    """The team's TERRA UTSAV logo (design/brand/terra-utsav-logo-source.jpg, flat cream ground).
+
+    Cropped to the artwork with an even cream margin. The cream stays: the logo is shown as a
+    printed sign or on cream surfaces, where `mix-blend-mode: multiply` hides the ground.
+    """
+    print("Logo")
+    src = Image.open(os.path.join(ROOT, "design", "brand", "terra-utsav-logo-source.jpg")).convert("RGB")
+    a = np.asarray(src, dtype=np.int32)
+    border = np.concatenate([a[:20].reshape(-1, 3), a[-20:].reshape(-1, 3), a[:, :20].reshape(-1, 3), a[:, -20:].reshape(-1, 3)])
+    bg = np.median(border, 0)
+    ys, xs = np.where(np.abs(a - bg).sum(-1) > 40)
+    pad = 56
+    box = (max(0, xs.min() - pad), max(0, ys.min() - pad), min(src.width, xs.max() + pad), min(src.height, ys.max() + pad))
+    logo = src.crop(box)
+    save_webp(logo, out("brand", "terra-utsav-logo.webp"), 90)
+
+
 def main() -> int:
-    targets = sys.argv[1:] or ["mascot", "sprites", "poses", "scenes", "food"]
+    targets = sys.argv[1:] or ["mascot", "sprites", "poses", "scenes", "food", "logo"]
     steps = {
+        "logo": build_logo,
         "mascot": build_mascot,
         "sprites": build_board_sprites,
         "poses": build_board_poses,

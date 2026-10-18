@@ -24,7 +24,7 @@ export function InstagramLink({ url, tone = "dark", className }: { url: string; 
       target="_blank"
       rel="noopener noreferrer"
       className={cn(
-        "inline-flex items-center gap-2.5 rounded-full px-5 py-3 font-display text-[1rem] uppercase tracking-[0.02em] transition-transform duration-150 hover:-translate-y-0.5",
+        "inline-flex min-h-12 items-center gap-2.5 rounded-full px-5 py-3 font-display text-[1rem] uppercase tracking-[0.02em] transition-transform duration-150 ease-out hover:-translate-y-0.5 active:translate-y-[2px]",
         tone === "dark"
           ? "border-2 border-cream-100/80 text-cream-100 hover:bg-cream-100 hover:text-ink"
           : "bg-choc-800 text-cream-100 shadow-[0_4px_0_var(--color-choc-950)]",
@@ -36,6 +36,7 @@ export function InstagramLink({ url, tone = "dark", className }: { url: string; 
         <span>Follow us on Instagram</span>
         <span className="mt-1 font-sans text-[0.8125rem] font-extrabold normal-case tracking-normal opacity-90">{instagramHandle(url)}</span>
       </span>
+      <span className="sr-only"> (opens in a new tab)</span>
     </a>
   );
 }

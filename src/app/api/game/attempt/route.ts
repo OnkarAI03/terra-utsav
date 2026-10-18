@@ -14,7 +14,7 @@ export async function POST(request: Request) {
   const { data, error } = await ctx.service.rpc("game_start_attempt", { p_user: ctx.user.id });
   if (error || !data) return fail("server_error", 500);
   if (data.error) {
-    const status = data.error === "no_attempts_left" ? 403 : 409;
+    const status = data.error === "no_attempts_left" || data.error === "already_won" || data.error === "rewards_closed" ? 403 : 409;
     return fail(data.error, status, { attemptsUsed: data.attemptsUsed, attemptsAllowed: data.attemptsAllowed });
   }
 

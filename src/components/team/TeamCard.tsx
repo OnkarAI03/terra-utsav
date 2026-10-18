@@ -15,8 +15,9 @@ export const SWITCH_INTERVAL_MS = 4000;
 /**
  * One person, two pictures: their real photograph and their Koochu Puchu. The card cross-fades
  * between them every few seconds while it is on screen. Switching pauses while the card is
- * hovered, focused or touched, stops when the card leaves the viewport, and is replaced by a
- * manual switch button under reduced motion.
+ * hovered, focused or touched, when the visitor pauses all cards, when the card leaves the
+ * viewport, and is replaced by the switch button under reduced motion. Screen readers always get
+ * the same thing: the photo (the kitten is decoration), so nothing changes under them.
  */
 export function TeamCard({
   member,
@@ -24,12 +25,15 @@ export function TeamCard({
   variant = "student",
   index = 0,
   intervalMs = SWITCH_INTERVAL_MS,
+  allPaused = false,
 }: {
   member: TeamMember;
   groupName?: string | null;
   variant?: "student" | "mentor";
   index?: number;
   intervalMs?: number;
+  /** The visitor paused every card (WCAG 2.2.2). */
+  allPaused?: boolean;
 }) {
   const reduce = usePrefersReducedMotion();
   // Real photos come first. Until a photo exists, lead with the kitten rather than a silhouette.
@@ -46,7 +50,8 @@ export function TeamCard({
     return () => io.disconnect();
   }, []);
 
-  const auto = !reduce && inView && !paused;
+  const auto = !reduce && inView && !paused && !allPaused;
+  const hasPhoto = Boolean(member.photoUrl);
 
   useEffect(() => {
     if (!auto) return;
@@ -73,6 +78,9 @@ export function TeamCard({
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocus={() => setPaused(true)}
+      onPointerDown={(e) => {
+        if (e.pointerType !== "mouse") setPaused(true);
+      }}
       onBlur={(e) => {
         if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setPaused(false);
       }}
@@ -89,7 +97,7 @@ export function TeamCard({
           initial={false}
           animate={{ opacity: showMascot ? 0 : 1, scale: showMascot ? 1.04 : 1 }}
           transition={fade}
-          aria-hidden={showMascot}
+          aria-hidden={!hasPhoto || undefined}
         >
           <PhotoSide name={member.name} photoUrl={member.photoUrl} sizes={sizes} />
         </motion.div>
@@ -98,7 +106,7 @@ export function TeamCard({
           initial={false}
           animate={{ opacity: showMascot ? 1 : 0, scale: showMascot ? 1 : 1.04 }}
           transition={fade}
-          aria-hidden={!showMascot}
+          aria-hidden={hasPhoto || undefined}
         >
           <MascotFigure name={member.name} variant={member.mascotVariant} mascotUrl={member.mascotUrl} sizes={sizes} />
         </motion.div>
@@ -107,7 +115,7 @@ export function TeamCard({
           type="button"
           onClick={() => setShowMascot((v) => !v)}
           aria-pressed={showMascot}
-          aria-label={showMascot ? `Show ${member.name}'s photo` : `Show ${member.name} as Koochu Puchu`}
+          aria-label={`Show ${member.name} as Koochu Puchu`}
           className={cn(
             "absolute bottom-3 right-3 grid h-11 w-11 place-items-center rounded-full bg-cream-100 text-ink shadow-[0_4px_0_var(--color-cream-300)] transition-[opacity,transform] duration-200 active:translate-y-[2px]",
             reduce ? "opacity-100" : "opacity-0 focus-visible:opacity-100 group-hover:opacity-100 [@media(hover:none)]:opacity-100",
@@ -122,12 +130,12 @@ export function TeamCard({
       </div>
 
       <div className={cn("flex flex-1 flex-col gap-1.5", variant === "mentor" ? "p-6" : "p-4 md:p-5")}>
-        <h3
+        <h4
           id={`${member.slug}-name`}
           className={cn("font-display leading-[1.02]", variant === "mentor" ? "text-[1.8rem] text-cream-100" : "text-[1.3rem] text-choc-900 md:text-[1.4rem]")}
         >
           {member.name}
-        </h3>
+        </h4>
         <p className={cn("font-bold leading-snug", variant === "mentor" ? "text-[1.02rem] text-gold-300" : "text-[0.95rem] text-maroon-600")}>
           {member.title}
         </p>
@@ -154,9 +162,7 @@ export function TeamCard({
             ))}
           </ul>
         )}
-        <p className="sr-only">
-          This card switches between a photo of {member.name} and an illustration of them as Koochu Puchu ({VARIANT_LABEL[member.mascotVariant]}).
-        </p>
+        {!hasPhoto && <p className="sr-only">Shown as Koochu Puchu ({VARIANT_LABEL[member.mascotVariant]}).</p>}
       </div>
     </article>
   );

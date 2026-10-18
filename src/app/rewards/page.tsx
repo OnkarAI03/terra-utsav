@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { ArrowRight, Info } from "lucide-react";
 import { redirect } from "next/navigation";
 import { CouponTicket, type TicketState } from "@/components/rewards/CouponTicket";
+import { Tilt } from "@/components/ui/Tilt";
 import { ButtonLink } from "@/components/ui/Button";
 import { PageHero } from "@/components/ui/PageHero";
 import { getSession } from "@/lib/auth";
@@ -44,7 +45,9 @@ export default async function RewardsPage() {
         <PageHero title="My coupons" intro="Coupons appear here once sign-in is switched on for the stall." />
         <section className="bg-cream-200 py-20 text-ink">
           <div className="shell">
-            <p className="max-w-xl text-[1.05rem]">The stall team has not connected the rewards database yet. Practise the game in the meantime.</p>
+            <p className="max-w-xl text-[1.05rem]">
+              Coupons open closer to the Mandi. Practise the game in the meantime: the levels are the same.
+            </p>
           </div>
         </section>
       </>
@@ -76,12 +79,14 @@ export default async function RewardsPage() {
         <div className="shell grid gap-12 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,0.8fr)]">
           <div>
             {couponsRes.error ? (
-              <p className="rounded-2xl bg-gold-300 p-5 font-bold text-ink">We could not load your coupons right now. Please refresh in a moment.</p>
+              <p className="rounded-2xl bg-gold-300 p-5 font-bold text-ink">
+                We could not load your coupons right now. Please refresh in a moment.
+              </p>
             ) : coupons.length === 0 ? (
               <div className="rounded-[var(--radius-panel)] bg-cream-100 p-8 text-ink">
                 <h2 className="display-m text-choc-900">No coupons yet</h2>
                 <p className="mt-3 max-w-md text-[1.05rem] leading-relaxed">
-                  Clear all five levels of Catch the Koochu Puchu in a reward attempt and your coupon lands here.
+                  Clear every level of Catch the Koochu Puchu in a reward attempt and your coupon lands here.
                 </p>
                 <ButtonLink href="/game" className="mt-6" trailing={<ArrowRight />}>
                   Play now
@@ -91,16 +96,18 @@ export default async function RewardsPage() {
               <ul className="flex flex-col gap-6">
                 {coupons.map((c) => (
                   <li key={c.id}>
-                    <CouponTicket
-                      className="[--notch:#2a0b10]"
-                      code={c.code}
-                      label={c.label}
-                      valueText={c.value_text}
-                      expiresAt={c.expires_at}
-                      issuedAt={c.issued_at}
-                      state={ticketState(c)}
-                      redemptionsLeft={Math.max(0, c.max_redemptions - c.redemption_count)}
-                    />
+                    <Tilt max={4}>
+                      <CouponTicket
+                        className="[--notch:#2a0b10]"
+                        code={c.code}
+                        label={c.label}
+                        valueText={c.value_text}
+                        expiresAt={c.expires_at}
+                        issuedAt={c.issued_at}
+                        state={ticketState(c)}
+                        redemptionsLeft={Math.max(0, c.max_redemptions - c.redemption_count)}
+                      />
+                    </Tilt>
                   </li>
                 ))}
               </ul>
@@ -128,7 +135,10 @@ export default async function RewardsPage() {
               </div>
             </div>
             <form action="/auth/signout" method="post">
-              <button type="submit" className="text-[0.95rem] font-extrabold text-cream-100 underline underline-offset-4 hover:text-gold-300">
+              <button
+                type="submit"
+                className="text-[0.95rem] font-extrabold text-cream-100 underline underline-offset-4 hover:text-gold-300"
+              >
                 Sign out
               </button>
             </form>

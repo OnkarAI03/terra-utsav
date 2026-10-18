@@ -46,7 +46,8 @@ export default async function AdminOverview() {
     { done: products.every((p) => !p.imageIsIllustrative && !!p.imageUrl), label: "Real photos of the food and diyas", href: "/admin/menu" },
     { done: rewards.confirmed && !!rewards.couponValueText, label: "Coupon value and terms confirmed", href: "/admin/rewards" },
     { done: !!rewards.expiresAt || !!rewards.expiresAfterHours, label: "Coupon expiry set", href: "/admin/rewards" },
-    { done: !team.isPreview, label: "Team names, roles and photos entered", href: "/admin/team" },
+    { done: !team.studentsArePreview, label: "Team names, roles and photos entered", href: "/admin/team" },
+    { done: !team.mentorsArePreview, label: "Mentor names, designations and photos entered", href: "/admin/team" },
     { done: CHALLENGE.rulesApproved, label: "Brick challenge safety rules approved (edit src/content/challenge.ts)", href: "/challenge" },
   ];
 

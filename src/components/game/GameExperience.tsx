@@ -11,9 +11,11 @@ import { CouponTicket } from "@/components/rewards/CouponTicket";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { cn } from "@/lib/cn";
 import type { GameSettings, LevelConfig } from "@/lib/game/config";
+import { gameFacts } from "@/lib/game/copy";
 import { randomSeed } from "@/lib/game/rng";
 import { sfx } from "@/lib/game/sound";
 import { GameBoard, type BoardResult } from "./GameBoard";
+import { ResultKitten } from "./ResultKitten";
 import { loadSprites } from "./sprites";
 
 type Mode = "practice" | "reward";
@@ -61,6 +63,8 @@ const ERRORS: Record<string, string> = {
   not_configured: "Reward play is not switched on yet. You can still practise.",
   unauthenticated: "Please sign in to play for a reward.",
   no_attempts_left: "You have used all your reward attempts.",
+  rewards_closed: "Reward play opens once the organisers switch the coupons on. Practise meanwhile: the levels are the same.",
+  already_won: "You have already won your coupon. It's one per player, so give someone else a chance! Practice is still open.",
   level_in_progress: "One of your levels is still running. Give it a moment and try again.",
   attempt_finished: "That attempt has already finished.",
   wrong_level: "Your attempt has moved on. Reloading your progress.",
@@ -91,14 +95,16 @@ async function post<T>(url: string, body: unknown): Promise<{ ok: true; data: T 
 
 export function GameExperience({
   settings,
-  rewardsEnabled,
+  rewardsOpen,
   couponValueText,
 }: {
   settings: GameSettings;
-  rewardsEnabled: boolean;
+  /** Coupons switched on and their terms confirmed by the organisers (the server checks too). */
+  rewardsOpen: boolean;
   couponValueText: string | null;
 }) {
   const reduce = usePrefersReducedMotion();
+  const facts = gameFacts(settings, couponValueText);
   const [status, setStatus] = useState<Status | null>(null);
   const [run, setRun] = useState<Run | null>(null);
   const [screen, setScreen] = useState<Screen>({ name: "home" });
@@ -212,7 +218,8 @@ export function GameExperience({
       if (run.mode === "practice") {
         if (result.outcome === "passed" && !result.aborted) {
           if (sound) sfx.levelUp();
-          if (run.level >= 5) setScreen({ name: "won", coupon: null, reward: "practice" });
+          // The last level comes from the live settings (3 by default; admins may choose 1 to 5).
+          if (run.level >= run.settings.levels.length) setScreen({ name: "won", coupon: null, reward: "practice" });
           else setScreen({ name: "level-passed", catches: result.catches });
         } else {
           if (sound) sfx.lose();
@@ -265,7 +272,7 @@ export function GameExperience({
   );
 
   const nextPracticeLevel = () => {
-    setRun((cur) => (cur ? { ...cur, level: Math.min(5, cur.level + 1) } : cur));
+    setRun((cur) => (cur ? { ...cur, level: Math.min(cur.settings.levels.length, cur.level + 1) } : cur));
     setScreen({ name: "level-intro" });
   };
 
@@ -294,61 +301,16 @@ export function GameExperience({
         </button>
       </div>
 
-      <AnimatePresence mode="wait">
+      <AnimatePresence mode="wait" initial={false}>
         {screen.name === "home" && (
           <motion.section key="home" {...fade} aria-labelledby="game-home-title" className="grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)]">
             <div>
               <h2 id="game-home-title" className="display-m text-sticker">
-                How to play
+                Ready to play?
               </h2>
-              <ul className="mt-6 flex flex-col gap-3 text-[1.08rem] leading-relaxed text-cream-100">
-                <li className="flex gap-3">
-                  <Gamepad2 aria-hidden className="mt-1 h-5 w-5 shrink-0 text-gold-400" />
-                  Koochu Puchu pops out of the Diwali gift boxes and dashes across the stall. Tap it to catch it.
-                </li>
-                <li className="flex gap-3">
-                  <Heart aria-hidden className="mt-1 h-5 w-5 shrink-0 text-gold-400" />
-                  Snacks pop up too. Tap one and you lose a heart.
-                </li>
-                <li className="flex gap-3">
-                  <Timer aria-hidden className="mt-1 h-5 w-5 shrink-0 text-gold-400" />
-                  Catch enough kittens before the timer runs out to clear the level. Five levels, each harder than the last.
-                </li>
-                <li className="flex gap-3">
-                  <Trophy aria-hidden className="mt-1 h-5 w-5 shrink-0 text-gold-400" />
-                  Clear Level 5 in a reward attempt to win a coupon{couponValueText ? `: ${couponValueText}` : ""}.
-                </li>
-              </ul>
-              <p className="mt-4 text-[0.98rem] text-cream-100/90">Keyboard players: number keys 1 to 9 tap the boxes, laid out like a phone keypad.</p>
-
-              <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:flex-wrap">
-                {settings.practiceEnabled && (
-                  <Button variant="secondary" size="lg" icon={<Play />} onClick={() => startPractice(practiceLevel)}>
-                    Practise
-                  </Button>
-                )}
-                <RewardButton status={status} attemptsLeft={attemptsLeft} onStart={() => setScreen({ name: "confirm" })} />
-              </div>
-
-              {status?.signedIn && attemptsLeft !== null && (
-                <p className="mt-4 text-[1rem] font-bold text-cream-100">
-                  Reward attempts used: {status.attemptsUsed} of {status.attemptsAllowed}
-                  {status.coupons ? (
-                    <>
-                      {" "}
-                      ·{" "}
-                      <Link href="/rewards" className="text-gold-300 underline underline-offset-4">
-                        {status.coupons} coupon{status.coupons === 1 ? "" : "s"} in your wallet
-                      </Link>
-                    </>
-                  ) : null}
-                </p>
-              )}
-              {!rewardsEnabled && <p className="mt-3 text-[0.98rem] font-bold text-gold-300">Coupons are paused right now. You can still play.</p>}
-
               {settings.practiceEnabled && (
-                <div className="mt-8">
-                  <p className="text-[0.95rem] font-extrabold text-gold-300">Practise a level</p>
+                <div className="mt-6">
+                  <p className="text-[0.95rem] font-extrabold text-gold-300">Practise level</p>
                   <div className="mt-2 flex flex-wrap gap-2" role="group" aria-label="Choose a practice level">
                     {settings.levels.map((l) => (
                       <button
@@ -367,6 +329,54 @@ export function GameExperience({
                   </div>
                 </div>
               )}
+
+              <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:flex-wrap">
+                {settings.practiceEnabled && (
+                  <Button variant="secondary" size="lg" icon={<Play />} onClick={() => startPractice(practiceLevel)}>
+                    Practise level {practiceLevel}
+                  </Button>
+                )}
+                <RewardButton status={status} attemptsLeft={attemptsLeft} rewardsOpen={rewardsOpen} onStart={() => setScreen({ name: "confirm" })} />
+              </div>
+
+              {status?.signedIn && attemptsLeft !== null && (
+                <p className="mt-4 text-[1rem] font-bold text-cream-100">
+                  Reward attempts used: {status.attemptsUsed} of {status.attemptsAllowed}
+                  {status.coupons ? (
+                    <>
+                      {" "}
+                      ·{" "}
+                      <Link href="/rewards" className="text-gold-300 underline underline-offset-4">
+                        {status.coupons} coupon{status.coupons === 1 ? "" : "s"} in your wallet
+                      </Link>
+                    </>
+                  ) : null}
+                </p>
+              )}
+
+              <h3 className="mt-10 font-display text-[1.6rem] leading-none text-cream-100">How to play</h3>
+              <ul className="mt-4 flex flex-col gap-3 text-[1.08rem] leading-relaxed text-cream-100">
+                <li className="flex gap-3">
+                  <Gamepad2 aria-hidden className="mt-1 h-5 w-5 shrink-0 text-gold-400" />
+                  Koochu Puchu pops out of the Diwali gift boxes and dashes across the stall. Tap it to catch it.
+                </li>
+                <li className="flex gap-3">
+                  <Heart aria-hidden className="mt-1 h-5 w-5 shrink-0 text-gold-400" />
+                  Snacks pop up too. Tap one and you lose a heart.
+                </li>
+                <li className="flex gap-3">
+                  <Timer aria-hidden className="mt-1 h-5 w-5 shrink-0 text-gold-400" />
+                  Catch enough kittens before the timer runs out to clear the level. {facts.levels} levels, each harder than the last.
+                </li>
+                <li className="flex gap-3">
+                  <Trophy aria-hidden className="mt-1 h-5 w-5 shrink-0 text-gold-400" />
+                  Clear Level {facts.lastLevel} in a reward attempt to win {facts.prize}. One coupon per player.
+                </li>
+              </ul>
+              <p className="mt-4 text-[0.98rem] text-cream-100/90 [@media(pointer:coarse)]:hidden">
+                Keyboard players: number keys 1 to 9 tap the boxes, laid out like a phone keypad.
+              </p>
+              <p className="mt-2 text-[0.98rem] text-cream-100/90">This game needs sight and quick taps. If it doesn&apos;t work for you, talk to us at the stall.</p>
             </div>
             <div className="relative mx-auto w-[260px] sm:w-[320px]">
               <Image src="/images/mascot/koochu-idle.webp" alt="Koochu Puchu, ready to run" width={762} height={1000} sizes="320px" className="w-full" priority />
@@ -394,6 +404,19 @@ export function GameExperience({
               </Button>
               <Button variant="dark" size="lg" onClick={goHome}>
                 Not now
+              </Button>
+            </div>
+          </motion.section>
+        )}
+
+        {screen.name === "level-intro" && run && !cfg && (
+          // Never a blank panel: if a level number has no settings (an admin changed the level
+          // count mid-run), offer the way back.
+          <motion.section key="no-level" {...fade} className="mx-auto max-w-xl text-center">
+            <p className="text-[1.1rem] font-semibold text-cream-100">That level isn&apos;t set up any more.</p>
+            <div className="mt-6 flex justify-center">
+              <Button size="lg" onClick={goHome}>
+                Back to the game
               </Button>
             </div>
           </motion.section>
@@ -468,7 +491,7 @@ export function GameExperience({
 
         {screen.name === "level-passed" && run && (
           <motion.section key="passed" {...fade} className="mx-auto max-w-xl text-center">
-            <Image src="/images/mascot/koochu-excited.webp" alt="" width={282} height={356} className="mx-auto w-[150px]" />
+            <ResultKitten mood="cheer" />
             <h2 className="display-l text-sticker mt-4">Level cleared!</h2>
             <p className="mt-3 text-[1.1rem] font-semibold text-cream-100">
               {screen.catches} kittens caught. Next up: Level {run.mode === "practice" ? run.level + 1 : run.level}.
@@ -486,11 +509,11 @@ export function GameExperience({
 
         {screen.name === "won" && (
           <motion.section key="won" {...fade} className="mx-auto max-w-2xl text-center">
-            <Image src="/images/mascot/koochu-win.webp" alt="Koochu Puchu holding a trophy" width={290} height={332} className="mx-auto w-[170px]" />
+            <ResultKitten mood="win" />
             <h2 className="display-l text-sticker-gold mt-4">You caught Koochu Puchu!</h2>
             {screen.reward === "practice" ? (
               <p className="mx-auto mt-4 max-w-md text-[1.1rem] font-semibold text-cream-100">
-                All five levels cleared in practice. Now do it for real and win a coupon.
+                All {facts.levelsWord} levels cleared in practice. Now do it for real and win {facts.prize}.
               </p>
             ) : screen.coupon ? (
               <>
@@ -528,7 +551,7 @@ export function GameExperience({
 
         {screen.name === "lost" && run && (
           <motion.section key="lost" {...fade} className="mx-auto max-w-xl text-center">
-            <Image src="/images/mascot/koochu-oops.webp" alt="" width={271} height={315} className="mx-auto w-[150px]" />
+            <ResultKitten mood="oops" />
             <h2 className="display-l text-sticker mt-4">Oops! Koochu Puchu got away.</h2>
             <p className="mt-3 text-[1.1rem] font-semibold text-cream-100">{LOST_REASON[screen.reason] ?? LOST_REASON.failed_time}</p>
             <p className="mt-2 text-[1rem] text-cream-100">
@@ -573,17 +596,26 @@ export function GameExperience({
   );
 }
 
-function RewardButton({ status, attemptsLeft, onStart }: { status: Status | null; attemptsLeft: number | null; onStart: () => void }) {
+function RewardButton({
+  status,
+  attemptsLeft,
+  rewardsOpen,
+  onStart,
+}: {
+  status: Status | null;
+  attemptsLeft: number | null;
+  rewardsOpen: boolean;
+  onStart: () => void;
+}) {
+  // Said before sign-in, so nobody signs in only to find the door shut.
+  if (!rewardsOpen || (status && !status.configured)) {
+    return <p className="max-w-xs text-[0.98rem] font-bold text-gold-300 sm:self-center">Reward play opens closer to the Mandi. Practice is open now.</p>;
+  }
   if (!status) {
     return (
       <Button size="lg" disabled icon={<Trophy />}>
         Checking…
       </Button>
-    );
-  }
-  if (!status.configured) {
-    return (
-      <p className="max-w-xs self-center text-[0.98rem] font-bold text-cream-100">Reward play opens once the stall&apos;s sign-in is switched on.</p>
     );
   }
   if (!status.signedIn) {

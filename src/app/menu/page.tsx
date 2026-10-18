@@ -1,6 +1,7 @@
 import { Info } from "lucide-react";
 import { DiyaRow } from "@/components/art/DiyaArt";
 import { ProductCard } from "@/components/menu/ProductCard";
+import { BombScene3D } from "@/components/three/BombScene3D";
 import { PageHero } from "@/components/ui/PageHero";
 import { Reveal } from "@/components/ui/Reveal";
 import { getProducts } from "@/lib/data/public";
@@ -32,6 +33,7 @@ export default async function MenuPage() {
           </>
         }
         intro="Short menu, big chaos, plus homemade diyas to carry the Diwali glow home."
+        art={<BombScene3D />}
       >
         <nav aria-label="Menu sections" className="flex flex-wrap gap-2">
           <a href="#to-eat" className="rounded-full bg-cream-100 px-4 py-2 font-extrabold text-ink hover:bg-cream-50">
@@ -43,7 +45,7 @@ export default async function MenuPage() {
         </nav>
       </PageHero>
 
-      <section id="to-eat" aria-labelledby="to-eat-title" className="scroll-mt-24 bg-cream-200 pb-20 pt-14 text-ink md:pb-28 md:pt-20">
+      <section id="to-eat" tabIndex={-1} aria-labelledby="to-eat-title" className="anchor-target bg-cream-200 pb-20 pt-14 text-ink md:pb-28 md:pt-20">
         <div className="shell">
           <Reveal>
             <h2 id="to-eat-title" className="display-m text-choc-900">
@@ -64,7 +66,7 @@ export default async function MenuPage() {
         </div>
       </section>
 
-      <section id="diyas" aria-labelledby="diyas-title" className="festival-ground scroll-mt-24 relative overflow-hidden pb-20 pt-16 md:pb-28 md:pt-24">
+      <section id="diyas" tabIndex={-1} aria-labelledby="diyas-title" className="anchor-target festival-ground relative overflow-hidden pb-20 pt-16 md:pb-28 md:pt-24">
         <div className="shell">
           <Reveal className="max-w-2xl">
             <h2 id="diyas-title" className="display-l text-sticker">

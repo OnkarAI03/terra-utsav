@@ -1,8 +1,10 @@
 "use client";
 
+import { Pause, Play } from "lucide-react";
 import { useMemo, useState } from "react";
 import { cn } from "@/lib/cn";
 import type { TeamGroup, TeamMember } from "@/lib/types";
+import { Tilt } from "@/components/ui/Tilt";
 import { TeamCard } from "./TeamCard";
 
 /**
@@ -11,6 +13,7 @@ import { TeamCard } from "./TeamCard";
  */
 export function TeamDirectory({ groups, students }: { groups: TeamGroup[]; students: TeamMember[] }) {
   const [filter, setFilter] = useState<string>("all");
+  const [allPaused, setAllPaused] = useState(false);
   const groupName = useMemo(() => new Map(groups.map((g) => [g.id, g.name])), [groups]);
 
   const sections = useMemo(() => {
@@ -24,11 +27,26 @@ export function TeamDirectory({ groups, students }: { groups: TeamGroup[]; stude
 
   const visible = filter === "all" ? sections : sections.filter((s) => (s.group?.id ?? "none") === filter);
   const showFilters = sections.length > 1;
+  const shown = visible.reduce((n, s) => n + s.members.length, 0);
 
   return (
     <div>
+      <div className="mb-5 flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          aria-pressed={allPaused}
+          onClick={() => setAllPaused((v) => !v)}
+          className="inline-flex min-h-11 items-center gap-2 rounded-full border-2 border-choc-900/70 px-4 py-2 text-[0.95rem] font-extrabold text-ink transition-colors duration-150 hover:bg-cream-50"
+        >
+          {allPaused ? <Play aria-hidden className="h-4 w-4" /> : <Pause aria-hidden className="h-4 w-4" />}
+          Pause the photo switching
+        </button>
+        <p role="status" className="text-[0.95rem] font-bold text-ink-soft">
+          Showing {shown} {shown === 1 ? "person" : "people"}
+        </p>
+      </div>
       {showFilters && (
-        <div role="group" aria-label="Filter by team" className="no-scrollbar -mx-[var(--gutter)] mb-10 flex gap-2 overflow-x-auto px-[var(--gutter)] pb-1">
+        <div role="group" aria-label="Filter by team" className="no-scrollbar -mx-[var(--gutter)] mb-10 flex gap-2 overflow-x-auto px-[var(--gutter)] pb-1 lg:flex-wrap lg:overflow-visible">
           {[{ id: "all", name: "Everyone" }, ...sections.map((s) => ({ id: s.group?.id ?? "none", name: s.group?.name ?? "More of the team" }))].map(
             (f) => (
               <button
@@ -62,7 +80,9 @@ export function TeamDirectory({ groups, students }: { groups: TeamGroup[]; stude
             <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5">
               {members.map((m, i) => (
                 <li key={m.id}>
-                  <TeamCard member={m} groupName={group ? null : m.groupId ? groupName.get(m.groupId) : null} index={i} />
+                  <Tilt max={4} className="h-full">
+                    <TeamCard member={m} groupName={group ? null : m.groupId ? groupName.get(m.groupId) : null} index={i} allPaused={allPaused} />
+                  </Tilt>
                 </li>
               ))}
             </ul>

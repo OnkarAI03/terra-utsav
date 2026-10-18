@@ -43,11 +43,6 @@ export function FoodHighlights({ products }: { products: Product[] }) {
                       />
                     )}
                   </div>
-                  {p.imageIsIllustrative && (
-                    <figcaption className="absolute right-3 top-3 rounded-full bg-choc-900/85 px-3 py-1 text-[0.8125rem] font-bold text-cream-100">
-                      Illustrative image
-                    </figcaption>
-                  )}
                 </figure>
               </Reveal>
               <Reveal delay={90}>
@@ -57,7 +52,9 @@ export function FoodHighlights({ products }: { products: Product[] }) {
                 <dl className="mt-6 flex flex-wrap gap-x-8 gap-y-2 text-[1rem]">
                   <div>
                     <dt className="text-[0.9rem] font-bold text-ink-soft">Price</dt>
-                    <dd className="font-display text-[1.5rem] text-choc-900">{formatPrice(p.pricePaise, p.priceNote)}</dd>
+                    <dd className={p.pricePaise === null ? "pt-1 text-[1.05rem] font-bold text-ink" : "font-display text-[1.5rem] text-choc-900"}>
+                      {formatPrice(p.pricePaise, p.priceNote)}
+                    </dd>
                   </div>
                   <div>
                     <dt className="text-[0.9rem] font-bold text-ink-soft">Availability</dt>

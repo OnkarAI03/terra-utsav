@@ -5,7 +5,7 @@ import { generateSchedule, positionAt } from "@/lib/game/engine";
 
 // ---------------------------------------------------------------- mocks
 const state = {
-  user: null as { id: string; email: string } | null,
+  user: null as { id: string; email: string; email_confirmed_at?: string; is_anonymous?: boolean } | null,
   roles: [] as string[],
   rpcCalls: [] as { fn: string; args: Record<string, unknown> }[],
   attempt: { id: "11111111-1111-4111-8111-111111111111", user_id: "u1", status: "in_progress", current_level: 1, settings_snapshot: DEFAULT_GAME_SETTINGS },
@@ -53,7 +53,7 @@ function serviceClient() {
 vi.mock("@/lib/supabase/server", () => ({ createSupabaseServerClient: async () => sessionClient() }));
 vi.mock("@/lib/supabase/admin", () => ({ createSupabaseServiceClient: () => serviceClient() }));
 vi.mock("next/headers", () => ({ cookies: async () => ({ getAll: () => [], set: () => {} }) }));
-vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
+vi.mock("next/cache", () => ({ revalidatePath: vi.fn(), revalidateTag: vi.fn() }));
 
 beforeEach(() => {
   state.user = null;
@@ -90,15 +90,23 @@ describe("game API trusts only the server's own judgement", () => {
     expect(res.status).toBe(401);
   });
 
-  it("refuses cross-site requests", async () => {
+  it("refuses players whose email is not verified, and anonymous sessions", async () => {
+    const { POST } = await import("@/app/api/game/attempt/route");
     state.user = { id: "u1", email: "u1@x.test" };
+    expect((await POST(jsonRequest("http://localhost:3000/api/game/attempt", {}))).status).toBe(401);
+    state.user = { id: "u1", email: "u1@x.test", email_confirmed_at: "2026-10-18T00:00:00Z", is_anonymous: true };
+    expect((await POST(jsonRequest("http://localhost:3000/api/game/attempt", {}))).status).toBe(401);
+  });
+
+  it("refuses cross-site requests", async () => {
+    state.user = { id: "u1", email: "u1@x.test", email_confirmed_at: "2026-10-18T00:00:00Z" };
     const { POST } = await import("@/app/api/game/attempt/route");
     const res = await POST(jsonRequest("http://localhost:3000/api/game/attempt", {}, "https://evil.example"));
     expect(res.status).toBe(400);
   });
 
   it("ignores any score or success flag sent by the browser and replays the taps itself", async () => {
-    state.user = { id: "u1", email: "u1@x.test" };
+    state.user = { id: "u1", email: "u1@x.test", email_confirmed_at: "2026-10-18T00:00:00Z" };
     const { POST } = await import("@/app/api/game/level/submit/route");
     const res = await POST(
       jsonRequest("http://localhost:3000/api/game/level/submit", {
@@ -117,7 +125,7 @@ describe("game API trusts only the server's own judgement", () => {
   });
 
   it("passes a level only when the replayed taps really catch enough kittens", async () => {
-    state.user = { id: "u1", email: "u1@x.test" };
+    state.user = { id: "u1", email: "u1@x.test", email_confirmed_at: "2026-10-18T00:00:00Z" };
     const cfg = DEFAULT_GAME_SETTINGS.levels[0];
     const taps = generateSchedule(state.levelSeed, cfg)
       .filter((s) => s.kind === "cat")
@@ -135,14 +143,14 @@ describe("game API trusts only the server's own judgement", () => {
   });
 
   it("rejects another player's attempt", async () => {
-    state.user = { id: "someone-else", email: "x@x.test" };
+    state.user = { id: "someone-else", email: "x@x.test", email_confirmed_at: "2026-10-18T00:00:00Z" };
     const { POST } = await import("@/app/api/game/level/submit/route");
     const res = await POST(jsonRequest("http://localhost:3000/api/game/level/submit", { attemptId: state.attempt.id, level: 1, taps: [] }));
     expect(res.status).toBe(404);
   });
 
   it("rejects malformed or oversized tap logs", async () => {
-    state.user = { id: "u1", email: "u1@x.test" };
+    state.user = { id: "u1", email: "u1@x.test", email_confirmed_at: "2026-10-18T00:00:00Z" };
     const { POST } = await import("@/app/api/game/level/submit/route");
     const bad = await POST(jsonRequest("http://localhost:3000/api/game/level/submit", { attemptId: "not-a-uuid", level: 1, taps: [] }));
     expect(bad.status).toBe(400);
@@ -155,7 +163,7 @@ describe("game API trusts only the server's own judgement", () => {
 // ---------------------------------------------------------------- admin
 describe("admin actions", () => {
   it("refuse signed-in users who are not admins", async () => {
-    state.user = { id: "u1", email: "u1@x.test" };
+    state.user = { id: "u1", email: "u1@x.test", email_confirmed_at: "2026-10-18T00:00:00Z" };
     state.roles = ["staff"];
     const { saveEvent, setRole } = await import("@/app/admin/actions");
     const fd = new FormData();
@@ -178,7 +186,8 @@ describe("admin actions", () => {
     state.roles = ["admin"];
     const { saveGame } = await import("@/app/admin/actions");
     const fd = new FormData();
-    fd.set("settings", JSON.stringify({ ...DEFAULT_GAME_SETTINGS, levels: DEFAULT_GAME_SETTINGS.levels.slice(0, 2) }));
+    // Levels must be numbered from 1 in order: a game that starts at level 2 is refused.
+    fd.set("settings", JSON.stringify({ ...DEFAULT_GAME_SETTINGS, levels: DEFAULT_GAME_SETTINGS.levels.slice(1) }));
     const res = await saveGame(null, fd);
     expect(res?.ok).toBe(false);
   });
@@ -186,7 +195,7 @@ describe("admin actions", () => {
 
 describe("staff actions", () => {
   it("refuse students", async () => {
-    state.user = { id: "u1", email: "u1@x.test" };
+    state.user = { id: "u1", email: "u1@x.test", email_confirmed_at: "2026-10-18T00:00:00Z" };
     const { redeemCoupon } = await import("@/app/staff/actions");
     const res = await redeemCoupon("TU-AAAAA-AAAAA");
     expect(res.status).toBe("error");

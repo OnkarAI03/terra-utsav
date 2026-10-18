@@ -49,3 +49,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Local screenshots, 3D lab pages and QA captures
+/.shots/
+
+# Python bytecode from the asset scripts
+__pycache__/
