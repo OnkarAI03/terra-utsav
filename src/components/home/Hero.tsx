@@ -52,23 +52,25 @@ export function Hero({ event, game, prize = null }: { event: EventSettings; game
         className="pointer-events-none absolute inset-x-0 top-[calc(var(--header-h)-6px)] z-[1] h-[130px] w-full md:h-[max(210px,16.667vw)]"
       />
 
-      <div className="shell relative z-10 -mt-24 grid grid-cols-1 items-center gap-6 pb-44 md:-mt-32 md:pb-48 lg:mt-0 lg:min-h-[min(100svh,980px)] lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-6 lg:pb-56 lg:pt-[calc(var(--header-h)+96px)] xl:grid-cols-[minmax(0,0.78fr)_minmax(0,1.1fr)_auto]">
+      <div className="shell relative z-10 -mt-24 grid grid-cols-1 items-center gap-6 pb-44 md:-mt-32 md:pb-48 lg:mt-0 lg:min-h-[min(100svh,980px)] lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-6 lg:pb-56 lg:pt-[calc(var(--header-h)+min(96px,8svh))] xl:grid-cols-[minmax(0,0.78fr)_minmax(0,1.1fr)_auto]">
         <div aria-hidden className="hidden lg:block" />
 
-        {/* Phones read: headline, when and where, the buttons, then the story. Desktop keeps the approved order. */}
+        {/* Phones read (by flex order): headline, when and where, the buttons, then the story. Large screens read in
+            source order: headline, the sentence, the buttons, then when and where, so the buttons sit on the first
+            screen even on a 768px-tall laptop. */}
         <div className="relative flex flex-col text-center lg:block lg:text-left">
           <h1 id="hero-title" className="order-1 font-display leading-[0.86]">
             <span className="anim-rise text-sticker block text-[clamp(1.6rem,3.4vw,2.5rem)]" style={{ animationDelay: "120ms" }}>
               Came for the
             </span>{" "}
-            <span className="anim-land text-sticker-gold block text-[clamp(4.2rem,10.5vw,8rem)]" style={{ animationDelay: "260ms" }}>
+            <span className="anim-land text-sticker-gold block text-[clamp(4.2rem,min(10.5vw,15svh),8rem)]" style={{ animationDelay: "260ms" }}>
               Food.
             </span>{" "}
             <span className="anim-rise text-sticker mt-1 block text-[clamp(1.6rem,3.4vw,2.5rem)]" style={{ animationDelay: "520ms" }}>
               Stayed for the
             </span>{" "}
             <span
-              className="anim-land text-sticker-gold inline-flex items-center gap-3 text-[clamp(4.2rem,10.5vw,8rem)]"
+              className="anim-land text-sticker-gold inline-flex items-center gap-3 text-[clamp(4.2rem,min(10.5vw,15svh),8rem)]"
               style={{ animationDelay: "660ms" }}
             >
               Chaos.
@@ -83,6 +85,18 @@ export function Hero({ event, game, prize = null }: { event: EventSettings; game
             This Diwali: Chocolate Bombs, Chat Papdi, homemade diyas and a 60-second wet-brick challenge. Plus one mischievous kitten
             you probably won&apos;t catch.
           </p>
+
+          <div
+            className="anim-rise order-3 mt-7 flex flex-col flex-wrap items-stretch gap-4 sm:flex-row sm:items-center sm:justify-center lg:justify-start"
+            style={{ animationDelay: "420ms" }}
+          >
+            <ButtonLink href="/game" size="lg" icon={<Gamepad2 />} trailing={<ArrowRight />} subline={facts.subline} className="w-full text-balance sm:w-auto">
+              Catch Koochu Puchu
+            </ButtonLink>
+            <ButtonLink href="/menu" variant="secondary" size="lg" icon={<UtensilsCrossed />} className="w-full text-balance sm:w-auto">
+              Explore Menu
+            </ButtonLink>
+          </div>
 
           {(event.dateText || event.festivalName || venueShort) && (
             <p
@@ -114,18 +128,6 @@ export function Hero({ event, game, prize = null }: { event: EventSettings; game
               )}
             </p>
           )}
-
-          <div
-            className="anim-rise order-3 mt-7 flex flex-col flex-wrap items-stretch gap-4 sm:flex-row sm:items-center sm:justify-center lg:justify-start"
-            style={{ animationDelay: "420ms" }}
-          >
-            <ButtonLink href="/game" size="lg" icon={<Gamepad2 />} trailing={<ArrowRight />} subline={facts.subline} className="w-full text-balance sm:w-auto">
-              Catch Koochu Puchu
-            </ButtonLink>
-            <ButtonLink href="/menu" variant="secondary" size="lg" icon={<UtensilsCrossed />} className="w-full text-balance sm:w-auto">
-              Explore Menu
-            </ButtonLink>
-          </div>
 
           <div className="anim-rise order-5 mt-7 flex flex-col items-center gap-3 lg:items-start" style={{ animationDelay: "1040ms" }}>
             <HeroDiyas className="w-full max-w-[300px] justify-center lg:justify-start" />

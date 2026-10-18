@@ -34,8 +34,11 @@ function sweep() {
   if (pending.size === 0) stopListening();
 }
 
+// A fallback for browsers that throttle the observer: one check after scrolling settles, so the
+// position reads never land in the middle of a smooth scroll.
 function schedule() {
-  if (timer === null) timer = setTimeout(sweep, 80);
+  if (timer !== null) clearTimeout(timer);
+  timer = setTimeout(sweep, 140);
 }
 
 function startListening() {

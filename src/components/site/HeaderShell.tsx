@@ -8,10 +8,18 @@ export function HeaderShell({ children }: { children: React.ReactNode }) {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    // A 12px marker at the very top of the page: once it has scrolled out of view, the page has
+    // scrolled. The browser reports that by itself, so scrolling runs no code here.
+    const marker = document.createElement("div");
+    marker.setAttribute("aria-hidden", "true");
+    marker.style.cssText = "position:absolute;top:0;left:0;width:1px;height:12px;pointer-events:none";
+    document.body.prepend(marker);
+    const io = new IntersectionObserver(([entry]) => setScrolled(!entry.isIntersecting));
+    io.observe(marker);
+    return () => {
+      io.disconnect();
+      marker.remove();
+    };
   }, []);
 
   return (

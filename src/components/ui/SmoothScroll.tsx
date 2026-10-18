@@ -20,20 +20,16 @@ export function SmoothScroll() {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     // Loaded only for mouse and trackpad visitors; phones never download it.
-    let lenis: { raf(t: number): void; destroy(): void } | null = null;
-    let raf = 0;
+    let lenis: { destroy(): void } | null = null;
     let cancelled = false;
     void import("lenis").then(({ default: Lenis }) => {
       if (cancelled) return;
-      lenis = new Lenis({ lerp: 0.12, smoothWheel: true, anchors: true });
-      raf = requestAnimationFrame(function loop(time) {
-        lenis?.raf(time);
-        raf = requestAnimationFrame(loop);
-      });
+      // lerp 0.1: each frame closes a tenth of the gap, the long, even glide people call "butter".
+      // autoRaf: Lenis runs its own frame loop and idles when the page is still.
+      lenis = new Lenis({ lerp: 0.1, smoothWheel: true, anchors: true, autoRaf: true });
     });
     return () => {
       cancelled = true;
-      cancelAnimationFrame(raf);
       lenis?.destroy();
     };
   }, [pathname]);

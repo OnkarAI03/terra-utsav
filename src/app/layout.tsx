@@ -5,6 +5,7 @@ import { EggLayer } from "@/components/eggs/EggLayer";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { MotionProvider } from "@/components/ui/MotionProvider";
+import { PauseOffscreen } from "@/components/ui/PauseOffscreen";
 import { SmoothScroll } from "@/components/ui/SmoothScroll";
 import { allowIndexing, siteUrl, SITE_NAME } from "@/lib/env";
 import "./globals.css";
@@ -68,6 +69,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <EggLayer />
           <KoochuChat />
           <SmoothScroll />
+          <PauseOffscreen />
         </MotionProvider>
       </body>
     </html>

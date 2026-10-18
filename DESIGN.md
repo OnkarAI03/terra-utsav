@@ -181,8 +181,15 @@ the paw. Always shown on its own cream ground (never recoloured or cut out on da
   under the pointer. **Embers** drift up through the hero (CSS, linear).
 - **Tilt:** attraction cards, team cards and coupons lean towards the pointer in 3D (mouse only),
   with the card image floating forward.
-- **Smooth scroll:** Lenis on public pages with a mouse or trackpad (lerp 0.12); anchors stop below
-  the header.
+- **Smooth scroll:** Lenis on public pages with a mouse or trackpad (lerp 0.1, its own frame loop);
+  anchors stop below the header. Sections people jump to fade in place without the 24px rise, so the
+  scroll lands exactly.
+- **Scroll costs nothing extra:** no scroll handlers read the page position. The header turns solid
+  through an observer, and the hero art's drift is a scroll-driven CSS animation (browsers without
+  scroll timelines keep it still). The decorative loops (string lights, diya flames, kandils, embers,
+  the ribbon) pause in any section that is off screen (`PauseOffscreen`).
+- **Chat button:** on a phone's first homepage screen it waits for a small scroll, so it never sits on
+  the hero's main button; everywhere else it is always there.
 - **Mystery eggs:** five hero diyas to light, the "Can you catch me?" dare (the kitten dashes
   across), five quick taps on the header name (the kitten peeks), and the ticklish footer
   wordmark. Effects: marigold petal shower, peek, dash, and a toast in English with a Marathi

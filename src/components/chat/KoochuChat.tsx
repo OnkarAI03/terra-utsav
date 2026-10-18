@@ -41,6 +41,9 @@ export function KoochuChat() {
   const [draft, setDraft] = useState("");
   const [pending, setPending] = useState(false);
   const [nudge, setNudge] = useState(false);
+  // On a phone's first screen of the homepage the button would sit on the hero's main button,
+  // so there it waits until the visitor scrolls a little. Everywhere else it is always there.
+  const [waitForScroll, setWaitForScroll] = useState(false);
   const nextId = useRef(1);
   const launcher = useRef<HTMLButtonElement>(null);
   const input = useRef<HTMLInputElement>(null);
@@ -48,6 +51,24 @@ export function KoochuChat() {
   const log = useRef<HTMLDivElement>(null);
   const panelId = useId();
   const titleId = useId();
+
+  useEffect(() => {
+    if (pathname !== "/" || !window.matchMedia("(max-width: 639px)").matches) {
+      setWaitForScroll(false);
+      return;
+    }
+    // A 160px marker at the top of the page: while it is on screen, the visitor hasn't scrolled.
+    const marker = document.createElement("div");
+    marker.setAttribute("aria-hidden", "true");
+    marker.style.cssText = "position:absolute;top:0;left:0;width:1px;height:160px;pointer-events:none";
+    document.body.prepend(marker);
+    const io = new IntersectionObserver(([entry]) => setWaitForScroll(entry.isIntersecting));
+    io.observe(marker);
+    return () => {
+      io.disconnect();
+      marker.remove();
+    };
+  }, [pathname]);
 
   // A one-time hello on the homepage, after the visitor has had a look around.
   useEffect(() => {
@@ -150,7 +171,7 @@ export function KoochuChat() {
           data-lenis-prevent
           className="koochu-panel fixed inset-x-2 bottom-2 top-[calc(var(--header-h)+8px)] z-[48] flex flex-col overflow-hidden rounded-[26px] bg-burgundy-950 text-cream-100 shadow-[var(--shadow-lift)] ring-2 ring-gold-400/40 sm:inset-x-auto sm:right-4 sm:top-auto sm:bottom-[92px] sm:h-[min(600px,calc(100dvh-130px))] sm:w-[400px]"
         >
-          <header className="flex items-center gap-3 bg-maroon-600 px-4 py-3">
+          <div className="flex items-center gap-3 bg-maroon-600 px-4 py-3">
             <span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full bg-cream-100 ring-2 ring-gold-300">
               <Image src="/images/game/koochu-peek.webp" alt="" width={520} height={474} sizes="44px" className="h-full w-full object-cover object-top" />
             </span>
@@ -169,7 +190,7 @@ export function KoochuChat() {
             >
               <X aria-hidden className="h-5 w-5" />
             </button>
-          </header>
+          </div>
 
           <div ref={log} role="log" aria-live="polite" aria-relevant="additions" className="flex flex-1 flex-col gap-3 overflow-y-auto overscroll-contain px-4 py-4">
             {messages.map((m) =>
@@ -252,7 +273,7 @@ export function KoochuChat() {
         </section>
       )}
 
-      {nudge && !open && (
+      {nudge && !open && !waitForScroll && (
         <p aria-hidden className="koochu-nudge paper-note hand fixed bottom-[96px] right-5 z-[45] px-4 py-2.5 text-[1.05rem] uppercase sm:right-6" style={{ rotate: "-4deg" }}>
           Ask me anything!
         </p>
@@ -265,12 +286,15 @@ export function KoochuChat() {
         aria-expanded={open}
         aria-controls={open ? panelId : undefined}
         aria-label={open ? "Close chat" : "Ask Koochu Puchu"}
+        inert={waitForScroll && !open ? true : undefined}
         className={cn(
-          "group fixed bottom-[max(16px,env(safe-area-inset-bottom))] right-[max(16px,env(safe-area-inset-right))] z-[45] flex items-center gap-2 transition-transform duration-150 ease-out active:scale-95 sm:right-6",
+          "group fixed bottom-[max(16px,env(safe-area-inset-bottom))] right-[max(16px,env(safe-area-inset-right))] z-[45] grid place-items-center rounded-full transition-[opacity,transform] duration-200 ease-out active:scale-95 sm:right-6",
           open && "max-sm:hidden",
+          waitForScroll && !open && "pointer-events-none translate-y-3 opacity-0",
         )}
       >
-        <span aria-hidden className="pointer-events-none hidden rounded-full bg-cream-100 px-3 py-1.5 font-display text-[0.95rem] uppercase text-ink opacity-0 shadow-[0_4px_0_var(--color-cream-300)] transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100 sm:block">
+        {/* Positioned outside the button's box, so only the round kitten is clickable. */}
+        <span aria-hidden className="pointer-events-none absolute right-full top-1/2 mr-2 hidden -translate-y-1/2 whitespace-nowrap rounded-full bg-cream-100 px-3 py-1.5 font-display text-[0.95rem] uppercase text-ink opacity-0 shadow-[0_4px_0_var(--color-cream-300)] transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100 sm:block">
           {open ? "Close chat" : "Ask Koochu Puchu"}
         </span>
         <span className="relative grid h-14 w-14 place-items-center overflow-hidden rounded-full bg-cream-100 shadow-[var(--shadow-lift)] ring-[3px] ring-maroon-600 sm:h-16 sm:w-16">

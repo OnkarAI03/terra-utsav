@@ -341,6 +341,12 @@
   opacity: 0;
   transform: translate3d(0, 24px, 0);
 }
+/* A section people jump to (an anchor target) fades in place: a slide would move it after the
+   smooth scroll has measured where to stop, leaving its top under the header. */
+[data-reveal][data-pending]:not([data-in="true"]):has(.anchor-target),
+[data-reveal][data-pending].anchor-target:not([data-in="true"]) {
+  transform: none;
+}
 @media (prefers-reduced-motion: reduce) {
   [data-reveal][data-pending] {
     opacity: 1;
@@ -454,6 +460,31 @@
 
 .drip {
   animation: tu-drip 1.8s var(--ease-in-out) infinite;
+}
+
+/* Off-screen sections rest: their decorative loops pause until they scroll back into view
+   (components/ui/PauseOffscreen.tsx). Entrances use transitions, so they are unaffected. */
+[data-paused],
+[data-paused] * {
+  animation-play-state: paused !important;
+}
+
+/* Hero art drift on large screens: tied to the scroll position by the browser itself
+   (a scroll-driven animation runs on the compositor), so scrolling runs no script for it.
+   Browsers without scroll timelines simply keep the art still. */
+@keyframes tu-hero-drift {
+  to {
+    transform: translate3d(0, 108px, 0);
+  }
+}
+@supports (animation-timeline: scroll()) {
+  @media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
+    .hero-drift {
+      animation: tu-hero-drift linear both;
+      animation-timeline: scroll(root block);
+      animation-range: 0px 900px;
+    }
+  }
 }
 
 /* Hero art panel. The edges melt into the festival ground with linear fades: down into the

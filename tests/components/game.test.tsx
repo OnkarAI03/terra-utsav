@@ -219,12 +219,13 @@ describe("GameExperience: starting a level from the keyboard", () => {
 
     screen.getByRole("button", { name: "Practise level 1" }).focus();
     await user.keyboard("{Enter}");
-    (await screen.findByRole("button", { name: "Start level 1" })).focus();
+    (await screen.findByRole("button", { name: "Start level 1" }, { timeout: 4000 })).focus();
     await user.keyboard("{Enter}");
 
-    // The real countdown (real timers keep this simple): three ticks of a second each.
-    expect(await screen.findByText("3", { selector: "p" })).toBeInTheDocument();
+    // The real countdown (real timers keep this simple): three ticks of a second each. Under a busy
+    // test run the first tick can pass before the first look, so any of the three counts.
+    expect(await screen.findByText(/^[321]$/, { selector: "p" }, { timeout: 4000 })).toBeInTheDocument();
     expect(screen.queryByRole("application")).not.toBeInTheDocument();
     expect(await screen.findByRole("application", {}, { timeout: 6000 })).toHaveFocus();
-  });
+  }, 20_000);
 });

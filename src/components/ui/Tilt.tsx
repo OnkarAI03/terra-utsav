@@ -46,8 +46,13 @@ export function Tilt({ children, className, max = 7 }: { children: React.ReactNo
       running = true;
       raf = requestAnimationFrame(tick);
     };
+    // Measured once when the pointer arrives, not on every move (each read can force a layout).
+    let box: DOMRect | null = null;
+    const enter = () => {
+      box = el.getBoundingClientRect();
+    };
     const move = (e: PointerEvent) => {
-      const box = el.getBoundingClientRect();
+      box ??= el.getBoundingClientRect();
       const px = (e.clientX - box.left) / box.width - 0.5;
       const py = (e.clientY - box.top) / box.height - 0.5;
       ty = px * max * 2;
@@ -55,14 +60,17 @@ export function Tilt({ children, className, max = 7 }: { children: React.ReactNo
       kick();
     };
     const leave = () => {
+      box = null;
       tx = 0;
       ty = 0;
       kick();
     };
+    el.addEventListener("pointerenter", enter);
     el.addEventListener("pointermove", move);
     el.addEventListener("pointerleave", leave);
     return () => {
       cancelAnimationFrame(raf);
+      el.removeEventListener("pointerenter", enter);
       el.removeEventListener("pointermove", move);
       el.removeEventListener("pointerleave", leave);
       el.style.transform = "";
