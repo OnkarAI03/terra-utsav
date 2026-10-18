@@ -55,3 +55,6 @@ next-env.d.ts
 
 # Python bytecode from the asset scripts
 __pycache__/
+
+# Netlify CLI link and local build output
+.netlify/

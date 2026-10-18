@@ -8,6 +8,7 @@ import { MotionProvider } from "@/components/ui/MotionProvider";
 import { PauseOffscreen } from "@/components/ui/PauseOffscreen";
 import { SmoothScroll } from "@/components/ui/SmoothScroll";
 import { allowIndexing, siteUrl, SITE_NAME } from "@/lib/env";
+import { HEAD_SCRIPT } from "@/lib/head-script";
 import "./globals.css";
 
 const lilita = Lilita_One({ weight: "400", subsets: ["latin"], variable: "--font-lilita", display: "swap" });
@@ -46,15 +47,13 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-// Marks the document as script-enabled before first paint, so scroll reveals can hide content
-// only when they will also be able to show it again.
-const jsFlag = `document.documentElement.classList.add('js')`;
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en-IN" className={`${lilita.variable} ${nunito.variable} ${kalam.variable}`} suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: jsFlag }} />
+        {/* Runs while the page is parsed, before React starts: see src/lib/head-script.ts. */}
+        <script dangerouslySetInnerHTML={{ __html: HEAD_SCRIPT }} />
       </head>
       <body className="min-h-dvh-safe flex flex-col">
         <a href="#main" className="skip-link">
