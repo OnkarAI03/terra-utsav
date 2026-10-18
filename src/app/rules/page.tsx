@@ -6,6 +6,7 @@ import { CHALLENGE } from "@/content/challenge";
 import { getEventSettings, getGameSettings, getRewardSettings } from "@/lib/data/public";
 import { formatDateTime } from "@/lib/format";
 import { gameFacts } from "@/lib/game/copy";
+import { eventDayText } from "@/lib/game/window";
 import { pageMetadata } from "@/lib/seo";
 
 export const revalidate = 60;
@@ -36,6 +37,7 @@ function Dot() {
 export default async function RulesPage() {
   const [event, game, rewards] = await Promise.all([getEventSettings(), getGameSettings(), getRewardSettings()]);
   const attempts = game.maxRewardAttempts;
+  const eventDay = eventDayText(event);
   const facts = gameFacts(game);
   const expiry = rewards.expiresAt
     ? `Coupons expire on ${formatDateTime(rewards.expiresAt)}.`
@@ -85,7 +87,8 @@ export default async function RulesPage() {
               </li>
               <li>
                 <Dot />
-                Reward play needs you to sign in. Each player gets {attempts} reward {attempts === 1 ? "attempt" : "attempts"}. The
+                Reward play needs you to sign in, and sign-ups are open now. Coupons can be won on event day only
+                {eventDay ? ` (${eventDay})` : ""}. Each player gets {attempts} reward {attempts === 1 ? "attempt" : "attempts"}. The
                 organisers may add an extra attempt if something went wrong on our side.
               </li>
               <li>
@@ -134,7 +137,8 @@ export default async function RulesPage() {
                   ? "Each coupon can be redeemed once."
                   : `Each coupon can be redeemed ${rewards.maxRedemptions} times.`}{" "}
                 A team member redeems it by scanning or typing the code. Keep your code to yourself: a coupon works once, for
-                whoever shows it first. One coupon per player.
+                whoever shows it first. One coupon per player, and addresses that reach the same inbox (like name+1@gmail.com
+                and name@gmail.com) count as one player.
               </li>
               <li>
                 <Dot />

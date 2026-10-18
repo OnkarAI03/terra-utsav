@@ -56,6 +56,7 @@ describe("migrations", () => {
       "public.game_submit_level(uuid, uuid, int, text, int, int, int, int, jsonb)",
       "public.rate_limit_hit(text, int, int)",
       "public.generate_coupon_code()",
+      "public.canonical_email(text)",
     ];
     for (const fn of fns) {
       for (const role of ["anon", "authenticated"]) {

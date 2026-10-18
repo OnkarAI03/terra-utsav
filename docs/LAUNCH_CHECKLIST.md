@@ -28,6 +28,9 @@ The `/admin` overview shows a live version of this list.
 - [ ] Coupon expiry (for example 27 Oct 2026, 3 pm IST) and how many coupons exist in total
 - [ ] Tick "terms confirmed" in admin > Rewards (coupons are switched on by default). **Reward play stays closed until
       you do**
+- [ ] Check the event's start and end times in admin > Event: reward play opens and closes with them (event day only)
+- [ ] Decide on stronger limits against one person using several inboxes: college emails only, a code shown at the
+      stall, or a CAPTCHA (see `docs/SECURITY.md`)
 
 **Brick challenge**
 - [ ] Organisers approve or edit the draft safety and eligibility rules in `src/content/challenge.ts`, then set
@@ -52,11 +55,17 @@ The `/admin` overview shows a live version of this list.
 - [ ] Decide what happens if someone wins when coupons run out
 
 **Accounts and services**
-- [ ] Supabase project, migrations applied, auth URLs set, custom SMTP for event day
+- [ ] Supabase project, migrations applied, auth URLs set
+- [ ] **Custom SMTP before sign-ups open**: the built-in sender only emails your Supabase team (2 an hour)
+- [ ] The day before the event: open the Supabase dashboard (free projects pause after about a week of low activity;
+      Resume project if needed) and do the staff dry run
 - [ ] Email templates: **Confirm signup** and **Magic Link** both show the 6-digit code (`{{ .Token }}`)
+- [ ] Authentication > Providers > Email: Email OTP Expiration 600 seconds. Leave CAPTCHA off (the site does not send
+      a CAPTCHA token yet)
 - [ ] First admin added by SQL; staff accounts added in admin
 - [ ] GitHub repository under the intended account; Vercel project with environment variables; domain; `NEXT_PUBLIC_SITE_URL`
-- [ ] A staff dry run: win a coupon on a test account, redeem it on a staff phone, try redeeming again (must fail)
+- [ ] A staff dry run: win a coupon on a staff account (staff can play before the event), redeem it on another staff
+      phone, try redeeming again (must fail), then cancel the test coupon in admin
 - [ ] Ask Koochu Puchu (the chat button) the questions visitors will ask; anything it can't answer is a gap on the site
 
 **Files**

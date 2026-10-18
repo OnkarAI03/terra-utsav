@@ -4,13 +4,15 @@ import Link from "next/link";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { PageHero } from "@/components/ui/PageHero";
 import { getSession, safeNextPath } from "@/lib/auth";
+import { getEventSettings } from "@/lib/data/public";
 import { googleAuthEnabled } from "@/lib/env";
+import { eventDayText } from "@/lib/game/window";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Sign in",
-  description: "Sign in to TERRA UTSAV to play for rewards and keep your coupons.",
+  title: "Sign up or sign in",
+  description: "Sign up for TERRA UTSAV with your email to play for a coupon on event day and keep your coupons in one place.",
   alternates: { canonical: "/login" },
   robots: { index: false, follow: false },
 };
@@ -26,11 +28,15 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   const denied = typeof params.denied === "string" ? DENIED[params.denied] : null;
   const linkError = params.error === "link";
   const browserError = params.error === "browser";
-  const session = await getSession();
+  const [session, event] = await Promise.all([getSession(), getEventSettings()]);
+  const eventDay = eventDayText(event);
 
   return (
     <>
-      <PageHero title="Sign in" intro="Sign in with your email to play for rewards and keep your coupons in one place." />
+      <PageHero
+        title="Sign up or sign in"
+        intro={`Sign-ups are open now: just your email, no password. Coupons can be won on event day only${eventDay ? `: ${eventDay}` : ""}.`}
+      />
       <section className="bg-cream-200 pb-24 pt-12 text-ink md:pb-32">
         <div className="shell grid items-start gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.8fr)]">
           <div className="max-w-lg rounded-[var(--radius-panel)] bg-cream-100 p-7 shadow-[var(--shadow-card)] md:p-9">

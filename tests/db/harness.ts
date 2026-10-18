@@ -105,6 +105,18 @@ export async function userCall<T = Record<string, unknown>>(db: PGlite, userId: 
   });
 }
 
+/** An ISO time `hours` from now (negative for the past). */
+export function hoursFromNow(hours: number): string {
+  return new Date(Date.now() + hours * 3_600_000).toISOString();
+}
+
+/** Reward play runs only between the event's start and end; put "now" inside that window. */
+export async function openEventWindow(db: PGlite): Promise<void> {
+  await db.query("update public.site_settings set value = value || $1::jsonb where key = 'event'", [
+    { startsAt: hoursFromNow(-1), endsAt: hoursFromNow(1) },
+  ]);
+}
+
 /** Pretend a level was started `ms` milliseconds ago (the server clock check uses started_at). */
 export async function backdateLevel(db: PGlite, attemptId: string, level: number, ms: number): Promise<void> {
   await db.query(

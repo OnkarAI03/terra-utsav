@@ -121,7 +121,10 @@ export async function saveRewards(_: ActionState, fd: FormData): Promise<ActionS
       : parsed.data.expiresAfterHours
         ? ` Each coupon expires ${parsed.data.expiresAfterHours} hours after it is won.`
         : " Coupons have no expiry.";
-    const live = parsed.data.rewardsEnabled && parsed.data.confirmed ? " Reward play is open." : " Reward play stays closed until coupons are switched on and the terms are confirmed.";
+    const live =
+      parsed.data.rewardsEnabled && parsed.data.confirmed
+        ? " Reward play runs during the event (the start and end times in Event)."
+        : " Reward play stays closed until coupons are switched on and the terms are confirmed.";
     return ok(`Reward rules saved and live.${expiry}${live}`);
   } catch (e) {
     return authFail(e);

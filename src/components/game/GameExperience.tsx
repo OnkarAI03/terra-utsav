@@ -14,6 +14,7 @@ import type { GameSettings, LevelConfig } from "@/lib/game/config";
 import { gameFacts } from "@/lib/game/copy";
 import { randomSeed } from "@/lib/game/rng";
 import { sfx } from "@/lib/game/sound";
+import type { RewardPhase } from "@/lib/game/window";
 import { GameBoard, type BoardResult } from "./GameBoard";
 import { ResultKitten } from "./ResultKitten";
 import { loadSprites } from "./sprites";
@@ -23,6 +24,8 @@ type Mode = "practice" | "reward";
 interface Status {
   configured: boolean;
   signedIn: boolean;
+  /** Set when sign-in is configured; see src/lib/game/window.ts. */
+  rewardPhase?: RewardPhase;
   attemptsUsed?: number;
   attemptsAllowed?: number;
   activeAttempt?: { id: string; currentLevel: number } | null;
@@ -63,8 +66,11 @@ const ERRORS: Record<string, string> = {
   not_configured: "Reward play is not switched on yet. You can still practise.",
   unauthenticated: "Please sign in to play for a reward.",
   no_attempts_left: "You have used all your reward attempts.",
-  rewards_closed: "Reward play opens once the organisers switch the coupons on. Practise meanwhile: the levels are the same.",
-  already_won: "You have already won your coupon. It's one per player, so give someone else a chance! Practice is still open.",
+  rewards_closed: "Coupons are paused right now. Practise meanwhile: the levels are the same.",
+  not_open_yet: "Coupons can be won on event day only. You're signed up, so come back then. Practise meanwhile: the levels are the same.",
+  event_over: "Reward play has ended. Thank you for playing!",
+  alias_account:
+    "This email reaches the same inbox as an account that already plays for rewards (for example name+1@gmail.com and name@gmail.com). Play with that account.",  already_won: "You have already won your coupon. It's one per player, so give someone else a chance! Practice is still open.",
   level_in_progress: "One of your levels is still running. Give it a moment and try again.",
   attempt_finished: "That attempt has already finished.",
   wrong_level: "Your attempt has moved on. Reloading your progress.",
@@ -95,12 +101,12 @@ async function post<T>(url: string, body: unknown): Promise<{ ok: true; data: T 
 
 export function GameExperience({
   settings,
-  rewardsOpen,
+  eventDay,
   couponValueText,
 }: {
   settings: GameSettings;
-  /** Coupons switched on and their terms confirmed by the organisers (the server checks too). */
-  rewardsOpen: boolean;
+  /** When coupons can be won, e.g. "Tuesday, 27 October 2026, 9 am to 3 pm". */
+  eventDay: string | null;
   couponValueText: string | null;
 }) {
   const reduce = usePrefersReducedMotion();
@@ -110,6 +116,8 @@ export function GameExperience({
   const [screen, setScreen] = useState<Screen>({ name: "home" });
   const [sound, setSound] = useState(false);
   const [practiceLevel, setPracticeLevel] = useState(1);
+  // Once someone plays with the keys, every later level shows the key numbers from the start.
+  const [keyboardPlayer, setKeyboardPlayer] = useState(false);
 
   const refreshStatus = useCallback(async () => {
     try {
@@ -336,8 +344,14 @@ export function GameExperience({
                     Practise level {practiceLevel}
                   </Button>
                 )}
-                <RewardButton status={status} attemptsLeft={attemptsLeft} rewardsOpen={rewardsOpen} onStart={() => setScreen({ name: "confirm" })} />
+                <RewardButton status={status} attemptsLeft={attemptsLeft} onStart={() => setScreen({ name: "confirm" })} />
               </div>
+
+              {status?.rewardPhase === "before" && (
+                <p className="mt-4 max-w-md text-[1rem] font-bold text-gold-300">
+                  {status.signedIn ? "You're signed up." : "Sign-ups are open now."} Coupons can be won on event day only{eventDay ? `: ${eventDay}` : ""}.
+                </p>
+              )}
 
               {status?.signedIn && attemptsLeft !== null && (
                 <p className="mt-4 text-[1rem] font-bold text-cream-100">
@@ -374,7 +388,7 @@ export function GameExperience({
                 </li>
               </ul>
               <p className="mt-4 text-[0.98rem] text-cream-100/90 [@media(pointer:coarse)]:hidden">
-                Keyboard players: number keys 1 to 9 tap the boxes, laid out like a phone keypad.
+                Keyboard players: number keys 1 to 9 tap the boxes, laid out like a number pad with 7 8 9 along the top. Each box shows its key.
               </p>
               <p className="mt-2 text-[0.98rem] text-cream-100/90">This game needs sight and quick taps. If it doesn&apos;t work for you, talk to us at the stall.</p>
             </div>
@@ -475,6 +489,8 @@ export function GameExperience({
               sound={sound}
               reduceMotion={reduce}
               rewardMode={run.mode === "reward"}
+              showKeys={keyboardPlayer}
+              onKeyboard={() => setKeyboardPlayer(true)}
               onFinish={(r) => void onBoardFinish(r)}
             />
           </motion.div>
@@ -596,21 +612,9 @@ export function GameExperience({
   );
 }
 
-function RewardButton({
-  status,
-  attemptsLeft,
-  rewardsOpen,
-  onStart,
-}: {
-  status: Status | null;
-  attemptsLeft: number | null;
-  rewardsOpen: boolean;
-  onStart: () => void;
-}) {
-  // Said before sign-in, so nobody signs in only to find the door shut.
-  if (!rewardsOpen || (status && !status.configured)) {
-    return <p className="max-w-xs text-[0.98rem] font-bold text-gold-300 sm:self-center">Reward play opens closer to the Mandi. Practice is open now.</p>;
-  }
+const REWARD_NOTE = "max-w-xs text-[0.98rem] font-bold text-gold-300 sm:self-center";
+
+function RewardButton({ status, attemptsLeft, onStart }: { status: Status | null; attemptsLeft: number | null; onStart: () => void }) {
   if (!status) {
     return (
       <Button size="lg" disabled icon={<Trophy />}>
@@ -618,10 +622,17 @@ function RewardButton({
       </Button>
     );
   }
+  if (!status.configured) {
+    return <p className={REWARD_NOTE}>Sign-in isn&apos;t switched on yet. Practice is open now.</p>;
+  }
+  if (status.rewardPhase === "after") {
+    return <p className={REWARD_NOTE}>Reward play has ended. Thank you for playing!</p>;
+  }
   if (!status.signedIn) {
+    // Sign-ups are open whatever the date; the note under the buttons says when coupons can be won.
     return (
       <ButtonLink href="/login?next=/game" size="lg" icon={<Trophy />} trailing={<ArrowRight />}>
-        Sign in to play for a reward
+        {status.rewardPhase === "open" ? "Sign in to play for a reward" : "Sign up now"}
       </ButtonLink>
     );
   }
@@ -631,6 +642,16 @@ function RewardButton({
         Continue reward attempt
       </Button>
     );
+  }
+  if (status.rewardPhase === "before") {
+    return (
+      <Button size="lg" disabled icon={<Lock />}>
+        Reward play opens on event day
+      </Button>
+    );
+  }
+  if (status.rewardPhase === "paused") {
+    return <p className={REWARD_NOTE}>Coupons are paused right now. Practice is open.</p>;
   }
   if (attemptsLeft === 0) {
     return (

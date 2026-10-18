@@ -1,7 +1,8 @@
 import { GameExperience } from "@/components/game/GameExperience";
 import { PageHero } from "@/components/ui/PageHero";
-import { getGameSettings, getRewardSettings } from "@/lib/data/public";
+import { getEventSettings, getGameSettings, getRewardSettings } from "@/lib/data/public";
 import { gameFacts } from "@/lib/game/copy";
+import { eventDayText } from "@/lib/game/window";
 import { pageMetadata } from "@/lib/seo";
 
 export const revalidate = 60;
@@ -14,7 +15,7 @@ export const metadata = pageMetadata({
 });
 
 export default async function GamePage() {
-  const [settings, rewards] = await Promise.all([getGameSettings(), getRewardSettings()]);
+  const [settings, rewards, event] = await Promise.all([getGameSettings(), getRewardSettings(), getEventSettings()]);
   const facts = gameFacts(settings, rewards.couponValueText);
   return (
     <>
@@ -30,7 +31,7 @@ export default async function GamePage() {
       />
       <section aria-label="The game" className="bg-burgundy-950 pb-24 pt-10 md:pb-32">
         <div className="shell">
-          <GameExperience settings={settings} rewardsOpen={rewards.rewardsEnabled && rewards.confirmed} couponValueText={rewards.couponValueText} />
+          <GameExperience settings={settings} eventDay={eventDayText(event)} couponValueText={rewards.couponValueText} />
         </div>
       </section>
     </>

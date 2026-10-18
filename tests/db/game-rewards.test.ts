@@ -1,7 +1,7 @@
 import type { PGlite } from "@electric-sql/pglite";
 import { beforeEach, describe, expect, it } from "vitest";
 import { DEFAULT_GAME_SETTINGS } from "@/lib/game/config";
-import { as, backdateLevel, createTestDb, createUser, grantRole, serviceCall, userCall } from "./harness";
+import { as, backdateLevel, createTestDb, createUser, grantRole, hoursFromNow, openEventWindow, serviceCall, userCall } from "./harness";
 
 type Json = Record<string, unknown>;
 
@@ -11,8 +11,10 @@ const LAST_TARGET = DEFAULT_GAME_SETTINGS.levels[LAST - 1].targetCatches;
 
 beforeEach(async () => {
   db = await createTestDb();
-  // Reward play is closed until the organisers switch coupons on and confirm the terms.
+  // Reward play is closed until the organisers switch coupons on and confirm the terms,
+  // and it runs on event day only: these tests play during the event.
   await setRewards({ rewardsEnabled: true, confirmed: true });
+  await openEventWindow(db);
 });
 
 const startAttempt = (user: string) => serviceCall<Json>(db, "public.game_start_attempt($1)", [user]);
@@ -54,6 +56,10 @@ async function loseAttempt(user: string) {
 
 async function setRewards(patch: Json) {
   await db.query("update public.site_settings set value = value || $1::jsonb where key = 'rewards'", [patch]);
+}
+
+async function setEvent(patch: Json) {
+  await db.query("update public.site_settings set value = value || $1::jsonb where key = 'event'", [patch]);
 }
 
 describe("reward attempts", () => {
@@ -164,6 +170,51 @@ describe("reward attempts", () => {
     expect((await startAttempt(u)).error).toBe("rewards_closed");
     const n = await db.query<{ n: number }>("select count(*)::int as n from public.game_attempts where user_id = $1", [u]);
     expect(n.rows[0].n).toBe(0);
+  });
+
+  it("opens reward play on event day only", async () => {
+    const u = await createUser(db, "early@student.test");
+    await setEvent({ startsAt: hoursFromNow(2), endsAt: hoursFromNow(8) });
+    expect((await startAttempt(u)).error).toBe("not_open_yet");
+    await setEvent({ startsAt: hoursFromNow(-8), endsAt: hoursFromNow(-2) });
+    expect((await startAttempt(u)).error).toBe("event_over");
+    const none = await db.query<{ n: number }>("select count(*)::int as n from public.game_attempts where user_id = $1", [u]);
+    expect(none.rows[0].n).toBe(0);
+    await setEvent({ startsAt: hoursFromNow(-1), endsAt: hoursFromNow(1) });
+    expect((await startAttempt(u)).attemptNumber).toBe(1);
+  });
+
+  it("leaves the window open on a side whose date is missing or unreadable", async () => {
+    const u = await createUser(db, "nodate@student.test");
+    await setEvent({ startsAt: null, endsAt: "not a date" });
+    expect((await startAttempt(u)).attemptNumber).toBe(1);
+  });
+
+  it("lets staff and admins test reward play before the event", async () => {
+    const s = await createUser(db, "tester@stall.test");
+    await grantRole(db, s, "staff");
+    await setEvent({ startsAt: hoursFromNow(48), endsAt: hoursFromNow(54) });
+    expect((await startAttempt(s)).attemptNumber).toBe(1);
+  });
+
+  it("finds the real inbox behind an address", async () => {
+    const canon = async (e: string) => (await db.query<{ c: string }>("select public.canonical_email($1) as c", [e])).rows[0].c;
+    expect(await canon("N.Ame+x@GoogleMail.com")).toBe("name@gmail.com");
+    expect(await canon("first.last@college.edu")).toBe("first.last@college.edu");
+    expect(await canon("First+stall@College.edu")).toBe("first@college.edu");
+  });
+
+  it("treats Gmail dots and +tags as one player", async () => {
+    const main = await createUser(db, "asha.example@gmail.com");
+    expect((await startAttempt(main)).attemptNumber).toBe(1);
+    for (const alias of ["ashaexample+1@gmail.com", "a.s.h.a.example@googlemail.com", "AshaExample+win@gmail.com"]) {
+      expect((await startAttempt(await createUser(db, alias))).error, alias).toBe("alias_account");
+    }
+    const tagged = await createUser(db, "ravi+stall@college.test");
+    expect((await startAttempt(tagged)).attemptNumber).toBe(1);
+    expect((await startAttempt(await createUser(db, "ravi@college.test"))).error).toBe("alias_account");
+    // Someone else entirely is not an alias.
+    expect((await startAttempt(await createUser(db, "asha.other@gmail.com"))).attemptNumber).toBe(1);
   });
 
   it("gives each player one coupon at most", async () => {

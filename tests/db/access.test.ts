@@ -1,7 +1,7 @@
 import type { PGlite } from "@electric-sql/pglite";
 import { beforeAll, describe, expect, it } from "vitest";
 import { DEFAULT_GAME_SETTINGS } from "@/lib/game/config";
-import { as, backdateLevel, createTestDb, createUser, grantRole, serviceCall, userCall } from "./harness";
+import { as, backdateLevel, createTestDb, createUser, grantRole, openEventWindow, serviceCall, userCall } from "./harness";
 
 type Json = Record<string, unknown>;
 
@@ -23,6 +23,7 @@ beforeAll(async () => {
 
   // Alice wins a coupon (reward play is open once the organisers confirm the coupon terms).
   await db.query("update public.site_settings set value = value || $1::jsonb where key = 'rewards'", [{ rewardsEnabled: true, confirmed: true }]);
+  await openEventWindow(db);
   const a = await serviceCall<Json>(db, "public.game_start_attempt($1)", [alice]);
   const levels = DEFAULT_GAME_SETTINGS.levels;
   for (let l = 1; l <= levels.length; l++) {

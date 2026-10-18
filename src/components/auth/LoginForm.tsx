@@ -55,7 +55,7 @@ export function LoginForm({ next, googleEnabled }: { next: string; googleEnabled
   if (!supabase) {
     return (
       <p className="rounded-2xl bg-gold-300 p-4 font-bold text-ink">
-        Signing in opens closer to the Mandi. You can practise the game already, no sign-in needed.
+        Sign-in isn&apos;t switched on yet. You can practise the game already, no sign-in needed.
       </p>
     );
   }

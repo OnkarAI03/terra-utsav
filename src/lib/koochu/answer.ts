@@ -285,9 +285,11 @@ function reply(topic: Topic, f: KoochuFacts, tokens: string[]): KoochuReply {
     case "coupon": {
       const value = f.rewards.couponValueText ? ` A coupon is worth: ${f.rewards.couponValueText}.` : " What a coupon is worth will be announced by the organisers.";
       const paused = f.rewards.rewardsEnabled ? "" : " Coupons are paused right now.";
+      const day = [f.event.dateText, f.event.timeText].filter(Boolean).join(", ");
+      const eventDay = ` Coupons can be won on event day only${day ? ` (${day})` : ""}, and you can sign up now.`;
       return {
         topic,
-        text: `Sign in and you get ${attempts} reward attempt${attempts === 1 ? "" : "s"}. Clear all ${levels.length} levels in one attempt and a coupon lands in your wallet. Show it at the stall and a team member scans it.${value} It's meant to be hard: roughly 2 or 3 players in 10 win, so practise first.${paused}`,
+        text: `Sign in and you get ${attempts} reward attempt${attempts === 1 ? "" : "s"}. Clear all ${levels.length} levels in one attempt and a coupon lands in your wallet. Show it at the stall and a team member scans it.${value} It's meant to be hard: roughly 2 or 3 players in 10 win, so practise first.${eventDay}${paused}`,
         links: [linkGame, { label: "My coupons", href: "/rewards" }, { label: "Coupon rules", href: "/rules#coupons" }],
         chips: ["Do I need to sign in?", "How do I play?"],
       };
@@ -295,7 +297,7 @@ function reply(topic: Topic, f: KoochuFacts, tokens: string[]): KoochuReply {
     case "signin":
       return {
         topic,
-        text: "Only reward play needs a sign-in. Enter your email and we send you a link or a 6-digit code. No password. Practice works without signing in.",
+        text: "Only reward play needs a sign-in, and sign-ups are open now. Enter your email and we send you a 6-digit code (and a link). No password. Coupons can be won on event day only. Practice works without signing in.",
         links: [{ label: "Sign in", href: "/login" }, linkRules],
         chips: ["How do I win a coupon?", "Privacy and rules"],
       };

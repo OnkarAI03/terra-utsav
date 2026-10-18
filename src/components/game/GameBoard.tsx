@@ -1,7 +1,7 @@
 "use client";
 
 import { Heart, LogOut } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import type { GameSettings, LevelConfig } from "@/lib/game/config";
 import {
   applyTap,
@@ -52,6 +52,12 @@ const KEYS: Record<string, number> = {
   q: 0, w: 1, e: 2, a: 3, s: 4, d: 5, z: 6, x: 7, c: 8,
 };
 
+/** The number key for each box, in SPOTS order: laid out like a number pad, 7 8 9 along the top. */
+const KEY_LABELS = SPOTS.map((_, i) => Object.keys(KEYS).find((k) => KEYS[k] === i && /^\d$/.test(k)) ?? "");
+
+/** Screen readers hear the time left at these moments only (milliseconds left), never every second. */
+const TIME_WARNINGS_MS = [10_000, 5_000];
+
 const easeOut = (p: number) => 1 - Math.pow(1 - p, 3);
 
 /**
@@ -66,6 +72,8 @@ export function GameBoard({
   sound,
   reduceMotion,
   rewardMode,
+  showKeys = false,
+  onKeyboard,
   onFinish,
 }: {
   seed: number;
@@ -74,12 +82,20 @@ export function GameBoard({
   sound: boolean;
   reduceMotion: boolean;
   rewardMode: boolean;
+  /** Draw the key numbers from the start, even on a touch screen (the player used the keys before). */
+  showKeys?: boolean;
+  /** Called on the level's first key press that brings the key numbers out. */
+  onKeyboard?: () => void;
   onFinish: (result: BoardResult) => void;
 }) {
   const schedule = useMemo(() => generateSchedule(seed, config), [seed, config]);
   const wrapRef = useRef<HTMLDivElement>(null);
+  const boardRef = useRef<HTMLDivElement>(null);
+  const keepPlayingRef = useRef<HTMLButtonElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const timerRef = useRef<HTMLDivElement>(null);
+  const showKeysRef = useRef(showKeys);
+  const nextWarningRef = useRef(0);
   const stateRef = useRef(createLevelState(config));
   const tapsRef = useRef<[number, number, number][]>([]);
   const startRef = useRef(0);
@@ -94,6 +110,7 @@ export function GameBoard({
   const [hud, setHud] = useState({ catches: 0, lives: config.lives });
   const [announce, setAnnounce] = useState("");
   const [confirmExit, setConfirmExit] = useState(false);
+  const leaveTitleId = useId();
 
   // Fit a square board to the space available.
   useEffect(() => {
@@ -116,6 +133,14 @@ export function GameBoard({
     void loadSprites().then((s) => (spritesRef.current = s));
     const family = getComputedStyle(document.documentElement).getPropertyValue("--font-lilita").trim();
     if (family) fontRef.current = `${family}, sans-serif`;
+    // Mouse and keyboard players see which number key taps which box; touch phones keep plain boxes.
+    const touch = typeof window.matchMedia === "function" && window.matchMedia("(pointer: coarse)").matches;
+    if (!touch) showKeysRef.current = true;
+    // The number keys work straight away, without a click on the board first. The focus never
+    // scrolls (the line below does that), and asks for no focus ring on touch screens.
+    // (`focusVisible` is newer than TypeScript's DOM types.)
+    const focusOptions: FocusOptions & { focusVisible?: boolean } = touch ? { preventScroll: true, focusVisible: false } : { preventScroll: true };
+    boardRef.current?.focus(focusOptions);
     // Bring the whole board (HUD included) into view when the level starts.
     wrapRef.current?.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "center" });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -211,6 +236,8 @@ export function GameBoard({
     let last = performance.now();
     let raf = 0;
     let endedAt: number | null = null;
+    // A warning in the first three seconds would only repeat the level intro.
+    const warnings = TIME_WARNINGS_MS.filter((w) => config.durationMs - w >= 3000);
 
     const frame = (now: number) => {
       const dt = Math.min(64, now - last);
@@ -220,6 +247,14 @@ export function GameBoard({
 
       // Timer bar without re-rendering React.
       if (timerRef.current) timerRef.current.style.transform = `scaleX(${Math.max(0, 1 - t / config.durationMs)})`;
+
+      // The bar is hidden from screen readers, so they hear the time left at a few moments instead.
+      // After a sleeping tab skips past several, only the latest is said.
+      let warning: number | undefined;
+      while (nextWarningRef.current < warnings.length && config.durationMs - t <= warnings[nextWarningRef.current]) {
+        warning = warnings[nextWarningRef.current++];
+      }
+      if (warning !== undefined && !st.ended && t < config.durationMs) setAnnounce(`${warning / 1000} seconds left.`);
 
       if (st.ended && endedAt === null) endedAt = now;
       if ((endedAt !== null && now - endedAt > 450) || t >= config.durationMs) {
@@ -329,6 +364,7 @@ export function GameBoard({
           }
         }
         drawGiftBox(c, sp.x, sp.y, S, BOX_COLOURS[i % BOX_COLOURS.length]);
+        if (showKeysRef.current) drawKeyLabel(c, sp.x, sp.y, S, KEY_LABELS[i], fontRef.current);
       }
 
       // Dashing kittens run over everything.
@@ -393,18 +429,37 @@ export function GameBoard({
     handleTap((e.clientX - rect.left) / rect.width, (e.clientY - rect.top) / rect.height);
   };
 
-  const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    const idx = KEYS[e.key.toLowerCase()];
-    if (idx === undefined) return;
-    e.preventDefault();
-    // A held key auto-repeats about 30 times a second; only real presses count.
-    if (e.repeat) return;
-    handleTap(SPOTS[idx].x, SPOTS[idx].y);
+  // The leave question takes focus, and hands it back to the board so the number keys keep working.
+  useEffect(() => {
+    if (confirmExit) keepPlayingRef.current?.focus({ preventScroll: true });
+  }, [confirmExit]);
+
+  const keepPlaying = () => {
+    setConfirmExit(false);
+    boardRef.current?.focus({ preventScroll: true });
   };
 
   const leave = () => {
     setConfirmExit(false);
     finish(true);
+  };
+
+  const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    // The leave question covers the board: keys answer it and never tap the boxes underneath.
+    if (confirmExit) {
+      if (e.key === "Escape") keepPlaying();
+      return;
+    }
+    const idx = KEYS[e.key.toLowerCase()];
+    if (idx === undefined) return;
+    e.preventDefault();
+    // A held key auto-repeats about 30 times a second; only real presses count.
+    if (e.repeat) return;
+    if (!showKeysRef.current) {
+      showKeysRef.current = true;
+      onKeyboard?.();
+    }
+    handleTap(SPOTS[idx].x, SPOTS[idx].y);
   };
 
   return (
@@ -442,10 +497,11 @@ export function GameBoard({
         </div>
 
         <div
+          ref={boardRef}
           className="relative overflow-hidden rounded-[26px] bg-[radial-gradient(circle_at_50%_40%,#4f1420_0%,#2a0b10_75%)] shadow-[inset_0_0_0_3px_rgb(237_185_92/0.35)] outline-none focus-visible:ring-4 focus-visible:ring-gold-400"
           style={{ width: size, height: size }}
           role="application"
-          aria-label="Game board. Tap Koochu Puchu whenever it appears. Keyboard: number keys 1 to 9 tap the gift boxes, arranged like a phone keypad."
+          aria-label="Game board. Tap Koochu Puchu whenever it appears. Keyboard: number keys tap the gift boxes, laid out like a number pad: 7, 8 and 9 along the top, 1, 2 and 3 along the bottom."
           tabIndex={0}
           onKeyDown={onKeyDown}
         >
@@ -456,14 +512,16 @@ export function GameBoard({
             aria-hidden
           />
           {confirmExit && (
-            <div className="absolute inset-0 grid place-items-center bg-night/80 p-6 text-center">
+            <div className="absolute inset-0 grid place-items-center bg-night/80 p-6 text-center" role="dialog" aria-labelledby={leaveTitleId}>
               <div className="max-w-xs">
-                <p className="title text-cream-100">Leave this level?</p>
+                <p id={leaveTitleId} className="title text-cream-100">
+                  Leave this level?
+                </p>
                 <p className="mt-2 text-[0.98rem] text-cream-100">
                   {rewardMode ? "The clock keeps running. Leaving now ends this reward attempt." : "You can start again any time."}
                 </p>
                 <div className="mt-5 flex flex-col gap-3">
-                  <button type="button" onClick={() => setConfirmExit(false)} className="rounded-full bg-cream-100 px-5 py-3 font-display uppercase text-ink">
+                  <button ref={keepPlayingRef} type="button" onClick={keepPlaying} className="rounded-full bg-cream-100 px-5 py-3 font-display uppercase text-ink">
                     Keep playing
                   </button>
                   <button type="button" onClick={leave} className="rounded-full border-2 border-cream-100/80 px-5 py-3 font-display uppercase text-cream-100">
@@ -517,6 +575,22 @@ function drawGiftBox(c: CanvasRenderingContext2D, x: number, y: number, S: numbe
   c.arc(x * S, (top - 0.02) * S, 0.009 * S, 0, Math.PI * 2);
   c.fill();
   c.stroke();
+  c.restore();
+}
+
+/** The number key that taps this box, small on a dark seal across the ribbon, like a key cap. */
+function drawKeyLabel(c: CanvasRenderingContext2D, x: number, y: number, S: number, label: string, font: string) {
+  const cy = y + 0.098;
+  c.save();
+  c.beginPath();
+  c.arc(x * S, cy * S, 0.024 * S, 0, Math.PI * 2);
+  c.fillStyle = "rgba(36, 18, 12, 0.62)";
+  c.fill();
+  c.font = `${Math.round(0.03 * S)}px ${font}`;
+  c.textAlign = "center";
+  c.textBaseline = "middle";
+  c.fillStyle = "#fbefdb";
+  c.fillText(label, x * S, cy * S);
   c.restore();
 }
 

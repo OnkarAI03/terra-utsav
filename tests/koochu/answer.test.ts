@@ -65,13 +65,16 @@ describe("Koochu Puchu answers from the site", () => {
     expect(coupon.text).toContain("2 reward attempts");
     expect(coupon.text).toContain("all 3 levels");
     expect(coupon.text).toContain("50% off a Chocolate Bomb");
+    expect(coupon.text).toContain("Coupons can be won on event day only (Tuesday, 27 October 2026, 9 am to 3 pm)");
     expect(ask("what do I win?").topic).toBe("coupon");
     expect(coupon.links.map((l) => l.href)).toContain("/rewards");
     expect(ask("catch the koochu puchu").topic).toBe("game");
   });
 
   it("explains sign-in and the brick challenge", () => {
-    expect(ask("Do I need to sign in?").topic).toBe("signin");
+    const signin = ask("Do I need to sign in?");
+    expect(signin.topic).toBe("signin");
+    expect(signin.text).toContain("sign-ups are open now");
     const brick = ask("Brick challenge rules");
     expect(brick.topic).toBe("challenge");
     expect(brick.text).toContain("60 seconds");

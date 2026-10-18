@@ -46,7 +46,7 @@ export default async function RewardsPage() {
         <section className="bg-cream-200 py-20 text-ink">
           <div className="shell">
             <p className="max-w-xl text-[1.05rem]">
-              Coupons open closer to the Mandi. Practise the game in the meantime: the levels are the same.
+              Coupons can be won on event day only. Practise the game in the meantime: the levels are the same.
             </p>
           </div>
         </section>
@@ -86,7 +86,8 @@ export default async function RewardsPage() {
               <div className="rounded-[var(--radius-panel)] bg-cream-100 p-8 text-ink">
                 <h2 className="display-m text-choc-900">No coupons yet</h2>
                 <p className="mt-3 max-w-md text-[1.05rem] leading-relaxed">
-                  Clear every level of Catch the Koochu Puchu in a reward attempt and your coupon lands here.
+                  Clear every level of Catch the Koochu Puchu in a reward attempt and your coupon lands here. Coupons can be won on
+                  event day only.
                 </p>
                 <ButtonLink href="/game" className="mt-6" trailing={<ArrowRight />}>
                   Play now

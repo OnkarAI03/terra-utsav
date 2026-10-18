@@ -14,6 +14,8 @@
 | Unconfirmed or anonymous accounts | Reward play needs a signed-in, non-anonymous user with a confirmed email | `gameContext()` in `src/lib/game/server.ts` |
 | Reward play before it is ready | `game_start_attempt` refuses (`rewards_closed`) unless coupons are switched on and their terms confirmed in admin | `game_start_attempt` |
 | More than one coupon each | `game_start_attempt` refuses (`already_won`) once the player holds a coupon | `game_start_attempt` |
+| Reward play outside event day | New reward attempts start only between the event's start and end (admin > Event): `not_open_yet` before, `event_over` after. Sign-ups stay open at any time. Staff and admins may start early to test (cancel their test coupons) | `game_start_attempt`, `src/lib/game/window.ts` |
+| One inbox, many addresses | `canonical_email()` folds case, `+tags` and Gmail dots, so `n.ame+1@gmail.com` and `name@gmail.com` are one player: only the first to play gets reward attempts (`alias_account`), under an advisory lock | `game_start_attempt`, `canonical_email()` |
 | Bots and spam | Reactions under 140 ms ignored; taps closer than 90 ms ignored; at most 160 counted taps per level; at most 600 taps per request; per-user rate limits shared across servers | `src/lib/game/engine.ts`, `rate_limit_hit()` |
 | Two attempts | Counted in Postgres under a row lock on the player; a partial unique index allows one unfinished attempt per player | `game_start_attempt` |
 | Duplicate coupons | `coupons.attempt_id` is unique; issuance retries only on code collisions | `game_submit_level` |
@@ -26,6 +28,26 @@
 | Uploads | Admin-only storage policies; images only (WebP, JPEG, PNG, AVIF), 5 MB maximum, random file names. The admin form shrinks photos in the browser first (1600 px, WebP) | migration `0400`, `uploadImage()`, `ImageField` |
 | Headers | CSP (self + Supabase), frame-ancestors none, nosniff, referrer policy, permissions policy (camera for this site only, for QR scanning), HSTS | `next.config.ts` |
 | Secrets | `.env*` ignored by Git; only `.env.example` with placeholders is committed | `.gitignore` |
+
+## Sign-in: what stops a stranger getting in
+
+- **Guessing the 6-digit code.** A code belongs to one email address, works once, expires, and Supabase limits how
+  many codes can be tried from one place per hour. A random number has about a one-in-a-million chance per try.
+  Set **Authentication > Providers > Email > Email OTP Expiration** to 600 seconds (10 minutes; the default is an
+  hour) to shrink the window further.
+- **No way around the code.** Every route into an account goes through Supabase: the 6-digit code
+  (`verifyOtp`), the email link (`exchangeCodeForSession`, which only works in the browser that asked for it, or a
+  `token_hash` that Supabase checks) and Google. The server re-checks the session with Supabase on every request
+  (`auth.getUser()`), and reward play also needs a confirmed email.
+- **Another browser or another phone.** Signing in with the same email anywhere is the same account: the same
+  attempts and the same one coupon, counted in the database, not in the browser. The site never uses phone numbers
+  or SIM cards.
+- **Another email address.** A different inbox is a different account. Aliases of one inbox count as one player (see
+  above). Genuinely separate inboxes (a second Gmail, a throwaway-mail site) are the remaining gap; see Known
+  limitations.
+- **CAPTCHA.** Supabase can require one (Authentication > Attack Protection), but the sign-in form must then send a
+  CAPTCHA token. The site does not do that yet, so **do not switch CAPTCHA on in Supabase until it does**, or nobody
+  will be able to sign in.
 
 ## Privacy
 
@@ -45,9 +67,11 @@
   that taps at human-like times. The server checks make this slow and imperfect, rejected results show in the admin
   stats, and each account has two attempts. Staff can cancel a coupon that looks wrong. There is no perfect anti-cheat
   for a browser game, and this site does not claim one.
-- **Multiple accounts.** Anyone with several confirmed email addresses can sign in several times, and the one-coupon
-  rule is per account. Coupons are tied to the account that won them; organisers can decide at the stall. Limiting
-  sign-in to the college's email domain, or adding a CAPTCHA, would need a decision from the organisers.
+- **Multiple accounts.** Anyone with several real inboxes can sign up several times, and the one-coupon rule is per
+  player. What limits the damage: aliases of one inbox count as one player, reward play runs on event day only, the
+  total number of coupons can be capped (admin > Rewards), staff redeem every coupon in person, and a coupon is worth
+  half a Chocolate Bomb. Stronger options need the organisers' decision: reward play for college email addresses
+  only, a code shown at the stall that starts a reward attempt (so players must be there), or a CAPTCHA.
 - **CSP allows inline scripts**, which Next.js needs for hydration without a nonce setup.
 - **Rate limits** fail open if the limiter itself errors, so a database hiccup does not block play. Attempt limits and
   coupon rules do not depend on the limiter.

@@ -81,7 +81,16 @@ Useful scripts:
    - Email templates > **Confirm signup** and **Magic Link**: the sign-in page asks for the 6-digit code, so add it to
      both templates (someone signing in for the first time gets the Confirm signup email), e.g.
      `<p>Your TERRA UTSAV sign-in code: <strong>{{ .Token }}</strong></p>` next to the existing link.
-   - For an event day, set up custom SMTP (Auth > SMTP) so sign-in emails are not limited by the built-in sender.
+   - **Custom SMTP is required before sign-ups open** (Authentication > SMTP Settings). Supabase's built-in sender only
+     delivers to members of your Supabase team, at 2 emails an hour, so students would never get their code. Any SMTP
+     provider works (a transactional email service, or a Gmail account with an app password); check its daily limit
+     against the sign-ups you expect.
+   - Sign-in requests are limited per IP address (Supabase's default is 30 per 5 minutes). Many phones on one campus
+     Wi-Fi share an address, so ask people to sign up before the day (sign-ups are open now), and raise the limit under
+     Authentication > Rate Limits if the stall gets busy.
+   - **The free plan pauses an idle project** after about a week of low activity. Supabase emails a warning first, and
+     **Resume project** in the dashboard brings it back with all its data in a few minutes. Visitors keep it awake once
+     sign-ups are open; still, open the dashboard the day before the event and do the staff dry run then.
    - Optional: enable the Google provider and set `NEXT_PUBLIC_AUTH_GOOGLE=true`.
 4. **Environment variables**: copy `.env.example` to `.env.local` and fill in the URL, publishable (or anon) key and
    secret (service role) key from Project Settings > API.
@@ -131,8 +140,9 @@ game difficulty, reward value, expiry, stock and terms, staff roles, extra attem
 
 - Dates and times in admin are entered in India time (IST) with date pickers.
 - Photos chosen in admin are shrunk in the browser (longest side 1600 px, WebP) before they upload, so phone photos fit.
-- **Reward play stays closed until you open it**: in `/admin/rewards`, check the coupon terms, keep coupons switched on
-  and tick "terms confirmed". Until then the game page says "Reward play opens closer to the Mandi" (before anyone signs in) and practice stays open.
+- **Sign-ups are open now; coupons are for event day.** Reward play opens at the event's start time and closes at its
+  end (`/admin/event`), and only once coupons are switched on and "terms confirmed" is ticked in `/admin/rewards`.
+  Before the event the game page says "Sign up now" and "Coupons can be won on event day only"; practice is always open.
 - The "Image is illustrative" tick in `/admin/menu` no longer puts a tag on the picture. While any item is ticked, the
   footer says so once, and the admin checklist keeps "Real photos of the food and diyas" open.
 - The chat helper reads the same content as the pages. It picks up admin edits within about a minute (saving in
@@ -152,8 +162,11 @@ organisers approve them) and the default content used when the database is unrea
   oversized logs do not count.
 - Two reward attempts per player (configurable), enforced in Postgres with a row lock and a unique index. Starting a
   level and leaving counts as a loss. Admins can grant extra attempts.
-- Reward play needs a confirmed email address (anonymous sessions are refused), and a reward attempt can only start
-  while coupons are switched on and confirmed in admin.
+- Sign-ups are open at any time, but **coupons can be won on event day only**: a reward attempt starts only between
+  the event's start and end (admin > Event), and only while coupons are switched on and confirmed (admin > Rewards).
+  Staff and admins can start early to test; cancel the coupons they win.
+- Reward play needs a confirmed email address (anonymous sessions are refused). Addresses that reach one inbox
+  (`name+1@gmail.com`, `n.ame@gmail.com`, `name@gmail.com`) count as one player.
 - **One coupon per player**: an account that has already won cannot start another reward attempt.
 - Clearing the last level (Level 3 by default) issues at most one coupon (unique per attempt), with an unpredictable
   code from the database's cryptographic random generator. Redemption is a single atomic update; a second phone cannot
@@ -169,7 +182,7 @@ Difficulty targets roughly 20 to 30% of players winning across two attempts. The
 
 ## 6. Tests
 
-`npm test` runs 133 tests:
+`npm test` runs every test:
 
 - **Game engine and tuning**: determinism, hit testing, bot-speed and spam rejection, level progression, modelled win rate.
 - **Database** (real migrations in PGlite with a Supabase auth/storage shim): attempt limits, resume, abandoned levels, clock
@@ -191,10 +204,15 @@ and unique constraints, which the tests exercise by replaying the same request.
 
 ## 7. Troubleshooting
 
-- **Sign-in email never arrives**: check Auth > Logs in Supabase; the built-in email sender has a low hourly limit. Use custom SMTP.
+- **Sign-in email never arrives**: set up custom SMTP (step 2.3): the built-in sender only delivers to your Supabase team,
+  2 an hour. Then check Authentication > Logs.
+- **Nothing that needs the database works (sign-in, coupons, admin)**: the free Supabase project may be paused. Open
+  the dashboard and press Resume project.
 - **"Sign-in is not switched on yet"**: `NEXT_PUBLIC_SUPABASE_URL` / key missing in this environment. Redeploy after adding them.
-- **Game says "Reward play opens closer to the Mandi"**: coupons are not switched on and confirmed in `/admin/rewards`,
-  or `SUPABASE_SECRET_KEY` is missing on the server.
+- **Game says "Reward play opens on event day"**: it is before the event's start time in `/admin/event`. During the
+  event, "Coupons are paused right now" means coupons are not switched on and confirmed in `/admin/rewards`.
+- **Game or sign-in says "Sign-in isn't switched on yet"**: `NEXT_PUBLIC_SUPABASE_URL` / key are missing in this
+  environment (sign-ups need Supabase connected), or `SUPABASE_SECRET_KEY` is missing on the server.
 - **Staff page sends me to sign in**: your account needs the staff role (admin > People & coupons).
 - **Team photo not showing**: tick "agreed to their photo being published" for that person.
 - **Chat gives an old answer**: it caches site content for up to a minute; saving anything in admin refreshes it.

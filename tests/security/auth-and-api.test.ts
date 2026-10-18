@@ -10,6 +10,8 @@ const state = {
   rpcCalls: [] as { fn: string; args: Record<string, unknown> }[],
   attempt: { id: "11111111-1111-4111-8111-111111111111", user_id: "u1", status: "in_progress", current_level: 1, settings_snapshot: DEFAULT_GAME_SETTINGS },
   levelSeed: 4242,
+  /** What game_start_attempt answers, when a test needs a refusal. */
+  startAttempt: null as Record<string, unknown> | null,
 };
 
 function sessionClient() {
@@ -33,6 +35,7 @@ function serviceClient() {
     rpc: async (fn: string, args: Record<string, unknown>) => {
       state.rpcCalls.push({ fn, args });
       if (fn === "rate_limit_hit") return { data: true, error: null };
+      if (fn === "game_start_attempt" && state.startAttempt) return { data: state.startAttempt, error: null };
       if (fn === "game_submit_level") return { data: { outcome: args.p_outcome, attemptStatus: args.p_outcome === "passed" ? "in_progress" : "lost", nextLevel: 2 }, error: null };
       return { data: {}, error: null };
     },
@@ -59,6 +62,7 @@ beforeEach(() => {
   state.user = null;
   state.roles = [];
   state.rpcCalls = [];
+  state.startAttempt = null;
 });
 
 const jsonRequest = (url: string, body: unknown, origin = "http://localhost:3000") =>
@@ -96,6 +100,17 @@ describe("game API trusts only the server's own judgement", () => {
     expect((await POST(jsonRequest("http://localhost:3000/api/game/attempt", {}))).status).toBe(401);
     state.user = { id: "u1", email: "u1@x.test", email_confirmed_at: "2026-10-18T00:00:00Z", is_anonymous: true };
     expect((await POST(jsonRequest("http://localhost:3000/api/game/attempt", {}))).status).toBe(401);
+  });
+
+  it("passes on why a reward attempt cannot start: before or after event day, or an alias of another player", async () => {
+    state.user = { id: "u1", email: "u1+2@x.test", email_confirmed_at: "2026-10-18T00:00:00Z" };
+    const { POST } = await import("@/app/api/game/attempt/route");
+    for (const code of ["not_open_yet", "event_over", "alias_account", "rewards_closed", "already_won"]) {
+      state.startAttempt = { error: code };
+      const res = await POST(jsonRequest("http://localhost:3000/api/game/attempt", {}));
+      expect(res.status, code).toBe(403);
+      expect((await res.json()).error).toBe(code);
+    }
   });
 
   it("refuses cross-site requests", async () => {
