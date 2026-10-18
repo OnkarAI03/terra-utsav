@@ -269,6 +269,16 @@ describe("search engine rules", () => {
     expect(rules[0].disallow).toEqual(expect.arrayContaining(["/admin", "/staff", "/rewards"]));
   });
 
+  it("follows Netlify's deploy context: previews hidden, production indexable", async () => {
+    vi.stubEnv("VERCEL_ENV", "");
+    vi.stubEnv("CONTEXT", "deploy-preview");
+    const { default: robots } = await import("@/app/robots");
+    expect(robots().rules).toEqual([{ userAgent: "*", disallow: "/" }]);
+    vi.stubEnv("CONTEXT", "production");
+    const rules = robots().rules as { disallow: string[] }[];
+    expect(rules[0].disallow).toEqual(expect.arrayContaining(["/admin", "/staff"]));
+  });
+
   it("only describes the event to search engines once it is confirmed", async () => {
     const { eventJsonLd } = await import("@/lib/seo");
     const { DEFAULT_EVENT } = await import("@/lib/settings");

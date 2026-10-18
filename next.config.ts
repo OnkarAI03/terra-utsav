@@ -12,6 +12,20 @@ function supabaseHost(): string | null {
 
 const supabase = supabaseHost();
 
+// The site's public address and whether search engines may index it, decided once at build time and
+// baked in, so pages regenerated later keep the same answer. Netlify sets URL (the site's main
+// address) and CONTEXT ("production", "deploy-preview", ...) during its build; Vercel sets
+// VERCEL_PROJECT_PRODUCTION_URL and VERCEL_ENV. NEXT_PUBLIC_SITE_URL and ALLOW_INDEXING override.
+const siteAddress =
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  process.env.URL ||
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "");
+const indexable = process.env.VERCEL_ENV
+  ? process.env.VERCEL_ENV === "production"
+  : process.env.CONTEXT
+    ? process.env.CONTEXT === "production"
+    : process.env.ALLOW_INDEXING === "true";
+
 // Next.js injects small inline scripts for hydration, so script-src keeps 'unsafe-inline'.
 // Everything else is locked to this site and the Supabase project.
 const csp = [
@@ -30,6 +44,10 @@ const csp = [
 ].join("; ");
 
 const nextConfig: NextConfig = {
+  env: {
+    ...(siteAddress ? { NEXT_PUBLIC_SITE_URL: siteAddress } : {}),
+    ALLOW_INDEXING: String(indexable),
+  },
   poweredByHeader: false,
   images: {
     formats: ["image/avif", "image/webp"],

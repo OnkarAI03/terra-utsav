@@ -64,7 +64,9 @@ The `/admin` overview shows a live version of this list.
       Resume project if needed) and do the staff dry run
 - [ ] Leave CAPTCHA off in Supabase (the site does not send a CAPTCHA token)
 - [ ] First admin added by SQL; staff accounts added in admin
-- [ ] GitHub repository under the intended account; Vercel project with environment variables; domain; `NEXT_PUBLIC_SITE_URL`
+- [x] GitHub repository: `OnkarAI03/terra-utsav` (public; everyone in the team photos agreed)
+- [ ] Netlify site imported from the repository and renamed (for example `terra-utsav.netlify.app`)
+- [ ] Netlify environment variables: the Supabase URL, publishable key and secret key; then trigger a deploy
 - [ ] A staff dry run: win a coupon on a staff account (staff can play before the event), redeem it on another staff
       phone, try redeeming again (must fail), then cancel the test coupon in admin
 - [ ] Ask Koochu Puchu (the chat button) the questions visitors will ask; anything it can't answer is a gap on the site

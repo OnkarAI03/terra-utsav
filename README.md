@@ -24,7 +24,7 @@ stall (date and place, menu, the game and its coupon, the brick challenge, the t
 content. See section 4.
 
 Stack: Next.js 15 (App Router) · TypeScript (strict) · Tailwind CSS 4 · Framer Motion · Supabase (Auth, Postgres, RLS,
-Storage) · Vitest + PGlite · Vercel.
+Storage) · Vitest + PGlite · Netlify (free plan).
 
 ---
 
@@ -102,32 +102,28 @@ Useful scripts:
    taken from anything a user can edit.
 6. Visit `/admin`: work through the "Before the event" checklist.
 
-## 3. Put it on GitHub (your intended account) and deploy on Vercel
+## 3. Put it online free with Netlify
 
-Do this with the GitHub account you actually want to own the project, which may not be the one currently signed in on
-this computer. Check with `gh auth status`; sign in or switch with `gh auth login` / `gh auth switch`.
+The code lives on GitHub at `OnkarAI03/terra-utsav` (`git push` sends new commits there). `.env*` files are ignored, so
+no secrets are pushed (only `.env.example` with placeholders).
 
-```bash
-git init
-git add .
-git commit -m "TERRA UTSAV website"
-git branch -M main
-git remote add origin https://github.com/<your-account>/terra-utsav.git
-git push -u origin main
-```
+Netlify hosts it on its free plan. (Vercel's free Hobby plan is for non-commercial use only, and a site advertising food
+for sale counts as commercial there.) `netlify.toml` holds the build settings, so there is nothing to type in:
 
-`.env*` files are ignored, so no secrets are pushed (only `.env.example` with placeholders).
+1. On app.netlify.com, sign up or log in with GitHub, then **Add new project > Import an existing project > GitHub**,
+   allow Netlify to see the repository, and pick `terra-utsav`. Netlify reads `netlify.toml`; press **Deploy**.
+2. **Site configuration > Change site name**: for example `terra-utsav`, giving `https://terra-utsav.netlify.app`.
+3. Once Supabase is ready (section 2), add under **Site configuration > Environment variables**:
+   `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` and `SUPABASE_SECRET_KEY` (mark the secret key
+   as a secret). Then **Deploys > Trigger deploy**: the `NEXT_PUBLIC_` values are built into the pages.
+4. Every `git push` to `main` deploys again by itself.
 
-Then on vercel.com, signed in with the intended account:
+The site's address and search indexing come from Netlify (`URL` and `CONTEXT`, baked in at build time by
+`next.config.ts`): only the production deploy is indexable, and deploy previews send `noindex` and a blocking
+`robots.txt`. Set `NEXT_PUBLIC_SITE_URL` only when you add your own domain.
 
-1. Add New > Project > import the repository. Framework: Next.js (detected). No build settings to change.
-2. Environment Variables (Production and Preview): `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_SUPABASE_URL`,
-   `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY` (and `NEXT_PUBLIC_AUTH_GOOGLE` if used).
-3. Deploy. Add your domain under Settings > Domains and set `NEXT_PUBLIC_SITE_URL` to it, then redeploy.
-4. In Supabase, add the production domain to the Auth redirect URLs (step 2.3).
-
-Search engines: only the production deployment is indexable. Preview deployments send `noindex` and a blocking
-`robots.txt` automatically (`VERCEL_ENV`).
+Without the Supabase variables the public site still works fully (menu, practice game, team, rules, chat); reward
+play, the staff console and admin say they aren't switched on yet.
 
 ## 4. Updating content
 

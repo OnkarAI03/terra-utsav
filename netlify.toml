@@ -1,0 +1,13 @@
+# Netlify builds this Next.js site with its Next.js runtime, detected automatically.
+# Environment variables (Supabase keys and so on) are set in the Netlify dashboard, never here.
+
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "22"
+  # These are public by design: the Supabase URL and publishable key ship in the browser bundle,
+  # where row level security decides what they can do. Without this, Netlify's secret scan could
+  # mistake them for leaked secrets and stop the build. SUPABASE_SECRET_KEY stays scanned.
+  SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_SUPABASE_URL,NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,NEXT_PUBLIC_SITE_URL,NEXT_PUBLIC_AUTH_GOOGLE"
