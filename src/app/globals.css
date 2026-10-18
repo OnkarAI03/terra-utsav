@@ -1,0 +1,460 @@
+@import "tailwindcss";
+
+/*
+ * TERRA UTSAV design tokens. See DESIGN.md for the reasoning behind each value.
+ * Components reference these through Tailwind utilities (bg-burgundy-900, text-cream-100, ...).
+ */
+@theme {
+  --color-night: #1e0709;
+  --color-burgundy-950: #2a0b10;
+  --color-burgundy-900: #3a0f17;
+  --color-burgundy-800: #4f1420;
+  --color-maroon-700: #7a1a2a;
+  --color-maroon-600: #931f33;
+  --color-maroon-500: #ae2a40;
+  --color-choc-950: #1a0c08;
+  --color-choc-900: #24120c;
+  --color-choc-800: #3a1f14;
+  --color-choc-700: #5a321f;
+  --color-cream-50: #fff8ec;
+  --color-cream-100: #fbefdb;
+  --color-cream-200: #f4e2c4;
+  --color-cream-300: #e9cfa6;
+  --color-gold-300: #f7d58c;
+  --color-gold-400: #edb95c;
+  --color-gold-500: #d99a3c;
+  --color-gold-600: #b67a26;
+  --color-ink: #2b140d;
+  --color-ink-soft: #5b3a2b;
+  --color-paper: #efddbb;
+  --color-wood-800: #3f2213;
+  --color-wood-700: #5a3119;
+  --color-wood-600: #74421f;
+  /* Diwali accents: marigold garlands, diya flames, rangoli powder. Used in art, not for text. */
+  --color-marigold-300: #ffc93c;
+  --color-marigold-500: #f28c28;
+  --color-marigold-700: #c4561a;
+  --color-flame: #ffe08a;
+  --color-rangoli-pink: #e0457b;
+  --color-rangoli-teal: #1fa5a0;
+  --color-leaf: #3f7d3a;
+
+  --color-success: #7bd69c;
+  --color-success-ink: #1f5e37;
+  --color-danger: #ff8a80;
+  --color-danger-ink: #8c1d18;
+
+  --radius-sm: 12px;
+  --radius-card: 24px;
+  --radius-panel: 32px;
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  --shadow-card: 0 22px 44px -22px rgb(18 4 6 / 0.75);
+  --shadow-lift: 0 30px 60px -26px rgb(18 4 6 / 0.85);
+}
+
+@theme inline {
+  --font-display: var(--font-lilita), "Arial Rounded MT Bold", ui-rounded, system-ui, sans-serif;
+  --font-sans: var(--font-nunito), ui-rounded, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-hand: var(--font-kalam), "Segoe Print", "Comic Sans MS", cursive;
+}
+
+:root {
+  --dur-fast: 160ms;
+  --dur-base: 280ms;
+  --dur-slow: 600ms;
+  --gutter: 16px;
+  --header-h: 64px;
+  color-scheme: dark;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --gutter: 24px;
+    --header-h: 76px;
+  }
+}
+
+@media (min-width: 1280px) {
+  :root {
+    --gutter: 32px;
+  }
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    scroll-padding-top: calc(var(--header-h) + 16px);
+  }
+
+  body {
+    background-color: var(--color-burgundy-900);
+    color: var(--color-cream-100);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+    text-rendering: optimizeLegibility;
+    overflow-x: clip;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    line-height: 0.95;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    background: var(--color-gold-400);
+    color: var(--color-ink);
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--color-gold-400);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+
+  button,
+  [role="button"],
+  a {
+    touch-action: manipulation;
+  }
+
+  input,
+  select,
+  textarea {
+    /* 16px stops iOS from zooming the page when a field gets focus. */
+    font-size: max(16px, 1rem);
+  }
+
+  img {
+    -webkit-user-drag: none;
+  }
+}
+
+@layer components {
+  .shell {
+    width: 100%;
+    max-width: 1240px;
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+  }
+
+  .section-pad {
+    padding-block: clamp(72px, 10vw, 160px);
+  }
+
+  /* Sticker-style display lettering from the approved hero. */
+  .text-sticker {
+    color: var(--color-cream-100);
+    -webkit-text-stroke: 0.055em var(--color-choc-900);
+    paint-order: stroke fill;
+    text-shadow:
+      0 0.05em 0 var(--color-choc-900),
+      0 0.1em 0 var(--color-choc-900),
+      0 0.16em 0.12em rgb(18 4 6 / 0.55);
+  }
+
+  .text-sticker-gold {
+    color: var(--color-gold-300);
+    -webkit-text-stroke: 0.055em var(--color-choc-900);
+    paint-order: stroke fill;
+    text-shadow:
+      0 0.05em 0 var(--color-choc-900),
+      0 0.1em 0 var(--color-choc-900),
+      0 0.16em 0.12em rgb(18 4 6 / 0.55);
+  }
+
+  .display-xl {
+    font-family: var(--font-display);
+    font-size: clamp(3.5rem, 10vw, 8.75rem);
+    line-height: 0.88;
+  }
+
+  .display-l {
+    font-family: var(--font-display);
+    font-size: clamp(2.75rem, 6.5vw, 5.25rem);
+    line-height: 0.92;
+  }
+
+  .display-m {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 4.2vw, 3.4rem);
+    line-height: 0.95;
+  }
+
+  .title {
+    font-family: var(--font-display);
+    font-size: clamp(1.35rem, 2.1vw, 1.75rem);
+    line-height: 1.05;
+  }
+
+  .hand {
+    font-family: var(--font-hand);
+    font-weight: 700;
+    line-height: 1.05;
+  }
+
+  /* Torn paper note. */
+  .paper-note {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    clip-path: polygon(
+      0% 4%, 6% 0%, 14% 3%, 23% 0%, 33% 2%, 44% 0%, 55% 3%, 66% 0%, 77% 2%, 88% 0%, 100% 3%,
+      98% 14%, 100% 27%, 98% 41%, 100% 55%, 98% 69%, 100% 83%, 99% 97%,
+      90% 100%, 79% 97%, 68% 100%, 57% 98%, 46% 100%, 35% 97%, 24% 100%, 13% 98%, 3% 100%,
+      1% 86%, 0% 72%, 2% 58%, 0% 44%, 2% 30%, 0% 16%
+    );
+  }
+
+  /* Wood plank used by the signpost. */
+  .plank {
+    background-color: var(--color-wood-700);
+    background-image:
+      repeating-linear-gradient(
+        178deg,
+        rgb(255 255 255 / 0.035) 0 2px,
+        transparent 2px 9px
+      ),
+      linear-gradient(180deg, rgb(255 255 255 / 0.08), rgb(0 0 0 / 0.18));
+    box-shadow:
+      inset 0 0 0 2px rgb(20 8 4 / 0.55),
+      inset 0 2px 0 rgb(255 220 180 / 0.12),
+      0 10px 18px -10px rgb(10 3 2 / 0.9);
+  }
+
+  /* Festival backdrop: string-light glow pools over the burgundy ground. */
+  .festival-ground {
+    background-color: var(--color-burgundy-900);
+    background-image:
+      radial-gradient(60% 50% at 78% 18%, rgb(237 185 92 / 0.22), transparent 70%),
+      radial-gradient(40% 35% at 20% 10%, rgb(174 42 64 / 0.35), transparent 70%),
+      radial-gradient(70% 60% at 50% 110%, rgb(26 12 8 / 0.9), transparent 70%);
+  }
+
+  .skip-link {
+    position: absolute;
+    left: 12px;
+    top: -100px;
+    z-index: 100;
+    padding: 10px 16px;
+    border-radius: 999px;
+    background: var(--color-gold-400);
+    color: var(--color-ink);
+    font-weight: 800;
+    transition: top var(--dur-fast) var(--ease-out);
+  }
+
+  .skip-link:focus {
+    top: 12px;
+  }
+}
+
+@layer utilities {
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
+  }
+  .pb-safe {
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
+
+  .min-h-dvh-safe {
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+}
+
+/* Hero entrance: runs from first paint, needs no script, collapses under reduced motion. */
+@keyframes tu-land {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 30px, 0) scale(0.86) rotate(-3deg);
+  }
+  60% {
+    opacity: 1;
+    transform: translate3d(0, -6px, 0) scale(1.04) rotate(1deg);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes tu-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.anim-land {
+  animation: tu-land 720ms var(--ease-out) both;
+  transform-origin: 30% 80%;
+}
+
+.anim-rise {
+  animation: tu-rise 600ms var(--ease-out) both;
+}
+
+/* Scroll reveal (see components/ui/Reveal.tsx). Hidden only when script is running. */
+.js [data-reveal] {
+  opacity: 0;
+  transform: translate3d(0, 24px, 0);
+  transition:
+    opacity var(--dur-slow) var(--ease-out),
+    transform var(--dur-slow) var(--ease-out);
+}
+.js [data-reveal][data-in="true"] {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .js [data-reveal] {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes tu-twinkle {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes tu-drip {
+  0% {
+    transform: translateY(-6px) scaleY(0.6);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(46px) scaleY(1.1);
+    opacity: 0;
+  }
+}
+
+.twinkle {
+  animation: tu-twinkle 3.2s var(--ease-in-out) infinite;
+}
+
+/* Diya flame flicker: small, irregular, transform and opacity only. */
+@keyframes tu-flicker {
+  0%,
+  100% {
+    transform: scale(1, 1) rotate(0deg);
+    opacity: 1;
+  }
+  25% {
+    transform: scale(0.94, 1.08) rotate(-2deg);
+    opacity: 0.92;
+  }
+  50% {
+    transform: scale(1.04, 0.95) rotate(1.5deg);
+    opacity: 1;
+  }
+  75% {
+    transform: scale(0.97, 1.05) rotate(-1deg);
+    opacity: 0.95;
+  }
+}
+
+.flicker {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: tu-flicker 1.6s ease-in-out infinite;
+}
+
+@keyframes tu-glow {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+.glow-pulse {
+  animation: tu-glow 2.4s ease-in-out infinite;
+}
+
+/* Twinkling star: brightens and grows a little, then rests. */
+@keyframes tu-burst {
+  0%,
+  100% {
+    transform: scale(0.55);
+    opacity: 0.25;
+  }
+  45% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.burst {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: tu-burst 4.2s ease-in-out infinite;
+}
+
+@keyframes tu-sway {
+  0%,
+  100% {
+    transform: rotate(-3deg);
+  }
+  50% {
+    transform: rotate(3deg);
+  }
+}
+
+.sway {
+  transform-box: fill-box;
+  transform-origin: 50% 0%;
+  animation: tu-sway 4.5s ease-in-out infinite;
+}
+
+.drip {
+  animation: tu-drip 1.8s var(--ease-in-out) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

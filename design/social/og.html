@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>TERRA UTSAV OG card</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Kalam:wght@700&family=Lilita+One&family=Nunito:wght@700;800&display=block" rel="stylesheet" />
+    <style>
+      :root {
+        --burgundy: #3a0f17;
+        --night: #1e0709;
+        --choc: #24120c;
+        --cream: #fbefdb;
+        --gold: #f7d58c;
+        --maroon: #931f33;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      html, body { width: 1200px; height: 630px; overflow: hidden; background: var(--burgundy); }
+      body { position: relative; font-family: "Nunito", sans-serif; color: var(--cream); }
+      .bg { position: absolute; inset: 0; background: url("../../public/images/hero/festival-bokeh.webp") center / cover; opacity: 0.95; }
+      .shade { position: absolute; inset: 0; background: radial-gradient(110% 90% at 72% 45%, rgba(30, 7, 9, 0.15), rgba(30, 7, 9, 0.85) 75%); }
+      .kitten {
+        position: absolute; left: 34px; top: 74px; width: 452px; height: 540px;
+        background: url("../../public/images/scenes/koochu-chocolate-bomb.webp") center 30% / cover;
+        -webkit-mask-image: radial-gradient(92% 86% at 48% 44%, #000 62%, transparent 100%);
+        mask-image: radial-gradient(92% 86% at 48% 44%, #000 62%, transparent 100%);
+      }
+      .note {
+        position: absolute; left: 22px; top: 96px; transform: rotate(-8deg);
+        background: #efddbb; color: #2b140d; font-family: "Kalam", cursive; font-weight: 700; font-size: 30px; line-height: 1.05;
+        padding: 14px 20px; text-transform: uppercase; box-shadow: 0 14px 24px -14px rgba(10, 3, 2, 0.9);
+        clip-path: polygon(0 5%, 8% 0, 22% 4%, 40% 0, 60% 4%, 80% 0, 100% 4%, 98% 30%, 100% 60%, 98% 100%, 70% 96%, 45% 100%, 20% 96%, 2% 100%, 0 70%, 2% 35%);
+      }
+      .copy { position: absolute; left: 520px; top: 104px; width: 640px; }
+      .brand { font-family: "Lilita One"; font-size: 34px; letter-spacing: 0.01em; color: var(--cream); display: flex; align-items: center; gap: 10px; }
+      .sticker {
+        font-family: "Lilita One"; color: var(--cream);
+        -webkit-text-stroke: 0.055em var(--choc); paint-order: stroke fill;
+        text-shadow: 0 0.05em 0 var(--choc), 0 0.1em 0 var(--choc), 0 0.16em 0.12em rgba(18, 4, 6, 0.55);
+      }
+      .gold { color: var(--gold); }
+      h1 { margin-top: 18px; line-height: 0.86; font-weight: 400; }
+      .small { display: block; font-size: 46px; }
+      .big { display: block; font-size: 128px; }
+      .strip {
+        margin-top: 24px; display: inline-flex; flex-direction: column; gap: 4px;
+        background: var(--cream); color: #2b140d; border-radius: 18px; padding: 12px 22px;
+        font-weight: 800; font-size: 22px; line-height: 1.25; box-shadow: 0 5px 0 #e9cfa6; white-space: nowrap;
+      }
+      .strip .sub { font-size: 19px; font-weight: 700; color: #5b3a2b; }
+      .toran { position: absolute; left: 0; top: 0; width: 1200px; height: 90px; }
+      .diyas { position: absolute; right: 52px; top: 352px; display: flex; gap: 10px; align-items: flex-end; }
+      .paw { width: 26px; height: 26px; }
+    </style>
+  </head>
+  <body>
+    <div class="bg"></div>
+    <div class="shade"></div>
+
+    <svg class="toran" viewBox="0 0 1200 90" aria-hidden="true">
+      <path d="M0 8 Q600 70 1200 8" stroke="#3a1f14" stroke-width="3" fill="none" />
+      <g id="flowers"></g>
+    </svg>
+
+    <div class="kitten"></div>
+    <div class="note">Can you<br />catch me?</div>
+
+    <div class="copy">
+      <div class="brand">
+        <span class="sticker">TERRA UTSAV</span>
+        <svg class="paw" viewBox="0 0 64 64" fill="#f7d58c"><ellipse cx="32" cy="42" rx="15" ry="13"/><ellipse cx="14" cy="27" rx="6.5" ry="8.5"/><ellipse cx="25" cy="16" rx="6.5" ry="9"/><ellipse cx="39" cy="16" rx="6.5" ry="9"/><ellipse cx="50" cy="27" rx="6.5" ry="8.5"/></svg>
+      </div>
+      <h1>
+        <span class="sticker small">Came for the</span>
+        <span class="sticker gold big">Food.</span>
+        <span class="sticker small">Stayed for the</span>
+        <span class="sticker gold big">Chaos.</span>
+      </h1>
+      <div class="strip">
+        <span>Tue 27 Oct 2026 · 9 am to 3 pm</span>
+        <span class="sub">Eco-friendly Diwali Mandi 2026 · S. B. Patil Institute of Management</span>
+      </div>
+    </div>
+
+    <div class="diyas" id="diyas"></div>
+
+    <script>
+      // Marigold flowers along the toran
+      const g = document.getElementById("flowers");
+      const NS = "http://www.w3.org/2000/svg";
+      for (let i = 0; i <= 40; i++) {
+        const t = i / 40, x = t * 1200, y = 8 + 4 * t * (1 - t) * 62 * 0.5 * 2;
+        if (i % 4 === 2) {
+          const leaf = document.createElementNS(NS, "ellipse");
+          leaf.setAttribute("cx", x); leaf.setAttribute("cy", y + 20); leaf.setAttribute("rx", 7); leaf.setAttribute("ry", 16);
+          leaf.setAttribute("fill", "#3f7d3a"); g.appendChild(leaf);
+        }
+        const f = document.createElementNS(NS, "circle");
+        f.setAttribute("cx", x); f.setAttribute("cy", y); f.setAttribute("r", 13);
+        f.setAttribute("fill", i % 3 === 0 ? "#ffc93c" : "#f28c28"); g.appendChild(f);
+        const c = document.createElementNS(NS, "circle");
+        c.setAttribute("cx", x); c.setAttribute("cy", y); c.setAttribute("r", 4.5); c.setAttribute("fill", "#c4561a"); g.appendChild(c);
+      }
+      // Lit diyas
+      const diya = (w, body) => `
+        <svg width="${w}" viewBox="0 0 140 120"><circle cx="104" cy="44" r="40" fill="#ff9f1c" opacity="0.25"/>
+        <path d="M10 66 C14 98 52 112 78 108 C104 104 124 86 128 64 L118 60 C96 66 60 68 18 62 Z" fill="${body}"/>
+        <ellipse cx="66" cy="64" rx="56" ry="9" fill="#5b240d"/><ellipse cx="66" cy="63" rx="50" ry="6.5" fill="#c99a3a"/>
+        <path d="M118 60 L134 52 L124 64 Z" fill="${body}"/>
+        <path d="M113 50 C100 40 106 24 113 10 C120 24 126 40 113 50Z" fill="#ffb703"/>
+        <path d="M113 47 C108 41 110 33 113 26 C116 33 118 41 113 47Z" fill="#fffbe6"/></svg>`;
+      document.getElementById("diyas").innerHTML = diya(72, "#b5304a") + diya(96, "#d0683a") + diya(72, "#e8b04f");
+    </script>
+  </body>
+</html>
