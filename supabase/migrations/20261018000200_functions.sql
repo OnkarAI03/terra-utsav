@@ -42,23 +42,6 @@ as $$
   );
 $$;
 
--- ------------------------------------------------------------------ email aliases
--- The inbox an address really delivers to, so one person's aliases count as one player:
--- lower case, no "+tag", and for Gmail no dots ("N.ame+x@googlemail.com" -> "name@gmail.com").
-create or replace function public.canonical_email(p_email text)
-returns text
-language sql
-immutable
-set search_path = ''
-as $$
-  select case
-    when p_email is null or strpos(p_email, '@') = 0 then lower(p_email)
-    when lower(split_part(p_email, '@', 2)) in ('gmail.com', 'googlemail.com')
-      then replace(split_part(lower(split_part(p_email, '@', 1)), '+', 1), '.', '') || '@gmail.com'
-    else split_part(lower(split_part(p_email, '@', 1)), '+', 1) || '@' || lower(split_part(p_email, '@', 2))
-  end;
-$$;
-
 -- ------------------------------------------------------------------ new users
 create or replace function public.handle_new_user()
 returns trigger
@@ -238,7 +221,6 @@ declare
   v_event jsonb;
   v_starts timestamptz;
   v_ends timestamptz;
-  v_canon text;
 begin
   if p_user is null then
     raise exception 'not_authenticated' using errcode = '28000';
@@ -320,25 +302,8 @@ begin
     return jsonb_build_object('error', 'rewards_closed');
   end if;
 
-  -- One inbox, one player: "name+1@gmail.com" and "n.ame@gmail.com" reach the same inbox as
-  -- "name@gmail.com", so only the first of them to play gets reward attempts. The advisory lock
-  -- stops two aliases from starting at the same moment.
-  select public.canonical_email(u.email) into v_canon from auth.users u where u.id = p_user;
-  if v_canon is not null then
-    perform pg_advisory_xact_lock(hashtext('reward-player:' || v_canon));
-    if exists (
-      select 1
-      from public.game_attempts a
-      join auth.users u on u.id = a.user_id
-      where a.user_id <> p_user
-        and a.status <> 'void'
-        and public.canonical_email(u.email) = v_canon
-    ) then
-      return jsonb_build_object('error', 'alias_account');
-    end if;
-  end if;
-
-  -- One coupon per player: a win ends reward play for that account.
+  -- One coupon per player (each phone or browser plays as its own guest player; staff also
+  -- redeem only one coupon per person at the stall): a win ends reward play for that player.
   if exists (select 1 from public.game_attempts where user_id = p_user and status = 'won') then
     return jsonb_build_object('error', 'already_won');
   end if;
@@ -873,7 +838,6 @@ $$;
 -- ------------------------------------------------------------------ execution rights
 -- Postgres lets everyone execute new functions by default. Lock them down explicitly.
 revoke execute on function public.game_start_attempt(uuid) from public, anon, authenticated;
-revoke execute on function public.canonical_email(text) from public, anon, authenticated;
 revoke execute on function public.game_start_level(uuid, uuid, int, bigint) from public, anon, authenticated;
 revoke execute on function public.game_submit_level(uuid, uuid, int, text, int, int, int, int, jsonb) from public, anon, authenticated;
 revoke execute on function public.rate_limit_hit(text, int, int) from public, anon, authenticated;

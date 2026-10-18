@@ -197,26 +197,6 @@ describe("reward attempts", () => {
     expect((await startAttempt(s)).attemptNumber).toBe(1);
   });
 
-  it("finds the real inbox behind an address", async () => {
-    const canon = async (e: string) => (await db.query<{ c: string }>("select public.canonical_email($1) as c", [e])).rows[0].c;
-    expect(await canon("N.Ame+x@GoogleMail.com")).toBe("name@gmail.com");
-    expect(await canon("first.last@college.edu")).toBe("first.last@college.edu");
-    expect(await canon("First+stall@College.edu")).toBe("first@college.edu");
-  });
-
-  it("treats Gmail dots and +tags as one player", async () => {
-    const main = await createUser(db, "asha.example@gmail.com");
-    expect((await startAttempt(main)).attemptNumber).toBe(1);
-    for (const alias of ["ashaexample+1@gmail.com", "a.s.h.a.example@googlemail.com", "AshaExample+win@gmail.com"]) {
-      expect((await startAttempt(await createUser(db, alias))).error, alias).toBe("alias_account");
-    }
-    const tagged = await createUser(db, "ravi+stall@college.test");
-    expect((await startAttempt(tagged)).attemptNumber).toBe(1);
-    expect((await startAttempt(await createUser(db, "ravi@college.test"))).error).toBe("alias_account");
-    // Someone else entirely is not an alias.
-    expect((await startAttempt(await createUser(db, "asha.other@gmail.com"))).attemptNumber).toBe(1);
-  });
-
   it("gives each player one coupon at most", async () => {
     const u = await createUser(db, "once@student.test");
     expect((await winAttempt(u)).result.reward).toBe("issued");

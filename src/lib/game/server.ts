@@ -35,8 +35,10 @@ export async function gameContext(): Promise<GameContext> {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  // Reward play needs a real, verified email: no anonymous or half-finished sign-ups.
-  if (!user || user.is_anonymous || !user.email_confirmed_at) return { ok: false, code: "unauthenticated", status: 401 };
+  // Players don't sign up: the game gives each phone or browser a nameless guest account
+  // (Supabase anonymous sign-in) when they first play for a reward. Staff and admins use their own
+  // accounts. A half-finished email sign-up doesn't count.
+  if (!user || (!user.is_anonymous && !user.email_confirmed_at)) return { ok: false, code: "unauthenticated", status: 401 };
   return { ok: true, user, service };
 }
 

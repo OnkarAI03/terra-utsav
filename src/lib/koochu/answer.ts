@@ -99,7 +99,7 @@ const PHRASES: [RegExp, Topic, number][] = [
   [/\bhow (do i|to|can i) play\b/, "game", 2],
   [/\bhow (do i|to|can i) win\b/, "coupon", 2],
   [/\bwho (made|runs|built|organi[sz]es?)\b/, "team", 2],
-  [/\bsign ?in\b|\blog ?in\b/, "signin", 2],
+  [/\bsign ?(in|up)\b|\blog ?in\b|\bregister\b/, "signin", 2],
   [/\bcatch (the )?koochu\b/, "game", 3],
   [/\bwhat (do|can|will|would) (i|you|we) (get|win)\b|\bwhat('?s| is) the (prize|reward)\b/, "coupon", 3],
   [/\bwhat('?s| is) (on|in) (the )?menu\b|\bwhat do you sell\b/, "menu", 2],
@@ -280,25 +280,25 @@ function reply(topic: Topic, f: KoochuFacts, tokens: string[]): KoochuReply {
         topic,
         text: `Catch the Koochu Puchu has ${levels.length} quick levels: ${sentenceList(levels.map((l) => l.name))}. Tap me when I pop out of the Diwali gift boxes, don't tap the snacks, and catch enough before the timer ends. Practice is free and unlimited.`,
         links: [linkGame, { label: "Game rules", href: "/rules#game" }],
-        chips: ["How do I win a coupon?", "Do I need to sign in?"],
+        chips: ["How do I win a coupon?", "Do I need to sign up?"],
       };
     case "coupon": {
       const value = f.rewards.couponValueText ? ` A coupon is worth: ${f.rewards.couponValueText}.` : " What a coupon is worth will be announced by the organisers.";
       const paused = f.rewards.rewardsEnabled ? "" : " Coupons are paused right now.";
       const day = [f.event.dateText, f.event.timeText].filter(Boolean).join(", ");
-      const eventDay = ` Coupons can be won on event day only${day ? ` (${day})` : ""}, and you can sign up now.`;
+      const eventDay = ` Coupons can be won on event day only${day ? ` (${day})` : ""}.`;
       return {
         topic,
-        text: `Sign in and you get ${attempts} reward attempt${attempts === 1 ? "" : "s"}. Clear all ${levels.length} levels in one attempt and a coupon lands in your wallet. Show it at the stall and a team member scans it.${value} It's meant to be hard: roughly 2 or 3 players in 10 win, so practise first.${eventDay}${paused}`,
+        text: `No sign-up: tap Play for a reward and you get ${attempts} reward attempt${attempts === 1 ? "" : "s"} on your phone. Clear all ${levels.length} levels in one attempt and your coupon appears on screen. Show it at the stall and a team member scans it. One coupon per person.${value} It's meant to be hard: roughly 2 or 3 players in 10 win, so practise first.${eventDay}${paused}`,
         links: [linkGame, { label: "My coupons", href: "/rewards" }, { label: "Coupon rules", href: "/rules#coupons" }],
-        chips: ["Do I need to sign in?", "How do I play?"],
+        chips: ["Do I need to sign up?", "How do I play?"],
       };
     }
     case "signin":
       return {
         topic,
-        text: "Only reward play needs a sign-in, and sign-ups are open now. Enter your email and we send you a 6-digit code (and a link). No password. Coupons can be won on event day only. Practice works without signing in.",
-        links: [{ label: "Sign in", href: "/login" }, linkRules],
+        text: "No sign-up and no sign-in: just open the game and play. Your coupon appears on screen and stays in My coupons on that phone. Coupons can be won on event day only, one per person. (Signing in is only for TERRA UTSAV staff.)",
+        links: [linkGame, linkRules],
         chips: ["How do I win a coupon?", "Privacy and rules"],
       };
     case "challenge":

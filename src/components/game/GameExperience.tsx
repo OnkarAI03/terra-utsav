@@ -18,6 +18,7 @@ import type { RewardPhase } from "@/lib/game/window";
 import { GameBoard, type BoardResult } from "./GameBoard";
 import { ResultKitten } from "./ResultKitten";
 import { loadSprites } from "./sprites";
+import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 type Mode = "practice" | "reward";
 
@@ -64,13 +65,13 @@ type Screen =
 
 const ERRORS: Record<string, string> = {
   not_configured: "Reward play is not switched on yet. You can still practise.",
-  unauthenticated: "Please sign in to play for a reward.",
+  unauthenticated: "This phone lost its place in the game. Reload the page and tap Play for a reward again.",
+  guest_failed: "Couldn't start reward play just now. Check your connection and try again in a minute.",
   no_attempts_left: "You have used all your reward attempts.",
   rewards_closed: "Coupons are paused right now. Practise meanwhile: the levels are the same.",
-  not_open_yet: "Coupons can be won on event day only. You're signed up, so come back then. Practise meanwhile: the levels are the same.",
+  not_open_yet: "Coupons can be won on event day only. Practise meanwhile: the levels are the same.",
   event_over: "Reward play has ended. Thank you for playing!",
-  alias_account:
-    "This email reaches the same inbox as an account that already plays for rewards (for example name+1@gmail.com and name@gmail.com). Play with that account.",  already_won: "You have already won your coupon. It's one per player, so give someone else a chance! Practice is still open.",
+  already_won: "You have already won your coupon. It's one per person, so give someone else a chance! Practice is still open.",
   level_in_progress: "One of your levels is still running. Give it a moment and try again.",
   attempt_finished: "That attempt has already finished.",
   wrong_level: "Your attempt has moved on. Reloading your progress.",
@@ -155,6 +156,24 @@ export function GameExperience({
   const startPractice = (level: number) => {
     setRun({ mode: "practice", settings, level });
     setScreen({ name: "level-intro" });
+  };
+
+  /**
+   * No sign-up: the first time a phone or browser plays for a reward, it gets a nameless guest
+   * account (Supabase anonymous sign-in). Attempts and the coupon belong to that guest.
+   */
+  const playForReward = async () => {
+    if (!status?.signedIn) {
+      setScreen({ name: "submitting" });
+      const supabase = getSupabaseBrowserClient();
+      const result = supabase ? await supabase.auth.signInAnonymously() : null;
+      if (!result || result.error) {
+        setScreen({ name: "error", message: ERRORS.guest_failed });
+        return;
+      }
+      await refreshStatus();
+    }
+    setScreen({ name: "confirm" });
   };
 
   const startReward = async () => {
@@ -344,12 +363,12 @@ export function GameExperience({
                     Practise level {practiceLevel}
                   </Button>
                 )}
-                <RewardButton status={status} attemptsLeft={attemptsLeft} onStart={() => setScreen({ name: "confirm" })} />
+                <RewardButton status={status} attemptsLeft={attemptsLeft} onStart={() => void playForReward()} />
               </div>
 
               {status?.rewardPhase === "before" && (
                 <p className="mt-4 max-w-md text-[1rem] font-bold text-gold-300">
-                  {status.signedIn ? "You're signed up." : "Sign-ups are open now."} Coupons can be won on event day only{eventDay ? `: ${eventDay}` : ""}.
+                  No sign-up needed. Coupons can be won on event day only{eventDay ? `: ${eventDay}` : ""}.
                 </p>
               )}
 
@@ -411,6 +430,7 @@ export function GameExperience({
               <li>• You can take a break between levels.</li>
               <li>• Once a level starts, finish it. Leaving or refreshing during a level ends the attempt.</li>
               <li>• Every tap is checked on our server, so play fair.</li>
+              <li>• One coupon per person. Playing again on another phone or browser won&apos;t get you a second one at the stall.</li>
             </ul>
             <div className="mt-7 flex flex-col gap-3 sm:flex-row">
               <Button size="lg" onClick={() => void startReward()} trailing={<ArrowRight />}>
@@ -534,7 +554,7 @@ export function GameExperience({
             ) : screen.coupon ? (
               <>
                 <p className="mx-auto mt-4 max-w-md text-[1.1rem] font-semibold text-cream-100">
-                  Your coupon is saved in your wallet. Show it at the TERRA UTSAV stall.
+                  Show this coupon at the TERRA UTSAV stall. It&apos;s also saved under My coupons on this phone. One coupon per person.
                 </p>
                 <CouponTicket
                   className="mx-auto mt-8 max-w-xl text-left [--notch:#3a0f17]"
@@ -623,25 +643,18 @@ function RewardButton({ status, attemptsLeft, onStart }: { status: Status | null
     );
   }
   if (!status.configured) {
-    return <p className={REWARD_NOTE}>Sign-in isn&apos;t switched on yet. Practice is open now.</p>;
+    return <p className={REWARD_NOTE}>Reward play isn&apos;t switched on yet. Practice is open now.</p>;
   }
-  if (status.rewardPhase === "after") {
-    return <p className={REWARD_NOTE}>Reward play has ended. Thank you for playing!</p>;
-  }
-  if (!status.signedIn) {
-    // Sign-ups are open whatever the date; the note under the buttons says when coupons can be won.
-    return (
-      <ButtonLink href="/login?next=/game" size="lg" icon={<Trophy />} trailing={<ArrowRight />}>
-        {status.rewardPhase === "open" ? "Sign in to play for a reward" : "Sign up now"}
-      </ButtonLink>
-    );
-  }
+  // No sign-up: a visitor without a guest account yet gets one when they tap Play for a reward.
   if (status.activeAttempt) {
     return (
       <Button size="lg" icon={<Trophy />} onClick={onStart} trailing={<ArrowRight />}>
         Continue reward attempt
       </Button>
     );
+  }
+  if (status.rewardPhase === "after") {
+    return <p className={REWARD_NOTE}>Reward play has ended. Thank you for playing!</p>;
   }
   if (status.rewardPhase === "before") {
     return (

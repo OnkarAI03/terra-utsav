@@ -4,15 +4,13 @@ import Link from "next/link";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { PageHero } from "@/components/ui/PageHero";
 import { getSession, safeNextPath } from "@/lib/auth";
-import { getEventSettings } from "@/lib/data/public";
 import { googleAuthEnabled } from "@/lib/env";
-import { eventDayText } from "@/lib/game/window";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Sign up or sign in",
-  description: "Sign up for TERRA UTSAV with your email to play for a coupon on event day and keep your coupons in one place.",
+  title: "Staff sign in",
+  description: "Sign-in for TERRA UTSAV staff and admins. Players don't need to sign in.",
   alternates: { canonical: "/login" },
   robots: { index: false, follow: false },
 };
@@ -24,33 +22,25 @@ const DENIED: Record<string, string> = {
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const params = await searchParams;
-  const next = safeNextPath(typeof params.next === "string" ? params.next : null, "/rewards");
+  const next = safeNextPath(typeof params.next === "string" ? params.next : null, "/staff/redeem");
   const denied = typeof params.denied === "string" ? DENIED[params.denied] : null;
-  const linkError = params.error === "link";
-  const browserError = params.error === "browser";
-  const [session, event] = await Promise.all([getSession(), getEventSettings()]);
-  const eventDay = eventDayText(event);
+  const linkError = params.error === "link" || params.error === "browser";
+  const session = await getSession();
+  // A player's guest account (made by the game) is not a staff sign-in.
+  const staffSession = session && !session.user.is_anonymous ? session : null;
 
   return (
     <>
-      <PageHero
-        title="Sign up or sign in"
-        intro={`Sign-ups are open now: just your email, no password. Coupons can be won on event day only${eventDay ? `: ${eventDay}` : ""}.`}
-      />
+      <PageHero title="Staff sign in" intro="For TERRA UTSAV staff and admins. Players don't need to sign in: just open the game and play." />
       <section className="bg-cream-200 pb-24 pt-12 text-ink md:pb-32">
         <div className="shell grid items-start gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.8fr)]">
           <div className="max-w-lg rounded-[var(--radius-panel)] bg-cream-100 p-7 shadow-[var(--shadow-card)] md:p-9">
             {denied && <p className="mb-5 rounded-2xl bg-gold-300 p-4 font-bold">{denied}</p>}
-            {linkError && <p className="mb-5 rounded-2xl bg-gold-300 p-4 font-bold">That sign-in link has expired or was already used. Type the 6-digit code from the email instead, or ask for a new one.</p>}
-            {browserError && (
-              <p className="mb-5 rounded-2xl bg-gold-300 p-4 font-bold">
-                The link opened in a different browser from the one you started in. Go back to that one (Instagram, for example) and type the 6-digit code from the email.
-              </p>
-            )}
-            {session ? (
+            {linkError && <p className="mb-5 rounded-2xl bg-gold-300 p-4 font-bold">That sign-in didn&apos;t go through. Please sign in again here.</p>}
+            {staffSession ? (
               <div className="flex flex-col gap-4">
                 <p className="text-[1.05rem]">
-                  You are signed in as <strong>{session.user.email}</strong>.
+                  You are signed in as <strong>{staffSession.user.email}</strong>.
                 </p>
                 <div className="flex flex-wrap gap-3">
                   <Link href={next} className="rounded-full bg-maroon-600 px-5 py-3 font-display uppercase text-cream-100">
@@ -64,7 +54,14 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
                 </div>
               </div>
             ) : (
-              <LoginForm next={next} googleEnabled={googleAuthEnabled()} />
+              <>
+                {session && (
+                  <p className="mb-5 rounded-2xl bg-cream-200 p-4 text-[0.95rem] font-bold">
+                    This phone has a player&apos;s guest coupon wallet. Signing in as staff here hides those coupons from My coupons on this phone.
+                  </p>
+                )}
+                <LoginForm next={next} googleEnabled={googleAuthEnabled()} />
+              </>
             )}
           </div>
           <div className="relative mx-auto hidden w-[300px] lg:block">

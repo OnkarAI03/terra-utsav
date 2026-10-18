@@ -1,7 +1,7 @@
 import type { EventSettings, RewardSettings } from "@/lib/settings";
 
 /**
- * Where reward play stands right now. Sign-ups are open at any time; coupons can be won on event
+ * Where reward play stands right now. Players never sign up; coupons can be won on event
  * day only, between the event's start and end (admin > Event), and only once the organisers have
  * switched coupons on and confirmed the terms (admin > Rewards). The database applies the same
  * rules in game_start_attempt; this copy only decides what the game screen says.

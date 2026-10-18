@@ -58,9 +58,9 @@ describe("public routes render without a database", () => {
   it("rules: attempts, coupons, privacy", async () => {
     const { default: Page } = await import("@/app/rules/page");
     render(await Page());
-    expect(screen.getByText(/Each player gets 2 reward attempts/)).toBeInTheDocument();
-    expect(screen.getByText(/sign-ups are open now\. Coupons can be won on event day only/)).toBeInTheDocument();
-    expect(screen.getByText(/count as one player/)).toBeInTheDocument();
+    expect(screen.getByText(/Each phone or browser gets 2 reward/)).toBeInTheDocument();
+    expect(screen.getByText(/No sign-up needed: just tap Play for a reward\. Coupons can be won on event day only/)).toBeInTheDocument();
+    expect(screen.getByText(/our team redeems only one coupon for each person/)).toBeInTheDocument();
     expect(screen.getByText(/Practice mode is free and unlimited. It never awards coupons./)).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Your data" })).toBeInTheDocument();
   });
@@ -83,6 +83,6 @@ describe("public routes render without a database", () => {
     const { default: Page } = await import("@/app/game/page");
     render(await Page());
     expect(screen.getByRole("button", { name: "Practise level 1" })).toBeInTheDocument();
-    expect(await screen.findByText(/Sign-in isn't switched on yet/)).toBeInTheDocument();
+    expect(await screen.findByText(/Reward play isn't switched on yet/)).toBeInTheDocument();
   });
 });

@@ -11,11 +11,11 @@ three-level game where winners get a coupon.
 | `/` | Homepage (approved design with a Diwali twist): hero with 3D akash kandils, five attractions, festive ribbon, "What's happening", Find us, food, 3D diyas, 3D brick challenge, game, close |
 | `/menu` | Food and homemade diyas, editable from admin, with a 3D chocolate bomb to crack open |
 | `/challenge` | Hold the Wet Brick: 3D brick, steps, draft safety rules, spectator timer (records nothing) |
-| `/game` | Catch the Koochu Puchu: free practice and server-checked reward attempts |
+| `/game` | Catch the Koochu Puchu: free practice and server-checked reward attempts. No sign-up: a win shows the coupon on screen |
 | `/team` | The 17 students in their 7 teams, each card switching between a real photo and that person's Koochu Puchu, and a row for our 3 mentors (Ankush, Jidnyesh, Sairaj). Kept out of search engines (`noindex`, and team photos send `X-Robots-Tag`), with a line on how to get a photo taken down |
 | `/rules` | Event, game, coupon and challenge rules, and how data is used |
-| `/login`, `/auth/callback`, `/auth/signout` | Passwordless sign-in: a 6-digit code by email (the email's link works too, on the same browser); Google optional |
-| `/rewards` | A student's coupon wallet with QR codes |
+| `/login`, `/auth/callback`, `/auth/signout` | Staff and admin sign-in with email and password (Google optional). Players never sign in |
+| `/rewards` | The coupons won on this phone, with QR codes (no sign-in) |
 | `/staff/redeem` | Staff console: scan or type a code, verify, redeem once, record brick results |
 | `/admin` | Admin dashboard: stats, event, menu, team, game tuning, rewards, roles, coupons, audit log |
 
@@ -75,33 +75,30 @@ Useful scripts:
    - Dashboard > SQL Editor: paste and run each file in order (`...0100` to `...0600`). `...0500` sets the default
      settings (coupon value "50% off a Chocolate Bomb"; reward play stays closed until you tick "terms confirmed").
      `...0600` seeds the 17 students, their 7 groups and the 3 mentors.
-3. **Auth settings** (Dashboard > Authentication):
-   - URL configuration: Site URL = your production URL. Redirect URLs: `https://<your-domain>/auth/callback`,
-     `http://localhost:3000/auth/callback`, and your Vercel preview pattern, e.g. `https://*-<team>.vercel.app/auth/callback`.
-   - Email templates > **Confirm signup** and **Magic Link**: the sign-in page asks for the 6-digit code, so add it to
-     both templates (someone signing in for the first time gets the Confirm signup email), e.g.
-     `<p>Your TERRA UTSAV sign-in code: <strong>{{ .Token }}</strong></p>` next to the existing link.
-   - **Custom SMTP is required before sign-ups open** (Authentication > SMTP Settings). Supabase's built-in sender only
-     delivers to members of your Supabase team, at 2 emails an hour, so students would never get their code. Any SMTP
-     provider works (a transactional email service, or a Gmail account with an app password); check its daily limit
-     against the sign-ups you expect.
-   - Sign-in requests are limited per IP address (Supabase's default is 30 per 5 minutes). Many phones on one campus
-     Wi-Fi share an address, so ask people to sign up before the day (sign-ups are open now), and raise the limit under
-     Authentication > Rate Limits if the stall gets busy.
+3. **Auth settings** (Dashboard > Authentication). Players never sign up and the site sends no emails, so no email
+   service is needed.
+   - **Turn on anonymous sign-ins** (Sign In / Providers > Allow anonymous sign-ins). The first time a phone plays for a
+     reward, the game gives it a nameless guest account; its attempts and coupon belong to that guest.
+   - **Raise the anonymous sign-in limit** (Rate Limits). Supabase allows 30 new guests an hour from one IP address by
+     default, and many phones on the campus Wi-Fi share one. A few hundred an hour is a safe event-day setting.
+   - **Staff and admin accounts**: Users > Add user > Create new user, with an email, a strong password and
+     **Auto Confirm User** ticked. They sign in at `/login`. Give them their role in step 5.
    - **The free plan pauses an idle project** after about a week of low activity. Supabase emails a warning first, and
-     **Resume project** in the dashboard brings it back with all its data in a few minutes. Visitors keep it awake once
-     sign-ups are open; still, open the dashboard the day before the event and do the staff dry run then.
-   - Optional: enable the Google provider and set `NEXT_PUBLIC_AUTH_GOOGLE=true`.
+     **Resume project** in the dashboard brings it back with all its data in a few minutes. Open the dashboard the day
+     before the event and do the staff dry run then.
+   - Optional, Google for staff: enable the Google provider, set `NEXT_PUBLIC_AUTH_GOOGLE=true`, and under URL
+     configuration set the Site URL and the redirect URLs (`https://<your-domain>/auth/callback`,
+     `http://localhost:3000/auth/callback`).
 4. **Environment variables**: copy `.env.example` to `.env.local` and fill in the URL, publishable (or anon) key and
    secret (service role) key from Project Settings > API.
-5. **Make yourself admin**: sign in once on the site, then run in the SQL Editor:
+5. **Make yourself admin**: create your account as in step 3, then run in the SQL Editor:
 
    ```sql
    insert into public.user_roles (user_id, role)
    select id, 'admin' from auth.users where email = 'you@example.com';
    ```
 
-   Every other role change happens in `/admin` > People & coupons (people must sign in once first). Roles are never
+   Every other role change happens in `/admin` > People & coupons (create the person's account first). Roles are never
    taken from anything a user can edit.
 6. Visit `/admin`: work through the "Before the event" checklist.
 
@@ -140,9 +137,9 @@ game difficulty, reward value, expiry, stock and terms, staff roles, extra attem
 
 - Dates and times in admin are entered in India time (IST) with date pickers.
 - Photos chosen in admin are shrunk in the browser (longest side 1600 px, WebP) before they upload, so phone photos fit.
-- **Sign-ups are open now; coupons are for event day.** Reward play opens at the event's start time and closes at its
-  end (`/admin/event`), and only once coupons are switched on and "terms confirmed" is ticked in `/admin/rewards`.
-  Before the event the game page says "Sign up now" and "Coupons can be won on event day only"; practice is always open.
+- **No sign-up, and coupons are for event day.** Reward play opens at the event's start time and closes at its end
+  (`/admin/event`), and only once coupons are switched on and "terms confirmed" is ticked in `/admin/rewards`. Before
+  the event the game page says "No sign-up needed. Coupons can be won on event day only"; practice is always open.
 - The "Image is illustrative" tick in `/admin/menu` no longer puts a tag on the picture. While any item is ticked, the
   footer says so once, and the admin checklist keeps "Real photos of the food and diyas" open.
 - The chat helper reads the same content as the pages. It picks up admin edits within about a minute (saving in
@@ -160,22 +157,24 @@ organisers approve them) and the default content used when the database is unrea
 - The database checks that levels are played in order, once each, by the attempt's owner, and that a pass did not
   finish faster than the server clock allows. Taps faster than 140 ms after a kitten appears, rapid-fire spam and
   oversized logs do not count.
+- **No sign-up.** Each phone or browser plays as its own guest player (a Supabase anonymous account the game makes
+  on the first "Play for a reward"). Staff and admins play with their own accounts.
 - Two reward attempts per player (configurable), enforced in Postgres with a row lock and a unique index. Starting a
-  level and leaving counts as a loss. Admins can grant extra attempts.
-- Sign-ups are open at any time, but **coupons can be won on event day only**: a reward attempt starts only between
-  the event's start and end (admin > Event), and only while coupons are switched on and confirmed (admin > Rewards).
-  Staff and admins can start early to test; cancel the coupons they win.
-- Reward play needs a confirmed email address (anonymous sessions are refused). Addresses that reach one inbox
-  (`name+1@gmail.com`, `n.ame@gmail.com`, `name@gmail.com`) count as one player.
-- **One coupon per player**: an account that has already won cannot start another reward attempt.
+  level and leaving counts as a loss. Admins can grant extra attempts to staff accounts.
+- **Coupons can be won on event day only**: a reward attempt starts only between the event's start and end (admin >
+  Event), and only while coupons are switched on and confirmed (admin > Rewards). Staff and admins can start early to
+  test; cancel the coupons they win.
+- **One coupon per person.** A guest that has already won cannot start another reward attempt. A new browser is a new
+  guest, so someone can win again elsewhere; the rule is that staff redeem only one coupon per person at the stall,
+  and the game, rules and staff console all say so.
 - Clearing the last level (Level 3 by default) issues at most one coupon (unique per attempt), with an unpredictable
   code from the database's cryptographic random generator. Redemption is a single atomic update; a second phone cannot
   redeem the same coupon.
 - Tap logs whose times run backwards, and passes that took far longer on the server clock than the level allows
   (countdown + play time + 25 s, a slow-motion trick), do not count.
 - Limitations (honest): it is a client-side game. Someone who reverse-engineers the engine could script plausible taps.
-  The checks above make that slow, visible in the admin stats ("Rejected results") and limited to two attempts per
-  account. Staff can cancel suspicious coupons. See `docs/SECURITY.md`.
+  The checks above make that slow and visible in the admin stats ("Rejected results"). Staff can cancel suspicious
+  coupons. See `docs/SECURITY.md`.
 
 Difficulty targets roughly 20 to 30% of players winning across two attempts. The default settings model at about 25%
 (`npm run game:simulate`); `/admin/game` shows the model for any edited settings. Confirm with real playtests.
@@ -186,15 +185,16 @@ Difficulty targets roughly 20 to 30% of players winning across two attempts. The
 
 - **Game engine and tuning**: determinism, hit testing, bot-speed and spam rejection, level progression, modelled win rate.
 - **Database** (real migrations in PGlite with a Supabase auth/storage shim): attempt limits, resume, abandoned levels, clock
-  checks (too fast, too slow, rewound), coupon issuance (one per win, one per player, stock, expiry, rewards closed or
-  unconfirmed), atomic redemption, row level security for students, staff, admins and the public, audit logging, seed
-  data matching the code defaults.
-- **Security**: API routes ignore client scores, refuse cross-site and malformed requests, unconfirmed or anonymous
-  accounts and other players' attempts;
+  checks (too fast, too slow, rewound), event-day window and staff early access, coupon issuance (one per win, one per
+  player, stock, expiry, rewards closed or unconfirmed), atomic redemption, row level security for players, staff,
+  admins and the public, audit logging, seed data matching the code defaults.
+- **Security**: API routes ignore client scores, refuse cross-site and malformed requests, half-finished email
+  sign-ups and other players' attempts, and let guest players in;
   admin and staff actions refuse the wrong roles; middleware protects private pages; robots and structured data rules.
 - **Components and pages**: team card switching (timing, pausing, off-screen, reduced motion, image fallbacks),
   navigation and mobile menu, menu cards and prices, 3D scene fallbacks, the mystery eggs, the chat widget (opens,
-  answers, copes with being offline, stays off private pages), and every public route rendering without a database.
+  answers, copes with being offline, stays off private pages), reward play states (no sign-up, guest player made on
+  the first play, event day only, paused, over, resume), and every public route rendering without a database.
 - **Chat answers**: date, place, menu (never an invented price), dishes by name with typos and Hindi or Marathi words,
   game and coupon numbers from the live settings, team, roles, people and mentors, and honest "the site doesn't say"
   replies.
@@ -204,16 +204,16 @@ and unique constraints, which the tests exercise by replaying the same request.
 
 ## 7. Troubleshooting
 
-- **Sign-in email never arrives**: set up custom SMTP (step 2.3): the built-in sender only delivers to your Supabase team,
-  2 an hour. Then check Authentication > Logs.
+- **"Couldn't start reward play just now"**: anonymous sign-ins are off, or the anonymous sign-in rate limit was hit
+  (step 2.3).
 - **Nothing that needs the database works (sign-in, coupons, admin)**: the free Supabase project may be paused. Open
   the dashboard and press Resume project.
-- **"Sign-in is not switched on yet"**: `NEXT_PUBLIC_SUPABASE_URL` / key missing in this environment. Redeploy after adding them.
 - **Game says "Reward play opens on event day"**: it is before the event's start time in `/admin/event`. During the
   event, "Coupons are paused right now" means coupons are not switched on and confirmed in `/admin/rewards`.
-- **Game or sign-in says "Sign-in isn't switched on yet"**: `NEXT_PUBLIC_SUPABASE_URL` / key are missing in this
-  environment (sign-ups need Supabase connected), or `SUPABASE_SECRET_KEY` is missing on the server.
+- **"Reward play isn't switched on yet" or "Staff sign-in isn't switched on yet"**: `NEXT_PUBLIC_SUPABASE_URL` / key
+  are missing in this environment, or `SUPABASE_SECRET_KEY` is missing on the server. Redeploy after adding them.
 - **Staff page sends me to sign in**: your account needs the staff role (admin > People & coupons).
+- **A staff member forgot their password**: in Supabase, Authentication > Users, open their account and set a new one.
 - **Team photo not showing**: tick "agreed to their photo being published" for that person.
 - **Chat gives an old answer**: it caches site content for up to a minute; saving anything in admin refreshes it.
 - **Images from Supabase Storage do not load**: `NEXT_PUBLIC_SUPABASE_URL` must be set at build time (it allows the image host).

@@ -57,11 +57,6 @@ export async function SiteFooter() {
                 </li>
               ))}
               <li>
-                <Link href="/login" className="text-[1rem] font-semibold hover:text-gold-300">
-                  Sign in
-                </Link>
-              </li>
-              <li>
                 <Link href="/staff/redeem" className="text-[1rem] font-semibold hover:text-gold-300">
                   Staff
                 </Link>

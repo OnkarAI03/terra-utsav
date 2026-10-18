@@ -87,9 +87,9 @@ export default async function RulesPage() {
               </li>
               <li>
                 <Dot />
-                Reward play needs you to sign in, and sign-ups are open now. Coupons can be won on event day only
-                {eventDay ? ` (${eventDay})` : ""}. Each player gets {attempts} reward {attempts === 1 ? "attempt" : "attempts"}. The
-                organisers may add an extra attempt if something went wrong on our side.
+                No sign-up needed: just tap Play for a reward. Coupons can be won on event day only
+                {eventDay ? ` (${eventDay})` : ""}. Each phone or browser gets {attempts} reward{" "}
+                {attempts === 1 ? "attempt" : "attempts"}. The organisers may add an extra attempt if something went wrong on our side.
               </li>
               <li>
                 <Dot />
@@ -108,7 +108,7 @@ export default async function RulesPage() {
               <li>
                 <Dot />
                 Every tap is checked on our server. Results that could not have happened (faster than real time, inhumanly quick
-                reactions, automated tapping) do not count. Bots, scripts and multiple accounts may be disqualified.
+                reactions, automated tapping) do not count. Bots and scripts may be disqualified.
               </li>
               <li>
                 <Dot />
@@ -121,11 +121,11 @@ export default async function RulesPage() {
             <ul>
               <li>
                 <Dot />
-                Winning a reward attempt issues one coupon to your account. You will find it in{" "}
+                Win a reward attempt and your coupon appears on screen. It also stays in{" "}
                 <Link href="/rewards" className="font-extrabold text-maroon-600 underline underline-offset-4">
                   My coupons
-                </Link>
-                .
+                </Link>{" "}
+                on the phone and browser you played on.
               </li>
               <li>
                 <Dot />
@@ -137,8 +137,12 @@ export default async function RulesPage() {
                   ? "Each coupon can be redeemed once."
                   : `Each coupon can be redeemed ${rewards.maxRedemptions} times.`}{" "}
                 A team member redeems it by scanning or typing the code. Keep your code to yourself: a coupon works once, for
-                whoever shows it first. One coupon per player, and addresses that reach the same inbox (like name+1@gmail.com
-                and name@gmail.com) count as one player.
+                whoever shows it first.
+              </li>
+              <li>
+                <Dot />
+                <strong>One coupon per person.</strong> Playing again on another phone or browser can win another coupon on screen,
+                but our team redeems only one coupon for each person at the stall.
               </li>
               <li>
                 <Dot />
@@ -191,13 +195,13 @@ export default async function RulesPage() {
             <ul>
               <li>
                 <Dot />
-                To play for rewards we keep your email address (to sign you in), your game attempts and results, and any coupons you
-                win and redeem. Nothing else.
+                Players don&apos;t sign up. When you play for a reward, this site gives your phone a random player ID and keeps your
+                game attempts and results and any coupon you win. No name, email address or phone number.
               </li>
               <li>
                 <Dot />
-                When a team member checks your coupon they see a shortened version of your email (like &ldquo;ab***@college.edu&rdquo;),
-                never the whole thing.
+                Clearing your browser&apos;s data, or switching browsers, loses that player ID, along with My coupons on that phone.
+                A coupon already won still works if you have the code: write it down or take a screenshot.
               </li>
               <li>
                 <Dot />

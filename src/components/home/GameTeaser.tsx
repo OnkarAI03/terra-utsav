@@ -18,8 +18,8 @@ export function GameTeaser({ settings, prize = null }: { settings: GameSettings;
           </h2>
           <p className="mt-6 max-w-xl text-[1.15rem] font-semibold leading-relaxed text-cream-100">
             {facts.levelsWord[0].toUpperCase() + facts.levelsWord.slice(1)} quick levels, each faster and sneakier than the last.
-            Practise as much as you like, then sign in and use your {facts.attemptsWord} reward attempts. Clear Level{" "}
-            {facts.lastLevel} to win {facts.prize}.
+            Practise as much as you like, then use your {facts.attemptsWord} reward attempts on event day: no sign-up. Clear
+            Level {facts.lastLevel} to win {facts.prize}.
           </p>
 
           <ol className="mt-9 grid gap-2.5 sm:grid-cols-3" aria-label="The levels">

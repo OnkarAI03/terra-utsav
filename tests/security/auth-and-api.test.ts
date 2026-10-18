@@ -94,18 +94,20 @@ describe("game API trusts only the server's own judgement", () => {
     expect(res.status).toBe(401);
   });
 
-  it("refuses players whose email is not verified, and anonymous sessions", async () => {
+  it("lets guest players in, but not a half-finished email sign-up", async () => {
     const { POST } = await import("@/app/api/game/attempt/route");
     state.user = { id: "u1", email: "u1@x.test" };
     expect((await POST(jsonRequest("http://localhost:3000/api/game/attempt", {}))).status).toBe(401);
-    state.user = { id: "u1", email: "u1@x.test", email_confirmed_at: "2026-10-18T00:00:00Z", is_anonymous: true };
-    expect((await POST(jsonRequest("http://localhost:3000/api/game/attempt", {}))).status).toBe(401);
+    // A guest (Supabase anonymous sign-in, no email) reaches the database, which applies the game rules.
+    state.user = { id: "g1", email: "", is_anonymous: true };
+    await POST(jsonRequest("http://localhost:3000/api/game/attempt", {}));
+    expect(state.rpcCalls.some((c) => c.fn === "game_start_attempt" && c.args.p_user === "g1")).toBe(true);
   });
 
-  it("passes on why a reward attempt cannot start: before or after event day, or an alias of another player", async () => {
-    state.user = { id: "u1", email: "u1+2@x.test", email_confirmed_at: "2026-10-18T00:00:00Z" };
+  it("passes on why a reward attempt cannot start: before or after event day, or already won", async () => {
+    state.user = { id: "g1", email: "", is_anonymous: true };
     const { POST } = await import("@/app/api/game/attempt/route");
-    for (const code of ["not_open_yet", "event_over", "alias_account", "rewards_closed", "already_won"]) {
+    for (const code of ["not_open_yet", "event_over", "rewards_closed", "already_won", "no_attempts_left"]) {
       state.startAttempt = { error: code };
       const res = await POST(jsonRequest("http://localhost:3000/api/game/attempt", {}));
       expect(res.status, code).toBe(403);
@@ -232,18 +234,18 @@ describe("middleware", () => {
     vi.resetModules();
   });
 
-  it("sends signed-out visitors from private pages to sign in", async () => {
+  it("sends signed-out visitors from staff and admin pages to sign in", async () => {
     const { middleware } = await import("@/middleware");
-    for (const path of ["/admin", "/admin/menu", "/staff/redeem", "/rewards"]) {
+    for (const path of ["/admin", "/admin/menu", "/staff/redeem"]) {
       const res = await middleware(new NextRequest(`http://localhost:3000${path}`));
       expect(res.status).toBe(307);
       expect(res.headers.get("location")).toBe(`http://localhost:3000/login?next=${encodeURIComponent(path)}`);
     }
   });
 
-  it("lets signed-out visitors play practice and sign in", async () => {
+  it("lets visitors play, see their coupon wallet and reach staff sign-in without signing in", async () => {
     const { middleware } = await import("@/middleware");
-    for (const path of ["/game", "/login"]) {
+    for (const path of ["/game", "/rewards", "/login"]) {
       const res = await middleware(new NextRequest(`http://localhost:3000${path}`));
       expect(res.headers.get("location")).toBeNull();
     }

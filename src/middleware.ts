@@ -7,7 +7,8 @@ import { NextResponse, type NextRequest } from "next/server";
  * Role checks (staff, admin) happen on the server for every page and action, and again inside
  * the database; this redirect is only a convenience.
  */
-const PRIVATE_PREFIXES = ["/rewards", "/admin", "/staff"];
+// The coupon wallet is not here: players have no sign-in, so /rewards explains itself instead.
+const PRIVATE_PREFIXES = ["/admin", "/staff"];
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request });

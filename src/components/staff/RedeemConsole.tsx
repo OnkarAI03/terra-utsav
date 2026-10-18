@@ -10,7 +10,7 @@ import { QrScanner } from "./QrScanner";
 
 /** Every refusal is one deep-red STOP block; only "try again" states are amber. Words and icons always carry the meaning. */
 const STATUS = {
-  valid: { label: "Valid: OK to redeem", tone: "bg-success text-ink", icon: CircleCheck, help: "Check the holder, then press Redeem now twice." },
+  valid: { label: "Valid: OK to redeem", tone: "bg-success text-ink", icon: CircleCheck, help: "One coupon per person: check they haven't had one already, then press Redeem now twice." },
   redeemed: { label: "STOP: already used", tone: "bg-danger-ink text-cream-50", icon: CircleX, help: "This coupon has been used. Sorry, it can't be used again." },
   expired: { label: "STOP: expired", tone: "bg-danger-ink text-cream-50", icon: Clock, help: "This coupon is past its expiry." },
   void: { label: "STOP: cancelled", tone: "bg-danger-ink text-cream-50", icon: CircleX, help: "An admin cancelled this coupon." },

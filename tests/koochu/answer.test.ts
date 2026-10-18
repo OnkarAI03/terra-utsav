@@ -72,9 +72,11 @@ describe("Koochu Puchu answers from the site", () => {
   });
 
   it("explains sign-in and the brick challenge", () => {
-    const signin = ask("Do I need to sign in?");
-    expect(signin.topic).toBe("signin");
-    expect(signin.text).toContain("sign-ups are open now");
+    for (const q of ["Do I need to sign in?", "do i need to sign up", "how to register"]) {
+      const signin = ask(q);
+      expect(signin.topic, q).toBe("signin");
+      expect(signin.text).toContain("No sign-up and no sign-in");
+    }
     const brick = ask("Brick challenge rules");
     expect(brick.topic).toBe("challenge");
     expect(brick.text).toContain("60 seconds");

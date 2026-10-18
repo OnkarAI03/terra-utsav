@@ -4,7 +4,7 @@ import { gameContext, parseSnapshot, withinRateLimit } from "@/lib/game/server";
 export const dynamic = "force-dynamic";
 
 /** Reasons the player may not start an attempt now (as opposed to a conflict worth retrying). */
-const REFUSED = new Set(["no_attempts_left", "already_won", "rewards_closed", "not_open_yet", "event_over", "alias_account"]);
+const REFUSED = new Set(["no_attempts_left", "already_won", "rewards_closed", "not_open_yet", "event_over"]);
 
 /** Start a reward attempt, or resume the player's unfinished one. */
 export async function POST(request: Request) {

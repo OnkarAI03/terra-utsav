@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { ArrowRight, Info } from "lucide-react";
-import { redirect } from "next/navigation";
 import { CouponTicket, type TicketState } from "@/components/rewards/CouponTicket";
 import { Tilt } from "@/components/ui/Tilt";
 import { ButtonLink } from "@/components/ui/Button";
@@ -42,7 +41,7 @@ export default async function RewardsPage() {
   if (!isSupabaseConfigured()) {
     return (
       <>
-        <PageHero title="My coupons" intro="Coupons appear here once sign-in is switched on for the stall." />
+        <PageHero title="My coupons" intro="Coupons appear here once reward play is switched on for the stall." />
         <section className="bg-cream-200 py-20 text-ink">
           <div className="shell">
             <p className="max-w-xl text-[1.05rem]">
@@ -55,7 +54,29 @@ export default async function RewardsPage() {
   }
 
   const session = await getSession();
-  if (!session) redirect("/login?next=/rewards");
+  // No sign-up: a coupon belongs to the phone and browser that won it (a guest account the game
+  // made when that phone first played for a reward).
+  if (!session) {
+    return (
+      <>
+        <PageHero title="My coupons" intro="Coupons you win show up here, on the phone and browser you played on. No sign-up needed." />
+        <section className="bg-cream-200 py-20 text-ink">
+          <div className="shell">
+            <div className="max-w-xl rounded-[var(--radius-panel)] bg-cream-100 p-8">
+              <h2 className="display-m text-choc-900">No coupons on this phone yet</h2>
+              <p className="mt-3 text-[1.05rem] leading-relaxed">
+                Clear every level of Catch the Koochu Puchu in a reward attempt and your coupon appears on screen, then here. Coupons
+                can be won on event day only, and it&apos;s one coupon per person.
+              </p>
+              <ButtonLink href="/game" className="mt-6" trailing={<ArrowRight />}>
+                Play now
+              </ButtonLink>
+            </div>
+          </div>
+        </section>
+      </>
+    );
+  }
 
   const [rewards, game, couponsRes, attemptsRes, stateRes] = await Promise.all([
     getRewardSettings(),
@@ -74,7 +95,14 @@ export default async function RewardsPage() {
 
   return (
     <>
-      <PageHero title="My coupons" intro={`Signed in as ${session.user.email}. Show a coupon at the TERRA UTSAV stall to use it.`} />
+      <PageHero
+        title="My coupons"
+        intro={
+          session.user.is_anonymous || !session.user.email
+            ? "Coupons won on this phone. Show one at the TERRA UTSAV stall to use it. One coupon per person."
+            : `Signed in as ${session.user.email}. Show a coupon at the TERRA UTSAV stall to use it.`
+        }
+      />
       <section className="bg-burgundy-950 pb-24 pt-12 md:pb-32">
         <div className="shell grid gap-12 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,0.8fr)]">
           <div>
