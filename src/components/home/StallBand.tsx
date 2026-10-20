@@ -1,6 +1,5 @@
 import { BrickWall, CakeSlice, Flame, MapPin, Ticket } from "lucide-react";
 import Image from "next/image";
-import { MapArt } from "@/components/art/MapArt";
 import { InstagramLink } from "@/components/brand/InstagramLink";
 import { LogoSign } from "@/components/brand/LogoSign";
 import { PaperNote } from "@/components/ui/PaperNote";
@@ -63,7 +62,7 @@ export function StallBand({ event, game, prize = null }: { event: EventSettings;
           <div
             id="find-us"
             tabIndex={-1}
-            className="relative rounded-[30px] bg-burgundy-800 p-5 shadow-[var(--shadow-card)] ring-2 ring-choc-950/60 outline-none sm:p-8 lg:p-10"
+            className="anchor-target relative rounded-[30px] bg-burgundy-800 p-5 shadow-[var(--shadow-card)] ring-2 ring-choc-950/60 outline-none sm:p-8 lg:p-10"
           >
             <div className="grid items-center gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:gap-12">
               <div>
@@ -91,15 +90,9 @@ export function StallBand({ event, game, prize = null }: { event: EventSettings;
                   {event.instagramUrl && <InstagramLink url={event.instagramUrl} />}
                 </div>
               </div>
-              <div className="flex flex-col items-center gap-6">
+              <div className="flex justify-center">
                 {/* The stall's real sign: what to look for at the Mandi on the day. */}
-                <LogoSign className="w-[min(82%,300px)]" />
-                <figure className="relative w-full">
-                  <MapArt className="w-full drop-shadow-[0_16px_20px_rgb(10_3_2/0.6)]" />
-                  <figcaption className="mt-2 text-center text-[0.95rem] font-semibold text-cream-100/90">
-                    A drawing, not a real map: use Get directions.
-                  </figcaption>
-                </figure>
+                <LogoSign className="w-[min(86%,400px)]" />
               </div>
             </div>
           </div>

@@ -9,7 +9,7 @@ import Image from "next/image";
  * sits on top of the headline. The edges blend with linear fades into the festival backdrop; the
  * entrance is a CSS keyframe so it never waits for script.
  */
-export function HeroArt({ children }: { children?: React.ReactNode }) {
+export function HeroArt() {
   return (
     <div className="hero-art relative h-[min(44svh,400px)] w-full lg:absolute lg:inset-y-0 lg:left-0 lg:h-auto lg:w-[48vw] lg:max-w-[920px]">
       <div className="hero-drift absolute inset-0">
@@ -26,7 +26,6 @@ export function HeroArt({ children }: { children?: React.ReactNode }) {
           />
         </div>
       </div>
-      {children}
     </div>
   );
 }

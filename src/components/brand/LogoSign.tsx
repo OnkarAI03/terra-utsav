@@ -25,7 +25,7 @@ export function LogoSign({ className, caption = "Look for this sign at the Mandi
           />
         </div>
       </div>
-      {caption && <figcaption className="hand mt-3 text-center text-[1.15rem] text-gold-300">{caption}</figcaption>}
+      {caption && <figcaption className="hand mt-3 text-balance text-center text-[1.15rem] text-gold-300">{caption}</figcaption>}
     </figure>
   );
 }

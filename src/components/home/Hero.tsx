@@ -34,15 +34,18 @@ export function Hero({ event, game, prize = null }: { event: EventSettings; game
       <Embers className="absolute inset-0 -z-10" />
 
       {/* Art: in the flow on phones, bleeding from the left edge on large screens. */}
-      <HeroArt>
-        <div className="absolute left-[4%] top-[calc(var(--header-h)+36px)] z-10 lg:left-[8%] lg:top-[26%]">
-          <CatchMeNote className="text-[1.1rem] md:text-[1.45rem]">
-            Can you
-            {" "}<br />
-            catch me?
-          </CatchMeNote>
-        </div>
-      </HeroArt>
+      <HeroArt />
+
+      {/* The dare sits outside the art panel: the panel's mask makes it its own layer, under the headline's
+          grid, which would swallow taps on large screens. Placed as the panel places it: 4% in and below the
+          header on small screens; 8% of the panel's width in and 26% down on large ones. */}
+      <div className="absolute left-[4%] top-[calc(var(--header-h)+36px)] z-20 lg:left-[calc(min(48vw,920px)*0.08)] lg:top-[26%]">
+        <CatchMeNote className="text-[1.1rem] md:text-[1.45rem]">
+          Can you
+          {" "}<br />
+          catch me?
+        </CatchMeNote>
+      </div>
 
       {/* Kandils hang behind the toran, so the strings start on the garland. */}
       <HeroKandils />

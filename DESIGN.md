@@ -27,7 +27,9 @@ the homepage follows:
    three-word tagline and a dark pill button.
 4. A chocolate-drip divider into a dark band: Mini peeking up beside a paper note "What's
    happening at our stall?", four round outlined icon badges (Delicious Food, Fun Challenges,
-   Exciting Coupons, Good Vibes) and a "Find us at TERRA UTSAV" card with a map.
+   Exciting Coupons, Good Vibes) and a "Find us at TERRA UTSAV" card with the stall's hanging sign
+   (the concept's drawn map was dropped on 20 October 2026: it was not a real map and made the card
+   taller than a laptop screen; "Get directions" opens the real one).
 
 Other reference files in `design/reference/` (asset boards and two hero concepts) define the
 mascot, palette and UI parts (buttons, coupon ticket, level-select screen).

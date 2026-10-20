@@ -45,7 +45,6 @@ are at the end of this file, ready for when credits are available.
 | `RangoliArt` | Diyas section and scene | |
 | `FestivalLights` | Top of every dark hero | Marigold toran, string lights, swaying kandils |
 | `TwinkleStars` | Hero sky | Eco-friendly: twinkling stars instead of fireworks |
-| `MapArt` | Find us card | Clearly captioned as an illustration; "Get directions" opens Google Maps for the venue |
 | `OutfitOverlay` | Team mascot outfits (11 roles, incl. leader and sales) | Accessories drawn over the locked render so the character never changes. Replace with full renders per person when possible |
 | `FestiveRibbon`, `Embers` | Homepage ribbon, hero embers | Drawn marigolds; CSS motion |
 | `ResultKitten` (trophy, sparkles) | Game result screens | The full-resolution mascot with a hop or wobble, and a trophy drawn in code |
