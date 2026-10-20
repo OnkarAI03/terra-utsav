@@ -1,6 +1,7 @@
 import type { PGlite } from "@electric-sql/pglite";
 import { beforeAll, describe, expect, it } from "vitest";
 import { DEFAULT_PRODUCTS } from "@/content/products";
+import { TEAM_MENTORS } from "@/content/team";
 import { DEFAULT_GAME_SETTINGS } from "@/lib/game/config";
 import { DEFAULT_EVENT, DEFAULT_REWARDS } from "@/lib/settings";
 import { createTestDb } from "./harness";
@@ -37,6 +38,13 @@ describe("migrations", () => {
     const rw = await db.query<{ value: unknown }>("select value from public.site_settings where key = 'rewards'");
     expect(ev.rows[0].value).toEqual(DEFAULT_EVENT);
     expect(rw.rows[0].value).toEqual(DEFAULT_REWARDS);
+  });
+
+  it("seed the same mentors as the code fallback, in the same order", async () => {
+    const r = await db.query<{ name: string; photo_url: string }>(
+      "select name, photo_url from public.team_members where kind = 'mentor' order by sort_order",
+    );
+    expect(r.rows).toEqual(TEAM_MENTORS.map((m) => ({ name: m.name, photo_url: m.photoUrl })));
   });
 
   it("seed the same menu as the code fallback, with no invented prices", async () => {

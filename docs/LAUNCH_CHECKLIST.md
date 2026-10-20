@@ -7,9 +7,9 @@ The `/admin` overview shows a live version of this list.
 - [x] Event: Eco-friendly Diwali Mandi 2026
 - [x] Date and time: Tuesday 27 October 2026, 9 am to 3 pm
 - [x] Venue: S. B. Patil Institute of Management, Pradhikaran Road, Haveli, Maharashtra 411044 (with Google Maps directions)
-- [x] Stall name: TERRA UTSAV. Mascot: Koochu Puchu (original)
+- [x] Stall name: TERRA UTSAV. Mascot: Mini (original; called Koochu Puchu until 20 October 2026)
 - [x] Instagram: https://www.instagram.com/pcet_terra_utsav ("Follow us on Instagram")
-- [x] Attractions: Chocolate Bomb, Chat Papdi, homemade Diwali diyas, 60-second wet-brick challenge, Catch the Koochu Puchu
+- [x] Attractions: Chocolate Bomb, Chat Papdi, homemade Diwali diyas, 60-second wet-brick challenge, Catch Mini
 
 ## Still needed (organisers or team)
 
@@ -42,9 +42,10 @@ The `/admin` overview shows a live version of this list.
 - [x] 17 students: names, groups and photos from the supplied roster and PDF
 - [ ] **Check every photo is on the right person** (photos were matched in page order: PDF page N = roster person N)
 - [ ] Confirm every student agreed to their photo being published
-- [x] 3 mentors: Ankush, Jidnyesh and Sairaj, with photos from the supplied PDF, in a row under the team
-- [ ] **Check each mentor photo is on the right name** (matched in page order: PDF page N = mentor N) and that all
-      three agreed to their photo being published
+- [x] 4 mentors in a row under the team: Ankush, Jidnyesh and Sairaj with photos from the supplied PDF, and
+      Giriraj (added 20 October 2026) with the photo supplied that day
+- [ ] **Check each mentor photo is on the right name** (PDF matched in page order: page N = mentor N) and that all
+      four agreed to their photo being published
 - [ ] Mentor designations (shown as "Mentor" for now) and full names, if they want them shown
 - [ ] A contact email for photo changes (admin > Event); until then the team page points to Instagram
 - [ ] Optional one-line descriptions per group, and bios or links per person
@@ -55,7 +56,8 @@ The `/admin` overview shows a live version of this list.
 - [ ] Decide what happens if someone wins when coupons run out
 
 **Accounts and services**
-- [ ] Supabase project, migrations applied
+- [ ] Supabase project, migrations applied, including `20261020000100_giriraj_and_mini.sql` (adds Giriraj and
+      renames the mascot in the stored game settings)
 - [ ] Authentication: **turn on anonymous sign-ins** (players' guest accounts) and raise their rate limit to a few
       hundred an hour (one campus Wi-Fi address is shared by many phones)
 - [ ] Staff and admin accounts: Authentication > Users > Add user, with a strong password and Auto Confirm User; then
@@ -69,7 +71,7 @@ The `/admin` overview shows a live version of this list.
 - [ ] Netlify environment variables: the Supabase URL, publishable key and secret key; then trigger a deploy
 - [ ] A staff dry run: win a coupon on a staff account (staff can play before the event), redeem it on another staff
       phone, try redeeming again (must fail), then cancel the test coupon in admin
-- [ ] Ask Koochu Puchu (the chat button) the questions visitors will ask; anything it can't answer is a gap on the site
+- [ ] Ask Mini (the chat button) the questions visitors will ask; anything it can't answer is a gap on the site
 - [ ] On a phone that has never played: tap Play for a reward during the event window and check a guest is made (no
       sign-up screen)
 

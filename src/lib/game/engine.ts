@@ -2,7 +2,7 @@ import type { LevelConfig, GameSettings } from "./config";
 import { between, mulberry32, pick } from "./rng";
 
 /**
- * Catch the Koochu Puchu: the rules of play as pure, deterministic functions.
+ * Catch Mini: the rules of play as pure, deterministic functions.
  *
  * The field is a square with coordinates from 0 to 1 on both axes. A level is fully described by
  * (seed, level config): `generateSchedule` turns them into the list of things that appear, when

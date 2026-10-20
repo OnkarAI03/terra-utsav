@@ -12,9 +12,9 @@ export function GameTeaser({ settings, prize = null }: { settings: GameSettings;
       <div className="shell grid items-center gap-12 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-16">
         <Reveal>
           <h2 id="game-teaser-title" className="display-l text-sticker">
-            Catch the
+            Catch
             {" "}<br />
-            <span className="text-sticker-gold">Koochu Puchu.</span>
+            <span className="text-sticker-gold">Mini.</span>
           </h2>
           <p className="mt-6 max-w-xl text-[1.15rem] font-semibold leading-relaxed text-cream-100">
             {facts.levelsWord[0].toUpperCase() + facts.levelsWord.slice(1)} quick levels, each faster and sneakier than the last.
@@ -51,7 +51,7 @@ export function GameTeaser({ settings, prize = null }: { settings: GameSettings;
             <div className="relative aspect-[696/1040] w-full">
               <Image
                 src="/images/scenes/koochu-paw.webp"
-                alt="Koochu Puchu winking and reaching out with a chocolate-covered paw"
+                alt="Mini winking and reaching out with a chocolate-covered paw"
                 fill
                 sizes="(min-width: 1024px) 40vw, 90vw"
                 className="object-cover"

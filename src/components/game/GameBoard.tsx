@@ -501,7 +501,7 @@ export function GameBoard({
           className="relative overflow-hidden rounded-[26px] bg-[radial-gradient(circle_at_50%_40%,#4f1420_0%,#2a0b10_75%)] shadow-[inset_0_0_0_3px_rgb(237_185_92/0.35)] outline-none focus-visible:ring-4 focus-visible:ring-gold-400"
           style={{ width: size, height: size }}
           role="application"
-          aria-label="Game board. Tap Koochu Puchu whenever it appears. Keyboard: number keys tap the gift boxes, laid out like a number pad: 7, 8 and 9 along the top, 1, 2 and 3 along the bottom."
+          aria-label="Game board. Tap Mini whenever it appears. Keyboard: number keys tap the gift boxes, laid out like a number pad: 7, 8 and 9 along the top, 1, 2 and 3 along the bottom."
           tabIndex={0}
           onKeyDown={onKeyDown}
         >

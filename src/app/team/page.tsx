@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   ...pageMetadata({
     title: "Meet the Team",
     description:
-      "Meet the TERRA UTSAV team and mentors. Every card switches between a real photo and that person's own Koochu Puchu, dressed for their role at our Diwali stall.",
+      "Meet the TERRA UTSAV team and mentors. Every card switches between a real photo and that person's own Mini, dressed for their role at our Diwali stall.",
     path: "/team",
   }),
   // Students' faces stay off search engines and image search.
@@ -39,7 +39,7 @@ export default async function TeamPage() {
             <span className="text-sticker-gold">TERRA UTSAV.</span>
           </>
         }
-        intro={`${count} students, ${team.groups.length || "a few"} teams${mentors.length ? `, ${mentors.length} mentors` : ""} and one kitten with a different outfit for every job. Watch the cards: each photo turns into that person's Koochu Puchu, and back again.`}
+        intro={`${count} students, ${team.groups.length || "a few"} teams${mentors.length ? `, ${mentors.length} mentors` : ""} and one kitten with a different outfit for every job. Watch the cards: each photo turns into that person's Mini, and back again.`}
         art={
           <div className="relative mx-auto w-[220px] md:w-[280px]">
             <Image src="/images/mascot/koochu-idle.webp" alt="" width={762} height={1000} sizes="280px" className="w-full" priority />

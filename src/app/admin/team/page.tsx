@@ -40,7 +40,7 @@ function GroupFields({ g }: { g?: GroupRow }) {
       <div className="grid gap-4 md:grid-cols-2">
         <Field label="Group name" name="name" defaultValue={g?.name} required maxLength={60} />
         <Field label="Slug" name="slug" defaultValue={g?.slug} required maxLength={60} hint="lowercase-with-dashes" />
-        <Select label="Default Koochu Puchu outfit" name="mascot_variant" defaultValue={g?.mascot_variant ?? "generic"} options={variantOptions} />
+        <Select label="Default Mini outfit" name="mascot_variant" defaultValue={g?.mascot_variant ?? "generic"} options={variantOptions} />
         <Field label="Order" name="sort_order" type="number" defaultValue={g?.sort_order ?? 0} />
       </div>
       <TextArea label="What this group does" name="description" defaultValue={g?.description} />
@@ -68,7 +68,7 @@ function MemberFields({ m, groups }: { m?: MemberRow; groups: GroupRow[] }) {
         />
         <Select label="Group" name="group_id" defaultValue={m?.group_id ?? ""} options={[{ value: "", label: "No group" }, ...groups.map((g) => ({ value: g.id, label: g.name }))]} />
         <Select
-          label="Koochu Puchu outfit"
+          label="Mini outfit"
           name="mascot_variant"
           defaultValue={m?.mascot_variant ?? ""}
           options={[{ value: "", label: "Use the group's outfit" }, ...variantOptions]}

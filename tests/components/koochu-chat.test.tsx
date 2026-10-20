@@ -10,7 +10,7 @@ vi.mock("next/link", async () => (await import("../helpers/dom")).nextMocks.link
 
 import { KoochuChat } from "@/components/chat/KoochuChat";
 
-describe("Koochu Puchu chat", () => {
+describe("Mini chat", () => {
   beforeEach(() => {
     pathname = "/";
     installDomMocks();
@@ -29,10 +29,10 @@ describe("Koochu Puchu chat", () => {
     vi.stubGlobal("fetch", fetchMock);
     render(<KoochuChat />);
 
-    const launcher = screen.getByRole("button", { name: "Ask Koochu Puchu" });
+    const launcher = screen.getByRole("button", { name: "Ask Mini" });
     fireEvent.click(launcher);
-    expect(screen.getByRole("dialog", { name: "Koochu Puchu" })).toBeInTheDocument();
-    expect(screen.getByText(/I'm Koochu Puchu, the TERRA UTSAV kitten/)).toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: "Mini" })).toBeInTheDocument();
+    expect(screen.getByText(/I'm Mini, the TERRA UTSAV kitten/)).toBeInTheDocument();
 
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: "When and where?" }));
@@ -48,8 +48,8 @@ describe("Koochu Puchu chat", () => {
   it("says so when it cannot reach its notes", async () => {
     vi.stubGlobal("fetch", vi.fn(async () => Promise.reject(new Error("offline"))));
     render(<KoochuChat />);
-    fireEvent.click(screen.getByRole("button", { name: "Ask Koochu Puchu" }));
-    const box = screen.getByRole("textbox", { name: "Ask Koochu Puchu a question" });
+    fireEvent.click(screen.getByRole("button", { name: "Ask Mini" }));
+    const box = screen.getByRole("textbox", { name: "Ask Mini a question" });
     fireEvent.change(box, { target: { value: "menu?" } });
     await act(async () => {
       fireEvent.submit(box.closest("form")!);
@@ -61,7 +61,7 @@ describe("Koochu Puchu chat", () => {
     for (const p of ["/game", "/staff/redeem", "/admin/menu", "/login"]) {
       pathname = p;
       const { unmount } = render(<KoochuChat />);
-      expect(screen.queryByRole("button", { name: "Ask Koochu Puchu" }), p).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Ask Mini" }), p).not.toBeInTheDocument();
       unmount();
     }
   });

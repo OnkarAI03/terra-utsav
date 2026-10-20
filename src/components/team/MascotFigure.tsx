@@ -8,7 +8,7 @@ import { OutfitOverlay, VARIANT_LABEL } from "./OutfitOverlay";
 const BASE = "/images/mascot/koochu-idle-cream.webp";
 
 /**
- * A team member's Koochu Puchu. Uses their personalised render when one exists, otherwise the
+ * A team member's Mini. Uses their personalised render when one exists, otherwise the
  * locked base render dressed in the outfit for their role. Falls back to the base render if the
  * personalised image fails to load, so a broken image is never shown.
  */
@@ -27,7 +27,7 @@ export function MascotFigure({
 }) {
   const [failed, setFailed] = useState(false);
   const custom = mascotUrl && !failed;
-  const alt = `Illustration: ${name} as Koochu Puchu, dressed for ${VARIANT_LABEL[variant].toLowerCase()}`;
+  const alt = `Illustration: ${name} as Mini, dressed for ${VARIANT_LABEL[variant].toLowerCase()}`;
 
   return (
     <div className="absolute inset-0 bg-[#f6e4cc]">

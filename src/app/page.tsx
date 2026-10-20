@@ -21,14 +21,14 @@ const RIBBON = [
   { text: "Homemade Diyas" },
   { text: "शुभ दीपावली", lang: "mr" },
   { text: "60-Second Brick Challenge" },
-  { text: "Catch Koochu Puchu" },
+  { text: "Catch Mini" },
   { text: "Happy Diwali" },
 ];
 
 export async function generateMetadata(): Promise<Metadata> {
   const event = await getEventSettings();
   const when = [event.festivalName, event.dateText, event.venue?.split(",")[0]].filter(Boolean).join(" · ");
-  const description = `TERRA UTSAV, our Diwali stall${when ? ` at ${when}` : ""}: Chocolate Bombs, Chat Papdi, homemade diyas, a 60-second wet-brick challenge and Catch the Koochu Puchu, a three-level game with a coupon for winners.`;
+  const description = `TERRA UTSAV, our Diwali stall${when ? ` at ${when}` : ""}: Chocolate Bombs, Chat Papdi, homemade diyas, a 60-second wet-brick challenge and Catch Mini, a three-level game with a coupon for winners.`;
   return {
     ...pageMetadata({ title: "Came for the food, stayed for the chaos", description, path: "/" }),
     title: { absolute: `TERRA UTSAV: food, diyas, games and chaos${event.festivalName ? ` at ${event.festivalName}` : " this Diwali"}` },

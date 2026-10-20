@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 /**
- * Difficulty settings for Catch the Koochu Puchu.
+ * Difficulty settings for Catch Mini.
  *
  * Three levels (about a minute and a half of play). These defaults are a tuning starting point, not
  * a promise: the modelled win rate across two reward attempts (target 20-30%, roughly 2 or 3 players
@@ -58,7 +58,7 @@ export const DEFAULT_GAME_SETTINGS: GameSettings = {
     {
       level: 1,
       name: "Warm-up Whiskers",
-      blurb: "Koochu Puchu pops out of the Diwali gift boxes. Tap to catch.",
+      blurb: "Mini pops out of the Diwali gift boxes. Tap to catch.",
       durationMs: 25_000,
       targetCatches: 8,
       lives: 3,
@@ -90,7 +90,7 @@ export const DEFAULT_GAME_SETTINGS: GameSettings = {
     {
       level: 3,
       name: "Diwali Finale",
-      blurb: "Koochu Puchu at full Diwali speed. Catch 21 to win.",
+      blurb: "Mini at full Diwali speed. Catch 21 to win.",
       durationMs: 30_000,
       targetCatches: 21,
       lives: 2,

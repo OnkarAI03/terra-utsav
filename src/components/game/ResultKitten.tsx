@@ -53,7 +53,7 @@ const SPARKLES = [
 ];
 
 /**
- * The result screens use the full-resolution Koochu Puchu (the locked character render) and give
+ * The result screens use the full-resolution Mini (the locked character render) and give
  * it a motion for the mood: a hop for a cleared level, a hop with a trophy for a win, a wobble
  * for a miss. Motion collapses under reduced motion.
  */

@@ -2,7 +2,7 @@
 Build the website's raster assets from the design sources.
 
 Sources (all in design/):
-  generated/mascot-reference.png   1264px Koochu Puchu render (Canva AI, locked character reference)
+  generated/mascot-reference.png   1264px Mini render (Canva AI, locked character reference)
   reference/*.webp                 the team's approved concept art and asset boards
 
 Outputs go to public/images/. Run from the project root:

@@ -67,7 +67,7 @@ export function AttractionCards({ products, game, prize = null }: { products: Pr
     },
     {
       key: "game",
-      title: "Catch Koochu Puchu",
+      title: "Catch Mini",
       tagline: prize ? `${facts.levels} levels. Win ${prize}!` : `${facts.levels} levels. ${facts.attempts} attempts. Win a coupon!`,
       href: "/game",
       cta: "Play now",

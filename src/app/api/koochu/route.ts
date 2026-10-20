@@ -12,7 +12,7 @@ const facts = unstable_cache(loadKoochuFacts, ["koochu-facts"], { revalidate: 60
 const body = z.object({ question: z.string().trim().min(1).max(300) });
 
 /**
- * Koochu Puchu, the stall's chat. Answers come only from the site's own content (see
+ * Mini, the stall's chat. Answers come only from the site's own content (see
  * src/lib/koochu/answer.ts); nothing is stored and nothing is sent anywhere else.
  */
 export async function POST(request: Request) {

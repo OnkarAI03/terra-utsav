@@ -6,7 +6,7 @@ not in components.
 
 ## 1. Direction
 
-**Idea:** a festival night at our stall. Koochu Puchu, a mischievous calico kitten, has already
+**Idea:** a festival night at our stall. Mini, a mischievous calico kitten, has already
 got into the chocolate. Everything on the page feels like it belongs to that stall: wooden
 signposts, torn paper notes, cream menu cards, chocolate drips and warm string lights.
 
@@ -16,16 +16,16 @@ the homepage follows:
 
 1. Plain top bar: `TERRA UTSAV` wordmark with a paw (left), five text links (centre), an outlined
    "Find Our Stall" pill with a map pin (right).
-2. Hero on a deep burgundy festival backdrop. Koochu Puchu leaps in from the left with a
+2. Hero on a deep burgundy festival backdrop. Mini leaps in from the left with a
    chocolate-covered paw over a cracked chocolate bomb; a torn paper note says "CAN YOU CATCH
    ME?". Centre: "Came for the **Food.** Stayed for the **Chaos.**" stacked, the two nouns huge.
-   One supporting sentence, then a maroon primary pill ("Catch Koochu Puchu", sub-line "3 levels ·
+   One supporting sentence, then a maroon primary pill ("Catch Mini", sub-line "3 levels ·
    2 attempts · win a coupon") and a cream secondary pill ("Explore Menu"). Right: a wooden
    signpost with planks linking to the attractions. "Scroll to explore" below.
 3. A cream card strip overlapping the hero's bottom edge with four attractions (Chocolate Bomb,
-   Chat Papdi, 60-Second Brick Challenge, Catch Koochu Puchu), each with an image, a title, a
+   Chat Papdi, 60-Second Brick Challenge, Catch Mini), each with an image, a title, a
    three-word tagline and a dark pill button.
-4. A chocolate-drip divider into a dark band: Koochu Puchu peeking up beside a paper note "What's
+4. A chocolate-drip divider into a dark band: Mini peeking up beside a paper note "What's
    happening at our stall?", four round outlined icon badges (Delicious Food, Fun Challenges,
    Exciting Coupons, Good Vibes) and a "Find us at TERRA UTSAV" card with a map.
 
@@ -43,7 +43,7 @@ top of it:
   the illustration for the homemade diyas until real photos arrive.
 - **Rangoli** medallions behind the diyas and as dotted floors under the game's gift boxes.
 - **No fireworks**: it is an eco-friendly Diwali, so the night sky has gently twinkling stars instead.
-- Game: Koochu Puchu pops out of Diwali gift boxes; levels include "Diya Dash" and "Diwali Finale".
+- Game: Mini pops out of Diwali gift boxes; levels include "Diya Dash" and "Diwali Finale".
 - A fifth attraction, **Homemade Diwali Diyas**, joins the card strip, the signpost, the menu and its own homepage section.
 
 Diwali accent tokens (art only, never text): `--color-marigold-300 #FFC93C`, `--color-marigold-500 #F28C28`,
@@ -120,11 +120,11 @@ shadow below. Used only on display sizes.
 - **Chocolate drip divider:** inline SVG path between dark and cream sections.
 - **Icon badge:** 64–88px circle, 2px gold-500 outline, cream line icon (lucide, 1.75 stroke).
 - **Coupon ticket:** cream ticket with notched sides, code in Lilita One, QR on the right.
-- **Koochu Puchu chat:** a round cream button with the kitten's face and a maroon ring, fixed bottom right
-  (56px, 64px from `sm`), above the page and below the menu. It opens a panel (full height on phones, a
+- **Mini chat:** a round cream button with the kitten's face and a maroon ring, fixed bottom left
+  (56px, 64px from `sm`; Netlify's free-plan badge holds the bottom right), above the page and below the menu. It opens a panel (full height on phones, a
   card on larger screens) with a burgundy header, cream answer bubbles, outlined question chips and
   a cream input. On the homepage a paper note ("Ask me anything!") appears once after 9 s. Not shown
-  on the game, sign-in, staff or admin pages, where the bottom right is needed.
+  on the game, sign-in, staff or admin pages, where the bottom corner is needed.
 
 ## 6. Motion
 
@@ -138,12 +138,12 @@ shadow below. Used only on display sizes.
 | `--dur-slow` | 600ms (section entrances) |
 
 - Signature move: the hero headline lands word by word (Food., then Chaos.) with a short
-  squash-and-settle, while Koochu Puchu drifts in from the left.
+  squash-and-settle, while Mini drifts in from the left.
 - Section entrances: heading, text, picture, staggered 70ms, rise 24px with opacity, once.
 - Team cards: photo ↔ mascot crossfade 700ms with 1.04 → 1 scale, every 4 s while visible.
 - Buttons: press scale 0.97 and the 3D edge collapses; hover lifts 2px.
 - Chat: the panel grows from the button's corner (rise 14px, scale 0.97 to 1, 240ms ease-out);
-  each message rises 8px as it arrives, with three bouncing dots while Koochu Puchu "thinks".
+  each message rises 8px as it arrives, with three bouncing dots while Mini "thinks".
 - `prefers-reduced-motion: reduce`: no travel, no loops; content appears in place; team cards
   switch only when the visitor presses the switch button; no 3D, no smooth scrolling, no embers,
   the ribbon stands still.

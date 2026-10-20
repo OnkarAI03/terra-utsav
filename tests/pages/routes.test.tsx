@@ -29,7 +29,7 @@ describe("public routes render without a database", () => {
     const { default: Page } = await import("@/app/page");
     render(await Page());
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Came for the Food. Stayed for the Chaos.");
-    for (const name of ["Chocolate Bomb", "Chat Papdi", "Homemade Diyas", "60-Second Brick Challenge", "Catch Koochu Puchu"]) {
+    for (const name of ["Chocolate Bomb", "Chat Papdi", "Homemade Diyas", "60-Second Brick Challenge", "Catch Mini"]) {
       expect(screen.getAllByText(name).length).toBeGreaterThan(0);
     }
     expect(screen.getAllByText("Tuesday, 27 October 2026").length).toBeGreaterThan(0);
@@ -65,7 +65,7 @@ describe("public routes render without a database", () => {
     expect(screen.getByRole("heading", { name: "Your data" })).toBeInTheDocument();
   });
 
-  it("team: the 17 students by group, and the 3 mentors in a compact row", async () => {
+  it("team: the 17 students by group, and the 4 mentors in a compact row", async () => {
     const { default: Page } = await import("@/app/team/page");
     render(await Page());
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("The people behind TERRA UTSAV.");
@@ -74,7 +74,7 @@ describe("public routes render without a database", () => {
     expect(screen.getByAltText("Photo of Sanket Wakale")).toBeInTheDocument();
     expect(screen.queryByText("Preview slot")).not.toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Our mentors" })).toBeInTheDocument();
-    for (const name of ["Ankush", "Jidnyesh", "Sairaj"]) expect(screen.getByAltText(`Photo of ${name}`)).toBeInTheDocument();
+    for (const name of ["Ankush", "Jidnyesh", "Sairaj", "Giriraj"]) expect(screen.getByAltText(`Photo of ${name}`)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Pause the photo switching" })).toBeInTheDocument();
     expect(screen.getByText(/Want your photo changed or removed/)).toBeInTheDocument();
   });

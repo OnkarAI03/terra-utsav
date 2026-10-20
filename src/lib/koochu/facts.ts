@@ -5,7 +5,7 @@ import { AVAILABILITY_LABEL, formatPrice } from "@/lib/format";
 import type { KoochuFacts } from "./answer";
 
 /**
- * Everything Koochu Puchu may say, taken from the same sources the pages use, so the chat always
+ * Everything Mini may say, taken from the same sources the pages use, so the chat always
  * agrees with the site (and picks up admin edits). Nothing here is written for the bot alone.
  */
 export async function loadKoochuFacts(): Promise<KoochuFacts> {

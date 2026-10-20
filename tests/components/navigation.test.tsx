@@ -37,7 +37,7 @@ describe("navigation", () => {
     fireEvent.click(button);
     expect(screen.getByRole("button", { name: "Close menu", expanded: true })).toBeInTheDocument();
     const dialog = screen.getByRole("dialog", { name: "Site menu" });
-    expect(within(dialog).getByRole("link", { name: "Catch Koochu Puchu" })).toHaveAttribute("href", "/game");
+    expect(within(dialog).getByRole("link", { name: "Catch Mini" })).toHaveAttribute("href", "/game");
     expect(within(dialog).getByRole("link", { name: "My coupons" })).toHaveAttribute("href", "/rewards");
     expect(document.body.style.overflow).toBe("hidden");
     // The dialog carries its own close button, since a screen reader can't reach the header's X.

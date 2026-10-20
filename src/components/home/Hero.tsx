@@ -15,7 +15,7 @@ import { HeroArt } from "./HeroArt";
 import { Signpost } from "./Signpost";
 
 /**
- * The approved hero with a Diwali twist. Koochu Puchu bleeds in from the left edge of the window,
+ * The approved hero with a Diwali twist. Mini bleeds in from the left edge of the window,
  * a marigold toran and kandils hang above, embers drift up from the diyas, and the
  * "Came for the Food. Stayed for the Chaos." lockup lands word by word (CSS keyframes: no script
  * needed, collapses under reduced motion). The date and place are on the first screen.
@@ -91,7 +91,7 @@ export function Hero({ event, game, prize = null }: { event: EventSettings; game
             style={{ animationDelay: "420ms" }}
           >
             <ButtonLink href="/game" size="lg" icon={<Gamepad2 />} trailing={<ArrowRight />} subline={facts.subline} className="w-full text-balance sm:w-auto">
-              Catch Koochu Puchu
+              Catch Mini
             </ButtonLink>
             <ButtonLink href="/menu" variant="secondary" size="lg" icon={<UtensilsCrossed />} className="w-full text-balance sm:w-auto">
               Explore Menu

@@ -2,7 +2,7 @@ import { useId } from "react";
 import type { MascotVariant } from "@/lib/types";
 
 /**
- * Role outfits drawn over the single locked Koochu Puchu render (public/images/mascot/
+ * Role outfits drawn over the single locked Mini render (public/images/mascot/
  * koochu-idle-cream.webp, 900 x 900). Only clothing and accessories change, so every team member's
  * mascot is unmistakably the same character. Coordinates follow the render's landmarks:
  * headband ornament (430, 205), eyes (390, 380) and (542, 352), neck y ~545, chest (470, 650).

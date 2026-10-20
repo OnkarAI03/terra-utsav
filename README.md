@@ -1,9 +1,9 @@
 # TERRA UTSAV
 
 Website for **TERRA UTSAV**, our stall at the **Eco-friendly Diwali Mandi 2026** (Tuesday 27 October 2026, 9 am to 3 pm,
-S. B. Patil Institute of Management, Pradhikaran Road). Koochu Puchu is our original mascot.
+S. B. Patil Institute of Management, Pradhikaran Road). Mini is our original mascot.
 
-Chocolate Bomb, Chat Papdi, homemade Diwali diyas, the 60-second wet-brick challenge, and **Catch the Koochu Puchu**, a
+Chocolate Bomb, Chat Papdi, homemade Diwali diyas, the 60-second wet-brick challenge, and **Catch Mini**, a
 three-level game where winners get a coupon.
 
 | Route | What it is |
@@ -11,17 +11,20 @@ three-level game where winners get a coupon.
 | `/` | Homepage (approved design with a Diwali twist): hero with 3D akash kandils, five attractions, festive ribbon, "What's happening", Find us, food, 3D diyas, 3D brick challenge, game, close |
 | `/menu` | Food and homemade diyas, editable from admin, with a 3D chocolate bomb to crack open |
 | `/challenge` | Hold the Wet Brick: 3D brick, steps, draft safety rules, spectator timer (records nothing) |
-| `/game` | Catch the Koochu Puchu: free practice and server-checked reward attempts. No sign-up: a win shows the coupon on screen |
-| `/team` | The 17 students in their 7 teams, each card switching between a real photo and that person's Koochu Puchu, and a row for our 3 mentors (Ankush, Jidnyesh, Sairaj). Kept out of search engines (`noindex`, and team photos send `X-Robots-Tag`), with a line on how to get a photo taken down |
+| `/game` | Catch Mini: free practice and server-checked reward attempts. No sign-up: a win shows the coupon on screen |
+| `/team` | The 17 students in their 7 teams, each card switching between a real photo and that person's Mini, and a row for our 4 mentors (Ankush, Jidnyesh, Sairaj, Giriraj). Kept out of search engines (`noindex`, and team photos send `X-Robots-Tag`), with a line on how to get a photo taken down |
 | `/rules` | Event, game, coupon and challenge rules, and how data is used |
 | `/login`, `/auth/callback`, `/auth/signout` | Staff and admin sign-in with email and password (Google optional). Players never sign in |
 | `/rewards` | The coupons won on this phone, with QR codes (no sign-in) |
 | `/staff/redeem` | Staff console: scan or type a code, verify, redeem once, record brick results |
 | `/admin` | Admin dashboard: stats, event, menu, team, game tuning, rewards, roles, coupons, audit log |
 
-**Koochu Puchu, the chat helper**: the kitten button at the bottom right of the site's pages (not the game or sign-in) answers questions about the
+**Mini, the chat helper**: the kitten button at the bottom left of the site's pages (not the game or sign-in) answers questions about the
 stall (date and place, menu, the game and its coupon, the brick challenge, the team and mentors) from the site's own
 content. See section 4.
+
+The mascot was called Koochu Puchu until 20 October 2026. Code, file and route names (`KoochuChat`,
+`/api/koochu`, `src/lib/koochu/`, `koochu-*.webp`) keep the old name; everything visitors see says Mini.
 
 Stack: Next.js 15 (App Router) · TypeScript (strict) · Tailwind CSS 4 · Framer Motion · Supabase (Auth, Postgres, RLS,
 Storage) · Vitest + PGlite · Netlify (free plan).
@@ -72,9 +75,10 @@ Useful scripts:
 1. **Create a project** at supabase.com (region: Mumbai `ap-south-1` is closest).
 2. **Apply the migrations** in `supabase/migrations/`, in filename order. Either:
    - Supabase CLI: `npx supabase login`, `npx supabase link --project-ref <ref>`, `npx supabase db push`, or
-   - Dashboard > SQL Editor: paste and run each file in order (`...0100` to `...0600`). `...0500` sets the default
+   - Dashboard > SQL Editor: paste and run each file in order (`20261018000100` to `...0600`, then `20261020000100`). `...0500` sets the default
      settings (coupon value "50% off a Chocolate Bomb"; reward play stays closed until you tick "terms confirmed").
-     `...0600` seeds the 17 students, their 7 groups and the 3 mentors.
+     `...0600` seeds the 17 students, their 7 groups and the first 3 mentors; `20261020000100` adds the
+     fourth mentor, Giriraj, and renames the mascot to Mini in the stored game settings.
 3. **Auth settings** (Dashboard > Authentication). Players never sign up and the site sends no emails, so no email
    service is needed.
    - **Turn on anonymous sign-ins** (Sign In / Providers > Allow anonymous sign-ins). The first time a phone plays for a

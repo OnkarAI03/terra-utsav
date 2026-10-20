@@ -391,7 +391,7 @@ export function GameExperience({
               <ul className="mt-4 flex flex-col gap-3 text-[1.08rem] leading-relaxed text-cream-100">
                 <li className="flex gap-3">
                   <Gamepad2 aria-hidden className="mt-1 h-5 w-5 shrink-0 text-gold-400" />
-                  Koochu Puchu pops out of the Diwali gift boxes and dashes across the stall. Tap it to catch it.
+                  Mini pops out of the Diwali gift boxes and dashes across the stall. Tap it to catch it.
                 </li>
                 <li className="flex gap-3">
                   <Heart aria-hidden className="mt-1 h-5 w-5 shrink-0 text-gold-400" />
@@ -412,7 +412,7 @@ export function GameExperience({
               <p className="mt-2 text-[0.98rem] text-cream-100/90">This game needs sight and quick taps. If it doesn&apos;t work for you, talk to us at the stall.</p>
             </div>
             <div className="relative mx-auto w-[260px] sm:w-[320px]">
-              <Image src="/images/mascot/koochu-idle.webp" alt="Koochu Puchu, ready to run" width={762} height={1000} sizes="320px" className="w-full" priority />
+              <Image src="/images/mascot/koochu-idle.webp" alt="Mini, ready to run" width={762} height={1000} sizes="320px" className="w-full" priority />
               <DiyaRow count={5} className="-mt-4 w-full" />
             </div>
           </motion.section>
@@ -546,7 +546,7 @@ export function GameExperience({
         {screen.name === "won" && (
           <motion.section key="won" {...fade} className="mx-auto max-w-2xl text-center">
             <ResultKitten mood="win" />
-            <h2 className="display-l text-sticker-gold mt-4">You caught Koochu Puchu!</h2>
+            <h2 className="display-l text-sticker-gold mt-4">You caught Mini!</h2>
             {screen.reward === "practice" ? (
               <p className="mx-auto mt-4 max-w-md text-[1.1rem] font-semibold text-cream-100">
                 All {facts.levelsWord} levels cleared in practice. Now do it for real and win {facts.prize}.
@@ -588,7 +588,7 @@ export function GameExperience({
         {screen.name === "lost" && run && (
           <motion.section key="lost" {...fade} className="mx-auto max-w-xl text-center">
             <ResultKitten mood="oops" />
-            <h2 className="display-l text-sticker mt-4">Oops! Koochu Puchu got away.</h2>
+            <h2 className="display-l text-sticker mt-4">Oops! Mini got away.</h2>
             <p className="mt-3 text-[1.1rem] font-semibold text-cream-100">{LOST_REASON[screen.reason] ?? LOST_REASON.failed_time}</p>
             <p className="mt-2 text-[1rem] text-cream-100">
               Level {run.level} · {screen.catches} caught

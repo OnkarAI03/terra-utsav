@@ -7,7 +7,7 @@ export interface NavItem {
 export const MAIN_NAV: NavItem[] = [
   { href: "/", label: "Home" },
   { href: "/menu", label: "Menu" },
-  { href: "/game", label: "Catch Koochu Puchu" },
+  { href: "/game", label: "Catch Mini" },
   { href: "/challenge", label: "Brick Challenge" },
   { href: "/team", label: "Meet the Team" },
 ];

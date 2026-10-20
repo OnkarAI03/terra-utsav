@@ -1,7 +1,7 @@
 /**
- * Koochu Puchu's answers. A small, honest matcher: it scores the question against topics and the
+ * Mini's answers. A small, honest matcher: it scores the question against topics and the
  * site's own facts (event, menu, game, coupons, challenge, team) and replies only with what the
- * website already says. When the site does not say something, Koochu Puchu says so and points to
+ * website already says. When the site does not say something, Mini says so and points to
  * Instagram or the team, rather than guessing. Pure and synchronous, so it is easy to test.
  */
 
@@ -71,7 +71,7 @@ const KEYWORDS: Record<Topic, string[]> = {
   greeting: ["hi", "hii", "hiii", "hello", "helo", "hey", "namaste", "namaskar", "hola", "yo", "morning", "evening"],
   thanks: ["thanks", "thank", "thx", "ty", "dhanyavad", "dhanyawad", "shukriya", "awesome", "cool", "nice", "great"],
   bye: ["bye", "goodbye", "tata", "cya", "byee"],
-  who: ["koochu", "puchu", "mascot", "bot", "yourself"],
+  who: ["mini", "koochu", "puchu", "mascot", "bot", "yourself"],
   when: ["when", "date", "day", "time", "timing", "timings", "schedule", "open", "opens", "close", "closes", "start", "starts", "end", "ends", "kab", "kevha", "kadhi", "baje", "vajta", "today", "tomorrow", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday", "weekend", "somvar", "mangalvar", "budhvar", "guruvar", "shukravar", "shanivar", "ravivar", "october", "oct"],
   where: ["where", "venue", "location", "address", "place", "kahan", "kaha", "kuthe", "map", "maps", "direction", "directions", "route", "reach", "stall", "spot", "campus", "college", "institute", "patil", "pradhikaran", "pune", "nigdi", "akurdi", "haveli", "find"],
   menu: ["menu", "food", "foods", "eat", "eating", "sell", "selling", "sold", "items", "item", "dish", "dishes", "snack", "snacks", "khana", "khaana", "khane", "khau", "serve", "serving", "buy", "order", "veg"],
@@ -100,7 +100,8 @@ const PHRASES: [RegExp, Topic, number][] = [
   [/\bhow (do i|to|can i) win\b/, "coupon", 2],
   [/\bwho (made|runs|built|organi[sz]es?)\b/, "team", 2],
   [/\bsign ?(in|up)\b|\blog ?in\b|\bregister\b/, "signin", 2],
-  [/\bcatch (the )?koochu\b/, "game", 3],
+  [/\bcatch (the )?(mini|koochu)\b/, "game", 3],
+  [/\b(mini|koochu)('?s)? game\b/, "game", 3],
   [/\bwhat (do|can|will|would) (i|you|we) (get|win)\b|\bwhat('?s| is) the (prize|reward)\b/, "coupon", 3],
   [/\bwhat('?s| is) (on|in) (the )?menu\b|\bwhat do you sell\b/, "menu", 2],
 ];
@@ -243,14 +244,14 @@ function reply(topic: Topic, f: KoochuFacts, tokens: string[]): KoochuReply {
     case "greeting":
       return {
         topic,
-        text: "Meow! I'm Koochu Puchu, the TERRA UTSAV kitten. Ask me about the date and place, the menu, my game and its coupons, the brick challenge or the team.",
+        text: "Meow! I'm Mini, the TERRA UTSAV kitten. Ask me about the date and place, the menu, my game and its coupons, the brick challenge or the team.",
         links: [],
         chips: DEFAULT_CHIPS,
       };
     case "who":
       return {
         topic,
-        text: "I'm Koochu Puchu, the stall's original mascot: a calico kitten who got into the chocolate. I answer from what's on this website, so if something isn't here, I won't make it up.",
+        text: "I'm Mini, the stall's original mascot: a calico kitten who got into the chocolate. I answer from what's on this website, so if something isn't here, I won't make it up.",
         links: [],
         chips: DEFAULT_CHIPS,
       };
@@ -278,7 +279,7 @@ function reply(topic: Topic, f: KoochuFacts, tokens: string[]): KoochuReply {
     case "game":
       return {
         topic,
-        text: `Catch the Koochu Puchu has ${levels.length} quick levels: ${sentenceList(levels.map((l) => l.name))}. Tap me when I pop out of the Diwali gift boxes, don't tap the snacks, and catch enough before the timer ends. Practice is free and unlimited.`,
+        text: `Catch Mini has ${levels.length} quick levels: ${sentenceList(levels.map((l) => l.name))}. Tap me when I pop out of the Diwali gift boxes, don't tap the snacks, and catch enough before the timer ends. Practice is free and unlimited.`,
         links: [linkGame, { label: "Game rules", href: "/rules#game" }],
         chips: ["How do I win a coupon?", "Do I need to sign up?"],
       };
@@ -431,7 +432,7 @@ export function answer(question: string, facts: KoochuFacts): KoochuReply {
 
 export const KOOCHU_GREETING: KoochuReply = {
   topic: "greeting",
-  text: "Meow! I'm Koochu Puchu, the TERRA UTSAV kitten. Ask me anything about the stall: timings, the menu, my game and its coupons, or the brick challenge. I only answer from this website.",
+  text: "Meow! I'm Mini, the TERRA UTSAV kitten. Ask me anything about the stall: timings, the menu, my game and its coupons, or the brick challenge. I only answer from this website.",
   links: [],
   chips: DEFAULT_CHIPS,
 };

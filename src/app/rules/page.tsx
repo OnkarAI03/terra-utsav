@@ -13,7 +13,7 @@ export const revalidate = 60;
 
 export const metadata = pageMetadata({
   title: "Rules",
-  description: "Rules for the TERRA UTSAV stall: the Catch the Koochu Puchu game, reward coupons, the wet-brick challenge and how we use your data.",
+  description: "Rules for the TERRA UTSAV stall: the Catch Mini game, reward coupons, the wet-brick challenge and how we use your data.",
   path: "/rules",
 });
 
@@ -79,7 +79,7 @@ export default async function RulesPage() {
             </ul>
           </Block>
 
-          <Block id="game" title="Catch the Koochu Puchu">
+          <Block id="game" title="Catch Mini">
             <ul>
               <li>
                 <Dot />

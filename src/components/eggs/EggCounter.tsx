@@ -20,7 +20,7 @@ export function EggCounter() {
       <p className="flex items-center gap-2 font-bold">
         <Egg aria-hidden className="h-4 w-4 text-gold-400" />
         {found.length === EGGS.length
-          ? "You found every mystery egg. Koochu Puchu is impressed."
+          ? "You found every mystery egg. Mini is impressed."
           : `${EGGS.length} mystery eggs are hidden on this site. Found: ${found.length} of ${EGGS.length}.`}
       </p>
       {remaining.length > 0 && (

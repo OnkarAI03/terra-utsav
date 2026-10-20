@@ -65,7 +65,7 @@ export default async function RewardsPage() {
             <div className="max-w-xl rounded-[var(--radius-panel)] bg-cream-100 p-8">
               <h2 className="display-m text-choc-900">No coupons on this phone yet</h2>
               <p className="mt-3 text-[1.05rem] leading-relaxed">
-                Clear every level of Catch the Koochu Puchu in a reward attempt and your coupon appears on screen, then here. Coupons
+                Clear every level of Catch Mini in a reward attempt and your coupon appears on screen, then here. Coupons
                 can be won on event day only, and it&apos;s one coupon per person.
               </p>
               <ButtonLink href="/game" className="mt-6" trailing={<ArrowRight />}>
@@ -114,7 +114,7 @@ export default async function RewardsPage() {
               <div className="rounded-[var(--radius-panel)] bg-cream-100 p-8 text-ink">
                 <h2 className="display-m text-choc-900">No coupons yet</h2>
                 <p className="mt-3 max-w-md text-[1.05rem] leading-relaxed">
-                  Clear every level of Catch the Koochu Puchu in a reward attempt and your coupon lands here. Coupons can be won on
+                  Clear every level of Catch Mini in a reward attempt and your coupon lands here. Coupons can be won on
                   event day only.
                 </p>
                 <ButtonLink href="/game" className="mt-6" trailing={<ArrowRight />}>

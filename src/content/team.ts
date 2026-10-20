@@ -3,10 +3,9 @@ import type { MascotVariant, TeamData, TeamGroup, TeamMember } from "@/lib/types
 /**
  * The TERRA UTSAV team, as supplied by the team on 2026-10-18 (names, roles and groups from the
  * roster; photos from the team's PDF, page N = person N in roster order). Mirrored by
- * supabase/migrations/20261018000600_seed_team.sql. Once Supabase is connected the team is edited
- * from /admin/team and this file is only the fallback.
- *
- * Mentors were not supplied yet, so three clearly labelled preview slots remain for them.
+ * supabase/migrations/20261018000600_seed_team.sql, plus 20261020000100_giriraj_and_mini.sql for
+ * the fourth mentor. Once Supabase is connected the team is edited from /admin/team and this file
+ * is only the fallback.
  */
 
 interface GroupSeed {
@@ -73,8 +72,9 @@ export const TEAM_MEMBERS: TeamMember[] = (() => {
 })();
 
 // Mentors supplied on 2026-10-18 (first names as given), with photos from the team's PDF in the
-// same order (page N = mentor N). Shown as a compact row at the bottom of the team.
-const MENTORS = ["Ankush", "Jidnyesh", "Sairaj"];
+// same order (page N = mentor N); Giriraj and a photo were supplied on 2026-10-20. Shown as a
+// compact row at the bottom of the team.
+const MENTORS = ["Ankush", "Jidnyesh", "Sairaj", "Giriraj"];
 
 export const TEAM_MENTORS: TeamMember[] = MENTORS.map((name, i) => ({
   id: `mentor-${String(i + 1).padStart(2, "0")}`,

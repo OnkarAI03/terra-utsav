@@ -10,7 +10,7 @@ beforeAll(async () => {
 
 const ask = (q: string) => answer(q, facts);
 
-describe("Koochu Puchu answers from the site", () => {
+describe("Mini answers from the site", () => {
   it("knows when, with the real date and time", () => {
     for (const q of ["When is it?", "what time does the stall open", "kab hai?", "kevha aahe", "which day", "is it open on sunday?", "ravivar la aahe ka"]) {
       const r = ask(q);
@@ -68,6 +68,8 @@ describe("Koochu Puchu answers from the site", () => {
     expect(coupon.text).toContain("Coupons can be won on event day only (Tuesday, 27 October 2026, 9 am to 3 pm)");
     expect(ask("what do I win?").topic).toBe("coupon");
     expect(coupon.links.map((l) => l.href)).toContain("/rewards");
+    expect(ask("catch mini").topic).toBe("game");
+    expect(ask("mini game").topic).toBe("game");
     expect(ask("catch the koochu puchu").topic).toBe("game");
   });
 
@@ -87,10 +89,10 @@ describe("Koochu Puchu answers from the site", () => {
     const team = ask("Who made this stall?");
     expect(team.topic).toBe("team");
     expect(team.text).toContain("17 students in 7 teams");
-    expect(team.text).toContain("Our mentors: Ankush, Jidnyesh and Sairaj");
+    expect(team.text).toContain("Our mentors: Ankush, Jidnyesh, Sairaj and Giriraj");
     const mentors = ask("who are the mentors?");
     expect(mentors.topic).toBe("mentors");
-    expect(mentors.text).toMatch(/^Our mentors: Ankush, Jidnyesh and Sairaj\./);
+    expect(mentors.text).toMatch(/^Our mentors: Ankush, Jidnyesh, Sairaj and Giriraj\./);
     expect(ask("who is the group leader").text).toContain("Saniya Bhor");
     const person = ask("Who is Sanket?");
     expect(person.topic).toBe("member");
@@ -111,6 +113,9 @@ describe("Koochu Puchu answers from the site", () => {
     expect(ask("hi").topic).toBe("greeting");
     expect(ask("hi, when is it?").topic).toBe("when");
     expect(ask("who are you").topic).toBe("who");
+    const mini = ask("who is mini?");
+    expect(mini.topic).toBe("who");
+    expect(mini.text).toContain("I'm Mini");
     expect(ask("thanks!").topic).toBe("thanks");
     expect(ask("???").topic).toBe("greeting");
   });

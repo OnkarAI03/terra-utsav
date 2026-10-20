@@ -38,7 +38,7 @@ function int(fd: FormData, key: string): number | null {
 
 function refresh() {
   revalidatePath("/", "layout");
-  // The Koochu Puchu chat caches the same content separately.
+  // The Mini chat caches the same content separately.
   revalidateTag("site-content");
 }
 

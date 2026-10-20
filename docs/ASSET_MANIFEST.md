@@ -5,7 +5,7 @@ Every image the site uses, where it came from, and whether it should be replaced
 **Sources**
 - **Reference art**: the team's approved concept images in `design/reference/` (homepage concept, hero concept, two
   asset boards). Crops never include their baked-in text.
-- **Generated**: `design/generated/mascot-reference.png`, a 1264 px Koochu Puchu render made with Canva AI image
+- **Generated**: `design/generated/mascot-reference.png`, a 1264 px Mini render made with Canva AI image
   generation from the approved art, used as the locked character reference.
 - **Drawn in code**: SVG components in `src/components/art/` (crisp at any size, theme colours).
 - Web images are rebuilt from the sources with `npm run assets:build` (`scripts/assets/build_assets.py`).
@@ -22,7 +22,7 @@ are at the end of this file, ready for when credits are available.
 | `images/mascot/koochu-idle-cream.webp` | 900×900 | Base for every team mascot (outfits drawn over it) | Generated render | Good |
 | `images/game/koochu-peek.webp` | 520×474, transparent | Game pop-up target, mystery-egg peek | Generated render, head crop | Good. (The "What's happening" band now shows the whole kitten, `koochu-idle.webp`.) |
 | `images/team/member-01-real.webp` to `member-17-real.webp` | 800×1000 | Team page photos | The team's PDF of photos (2026-10-18), face-centred crops by `scripts/assets/team_photos.py` | Mapped in roster order (PDF page N = roster person N). **Check each photo is on the right name** |
-| `images/team/mentor-01.webp` to `mentor-03.webp` | 480×480 | Team page, "Our mentors" row | The mentors' PDF (2026-10-18), square face crops by `scripts/assets/mentor_photos.py` | Mapped in page order: page 1 Ankush, page 2 Jidnyesh, page 3 Sairaj. **Check each photo is on the right name** |
+| `images/team/mentor-01.webp` to `mentor-04.webp` | 480×480 | Team page, "Our mentors" row | 01 to 03: the mentors' PDF (2026-10-18); 04: Giriraj's photo (2026-10-20). Square face crops by `scripts/assets/mentor_photos.py` | Mapped in page order: page 1 Ankush, page 2 Jidnyesh, page 3 Sairaj; 04 is Giriraj. **Check each photo is on the right name** |
 | `images/scenes/koochu-chocolate-bomb.webp` | 1188×1422 | Homepage hero, share image | Reference art (hero concept), text-free crop, 1.8× upscale | Usable. Replace with a high-res render for crisp retina display |
 | `images/scenes/koochu-paw.webp` | 696×1040 | Homepage game section | Reference art (approved homepage), kitten-only crop, 2× upscale | Usable. Same note |
 | `images/hero/festival-bokeh.webp` | 1280×853 | Hero background | Reference art blurred far past legibility | Good |
@@ -58,8 +58,8 @@ are at the end of this file, ready for when credits are available.
 |---|---|---|
 | Real photos of Chocolate Bomb and Chat Papdi | Menu, homepage | /admin/menu, upload; untick "illustrative" |
 | Real photos of the homemade diyas | Menu, diyas section | /admin/menu |
-| Mentor designations, and a consent check for the 3 mentor photos | Team page | /admin/team. Names and photos are in, shown as "Mentor" |
-| Personal Koochu Puchu renders (optional) | Team page | /admin/team "personal mascot art"; otherwise the role outfit is drawn |
+| Mentor designations, and a consent check for the 4 mentor photos | Team page | /admin/team. Names and photos are in, shown as "Mentor" |
+| Personal Mini renders (optional) | Team page | /admin/team "personal mascot art"; otherwise the role outfit is drawn |
 | Approved homepage screenshot file | `design/reference/homepage-final.png` | It was shared in chat but could not be saved automatically |
 
 ## Prompts for the remaining renders
@@ -67,7 +67,7 @@ are at the end of this file, ready for when credits are available.
 Use the locked reference (`design/generated/mascot-reference.png`, Canva media `MAHYWVGNswc`) as an image reference
 every time, and repeat the locked traits:
 
-> Koochu Puchu, the exact kitten from the reference image: a fluffy calico kitten with a white face, chest and paws,
+> Mini, the exact kitten from the reference image: a fluffy calico kitten with a white face, chest and paws,
 > dark chocolate-brown tabby-striped patches over the ears, forehead and back, a fluffy striped tail, large glossy
 > amber-brown eyes, a small pink nose and pink paw pads, wearing a maroon fabric headband with gold trim and a small
 > gold teardrop ornament between the ears. Polished 3D animated-film character render, soft fur detail, warm golden
@@ -79,6 +79,6 @@ small chef apron, holding a whisk". Outfits used on the site: chef (kitchen), ev
 utility vest (logistics), artist smock with brush (design), burgundy sherwani-style jacket with gold embroidery and
 round spectacles (mentor), maroon crew t-shirt (generic).
 
-For the hero at full resolution: "a cinematic wide illustration of a college Diwali food stall at night; Koochu Puchu
+For the hero at full resolution: "a cinematic wide illustration of a college Diwali food stall at night; Mini
 leaps in from the left third with a chocolate-covered paw over a cracked chocolate dome dessert; marigold garlands,
 paper star lanterns and diyas; the centre and right two-thirds are softly blurred for a headline. No text."

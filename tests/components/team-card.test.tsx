@@ -74,7 +74,7 @@ describe("TeamCard photo-to-mascot switching", () => {
     act(() => vi.advanceTimersByTime(20000));
     expect(showing(container)).toBe("photo");
 
-    const toggle = screen.getByRole("button", { name: "Show Asha Example as Koochu Puchu" });
+    const toggle = screen.getByRole("button", { name: "Show Asha Example as Mini" });
     fireEvent.click(toggle);
     expect(showing(container)).toBe("mascot");
     expect(toggle).toHaveAttribute("aria-pressed", "true");
@@ -84,7 +84,7 @@ describe("TeamCard photo-to-mascot switching", () => {
     installDomMocks();
     render(<TeamCard member={member} />);
     expect(screen.getByAltText("Photo of Asha Example")).toBeInTheDocument();
-    expect(screen.getByAltText(/Illustration: Asha Example as Koochu Puchu, dressed for food and products/)).toBeInTheDocument();
+    expect(screen.getByAltText(/Illustration: Asha Example as Mini, dressed for food and products/)).toBeInTheDocument();
   });
 });
 
@@ -98,13 +98,13 @@ describe("TeamCard missing images", () => {
     installDomMocks();
     const { container } = render(<TeamCard member={{ ...member, photoUrl: null }} />);
     expect(showing(container)).toBe("mascot");
-    const toggle = screen.getByRole("button", { name: "Show Asha Example as Koochu Puchu" });
+    const toggle = screen.getByRole("button", { name: "Show Asha Example as Mini" });
     expect(toggle).toHaveAttribute("aria-pressed", "true");
     fireEvent.click(toggle);
     expect(toggle).toHaveAttribute("aria-pressed", "false");
     expect(screen.getByText("Photo coming soon")).toBeInTheDocument();
     // The accessible picture stays put while the card flips, so a screen reader hears one stable image.
-    expect(screen.getByRole("img", { name: /Illustration: Asha Example as Koochu Puchu/ })).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: /Illustration: Asha Example as Mini/ })).toBeInTheDocument();
     expect(screen.queryByRole("img", { name: "Photo of Asha Example coming soon" })).not.toBeInTheDocument();
   });
 
