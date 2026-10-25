@@ -137,7 +137,8 @@ The team's own devices at the stall are shared by many players, so they run in s
 
 1. On Netlify, add `STALL_PIN` under **Site configuration > Environment variables** (6 or more digits), then
    **Deploys > Trigger deploy**. The PIN is checked on the server and never appears in this repository.
-2. On each laptop and the stall phone, open `/game?stall=1` and enter the PIN. A dark "Stall mode" bar appears.
+2. On each laptop and the stall phone, open the game page, tap **Stall mode** (above the game, next to Sound) and
+   enter the PIN. A dark "Stall mode" bar appears. (`/game?stall=1` opens the same PIN box directly.)
 3. After each player: **Prize given** (if they won), then **Next player** and the PIN. The next player gets fresh
    attempts, and the bar counts the prizes given on that device.
 

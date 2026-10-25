@@ -51,7 +51,7 @@ The `/admin` overview shows a live version of this list.
 - [ ] Optional one-line descriptions per group, and bios or links per person
 
 **Game**
-- [ ] Stall laptops and phone: add `STALL_PIN` on Netlify and trigger a deploy, then open `/game?stall=1` on each
+- [ ] Stall laptops and phone: add `STALL_PIN` on Netlify and trigger a deploy, then tap **Stall mode** on the game page on each
       device and enter the PIN (README, "Stall laptops and phone")
 - [ ] Keep the stall laptops plugged in, with sleep turned off, and press F11 for full screen
 - [x] Cut to three levels (modelled: about 1 in 4 players wins within two attempts)

@@ -421,7 +421,18 @@ export function GameExperience({
 
   return (
     <div className="relative">
-      <div className="mb-4 flex justify-end">
+      <div className="mb-4 flex flex-wrap justify-end gap-2">
+        {/* For the team at the stall; it asks for the team PIN, so anyone may see it. */}
+        {offline && stall !== "on" && screen.name === "home" && (
+          <button
+            type="button"
+            onClick={() => setPinFor("unlock")}
+            className="inline-flex items-center gap-2 rounded-full border-2 border-cream-100/60 px-4 py-2 text-[0.95rem] font-extrabold text-cream-100 hover:bg-cream-100 hover:text-ink"
+          >
+            <Lock aria-hidden className="h-4 w-4" />
+            Stall mode
+          </button>
+        )}
         <button
           type="button"
           onClick={toggleSound}

@@ -63,7 +63,7 @@ describe("prize play without the database", () => {
     fireEvent.click(play);
     expect(await screen.findByRole("heading", { name: "Use a prize attempt?" })).toBeInTheDocument();
     expect(screen.getByText("This will be attempt 1 of 2 on this device.")).toBeInTheDocument();
-    expect(screen.queryByText("Stall mode")).not.toBeInTheDocument();
+    expect(screen.queryByText(/Prizes given on this device/)).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Let's go" }));
     expect(await screen.findByText("Prize attempt 1 · Level 1")).toBeInTheDocument();
     // Backing out before the level starts costs nothing.
@@ -102,13 +102,21 @@ describe("prize play without the database", () => {
     const dialog = await screen.findByRole("dialog", { name: "Turn on stall mode" });
     enterPin(dialog, "111111", "Turn on");
     expect(await within(dialog).findByRole("alert")).toHaveTextContent("That PIN didn't work. Try again.");
-    expect(screen.queryByText("Stall mode")).not.toBeInTheDocument();
+    expect(screen.queryByText(/Prizes given on this device/)).not.toBeInTheDocument();
 
     enterPin(dialog, PIN, "Turn on");
-    expect(await screen.findByText("Stall mode")).toBeInTheDocument();
+    expect(await screen.findByText(/Prizes given on this device: \d/)).toBeInTheDocument();
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     expect(window.location.search).toBe("");
     expect(screen.getByText("Win all three levels and collect your prize from our team, right here.")).toBeInTheDocument();
+  });
+
+  it("has a Stall mode button on the game screen, so the team needs no special link", async () => {
+    renderOffline();
+    fireEvent.click(await screen.findByRole("button", { name: "Stall mode" }));
+    enterPin(await screen.findByRole("dialog", { name: "Turn on stall mode" }), PIN, "Turn on");
+    expect(await screen.findByText(/Prizes given on this device: 0/)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Stall mode" })).not.toBeInTheDocument();
   });
 
   it("leaves stall mode off when the PIN dialog is cancelled", async () => {
@@ -116,7 +124,7 @@ describe("prize play without the database", () => {
     renderOffline();
     fireEvent.click(within(await screen.findByRole("dialog", { name: "Turn on stall mode" })).getByRole("button", { name: "Cancel" }));
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-    expect(screen.queryByText("Stall mode")).not.toBeInTheDocument();
+    expect(screen.queryByText(/Prizes given on this device/)).not.toBeInTheDocument();
     expect(window.location.search).toBe("");
     expect(await screen.findByRole("button", { name: "Play for a prize" })).toBeEnabled();
   });
@@ -127,7 +135,7 @@ describe("prize play without the database", () => {
     localStorage.setItem("tu-prize-v1", JSON.stringify({ attemptsUsed: 1, win: { code: "MINI-7K4Q", wonAt: "2026-10-25T06:00:00.000Z", claimedAt: null } }));
     vi.stubGlobal("confirm", vi.fn(() => true));
     renderOffline();
-    expect(await screen.findByText("Stall mode")).toBeInTheDocument();
+    expect(await screen.findByText(/Prizes given on this device: \d/)).toBeInTheDocument();
     fireEvent.click(await screen.findByRole("button", { name: "Show my winner card" }));
     expect(await screen.findByText("Please collect your prize from the TERRA UTSAV team, right here at the stall.")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Next player" })).not.toBeInTheDocument();
