@@ -23,7 +23,7 @@ The `/admin` overview shows a live version of this list.
 - [ ] Confirm the approved taglines are still right ("Crack it. Pour it. Devour it." implies something is poured)
 
 **Rewards**
-- [x] What a coupon is worth: 50% off a Chocolate Bomb (the default; check it in admin > Rewards)
+- [x] No discount: winners collect a prize from the team at the stall (changed 25 October 2026)
 - [x] One coupon per player (enforced by the database)
 - [ ] Coupon expiry (for example 27 Oct 2026, 3 pm IST) and how many coupons exist in total
 - [ ] Tick "terms confirmed" in admin > Rewards (coupons are switched on by default). **Reward play stays closed until
@@ -51,6 +51,9 @@ The `/admin` overview shows a live version of this list.
 - [ ] Optional one-line descriptions per group, and bios or links per person
 
 **Game**
+- [ ] Stall laptops and phone: add `STALL_PIN` on Netlify and trigger a deploy, then open `/game?stall=1` on each
+      device and enter the PIN (README, "Stall laptops and phone")
+- [ ] Keep the stall laptops plugged in, with sleep turned off, and press F11 for full screen
 - [x] Cut to three levels (modelled: about 1 in 4 players wins within two attempts)
 - [ ] Playtest with 10 or more people on phones; compare the admin "Actual" win rate with the model; adjust in admin > Game
 - [ ] Decide what happens if someone wins when coupons run out

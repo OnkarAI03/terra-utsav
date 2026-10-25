@@ -126,8 +126,22 @@ The site's address and search indexing come from Netlify (`URL` and `CONTEXT`, b
 `next.config.ts`): only the production deploy is indexable, and deploy previews send `noindex` and a blocking
 `robots.txt`. Set `NEXT_PUBLIC_SITE_URL` only when you add your own domain.
 
-Without the Supabase variables the public site still works fully (menu, practice game, team, rules, chat); reward
-play, the staff console and admin say they aren't switched on yet.
+Without the Supabase variables the public site still works fully (menu, practice game, team, rules, chat), and the
+game plays for prizes on each device's own record (`src/lib/game/prize.ts`): two attempts per phone, a live winner
+card with a ticking clock, and the team taps "Prize given" when they hand the prize over. The staff console and admin
+say they aren't switched on yet.
+
+### Stall laptops and phone (stall mode)
+
+The team's own devices at the stall are shared by many players, so they run in stall mode:
+
+1. On Netlify, add `STALL_PIN` under **Site configuration > Environment variables** (6 or more digits), then
+   **Deploys > Trigger deploy**. The PIN is checked on the server and never appears in this repository.
+2. On each laptop and the stall phone, open `/game?stall=1` and enter the PIN. A dark "Stall mode" bar appears.
+3. After each player: **Prize given** (if they won), then **Next player** and the PIN. The next player gets fresh
+   attempts, and the bar counts the prizes given on that device.
+
+`/game?stall=0` turns stall mode off on a device. Without `STALL_PIN`, stall mode can't be turned on at all.
 
 ## 4. Updating content
 

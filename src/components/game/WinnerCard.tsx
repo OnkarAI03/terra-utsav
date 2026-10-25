@@ -24,7 +24,7 @@ export function WinnerCard({ win, prize, onGiven, className }: { win: LocalWin; 
 
   const given = win.claimedAt !== null;
   const give = () => {
-    if (window.confirm("Team member: hand over the prize now? This marks it as collected on this phone.")) onGiven();
+    if (window.confirm("Team member: hand over the prize now? This marks it as collected on this device.")) onGiven();
   };
 
   return (
@@ -78,7 +78,7 @@ export function WinnerCard({ win, prize, onGiven, className }: { win: LocalWin; 
         ) : (
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-[0.95rem] font-bold text-ink-soft">For our team: check the time is ticking, hand over the prize, then tap.</p>
-            <Button variant="dark" onClick={give}>
+            <Button variant="dark" className="shrink-0" onClick={give}>
               Prize given
             </Button>
           </div>

@@ -12,13 +12,30 @@ import { Button, ButtonLink } from "@/components/ui/Button";
 import { cn } from "@/lib/cn";
 import type { GameSettings, LevelConfig } from "@/lib/game/config";
 import { gameFacts } from "@/lib/game/copy";
-import { localPrizeOpen, markLocalPrizeGiven, readLocalPrize, recordLocalWin, spendLocalAttempt, type LocalPrize } from "@/lib/game/prize";
+import {
+  localPrizeOpen,
+  markLocalPrizeGiven,
+  nextPlayer,
+  prizesGiven,
+  readLocalPrize,
+  readStallLog,
+  readStallState,
+  recordLocalWin,
+  spendLocalAttempt,
+  stallPinMatches,
+  unlockStall,
+  type LocalPrize,
+  type StallState,
+  type StallUnlock,
+  type StallWin,
+} from "@/lib/game/prize";
 import { randomSeed } from "@/lib/game/rng";
 import { sfx } from "@/lib/game/sound";
 import type { RewardPhase } from "@/lib/game/window";
 import { GameBoard, type BoardResult } from "./GameBoard";
 import { ResultKitten } from "./ResultKitten";
 import { loadSprites } from "./sprites";
+import { StallPinDialog } from "./StallPinDialog";
 import { WinnerCard } from "./WinnerCard";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 
@@ -69,6 +86,14 @@ type Screen =
   | { name: "won-local" }
   | { name: "lost"; reason: string; catches: number }
   | { name: "error"; message: string; retry?: () => void };
+
+/** What the team sees when the PIN doesn't turn stall mode on. */
+const UNLOCK_PROBLEMS: Record<Exclude<StallUnlock, "ok">, string> = {
+  wrong: "That PIN didn't work. Try again.",
+  busy: "Too many wrong tries. Wait 10 minutes, then try again.",
+  "not-set": "The team PIN isn't set up on the website yet (STALL_PIN in Netlify).",
+  offline: "Couldn't reach the website. Check the internet connection and try again.",
+};
 
 const ERRORS: Record<string, string> = {
   not_configured: "Reward play is not switched on yet. You can still practise.",
@@ -127,8 +152,13 @@ export function GameExperience({
   const [screen, setScreen] = useState<Screen>({ name: "home" });
   const [sound, setSound] = useState(false);
   const [practiceLevel, setPracticeLevel] = useState(1);
-  // This phone's prize record, used when the database is not configured.
+  // This device's prize record, used when the database is not configured.
   const [local, setLocal] = useState<LocalPrize | null>(null);
+  // The team's own laptops and phone at the stall, shared by many players: turned on with
+  // /game?stall=1 and the team PIN, which is asked for again before each new player.
+  const [stall, setStall] = useState<StallState>("off");
+  const [stallLog, setStallLog] = useState<StallWin[]>([]);
+  const [pinFor, setPinFor] = useState<"unlock" | "next" | null>(null);
   // Once someone plays with the keys, every later level shows the key numbers from the start.
   const [keyboardPlayer, setKeyboardPlayer] = useState(false);
 
@@ -145,6 +175,10 @@ export function GameExperience({
     void refreshStatus();
     void loadSprites();
     setLocal(readLocalPrize());
+    const stallState = readStallState();
+    setStall(stallState);
+    if (stallState === "ask") setPinFor("unlock");
+    setStallLog(readStallLog());
     try {
       setSound(localStorage.getItem("tu-sound") === "on");
     } catch {
@@ -178,6 +212,46 @@ export function GameExperience({
   };
 
   const givePrize = () => setLocal(markLocalPrizeGiven());
+
+  /** Drops ?stall=1 from the address once it has done its job, so a reload doesn't ask again. */
+  const forgetStallLink = () => {
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("stall");
+      window.history.replaceState(window.history.state, "", url);
+    } catch {
+      /* the address just keeps it */
+    }
+  };
+
+  const checkUnlock = async (pin: string) => {
+    const result = await unlockStall(pin);
+    return result === "ok" ? null : UNLOCK_PROBLEMS[result];
+  };
+
+  const stallTurnedOn = () => {
+    setStall("on");
+    setPinFor(null);
+    setStallLog(readStallLog());
+    forgetStallLink();
+  };
+
+  const stallNotNow = () => {
+    setStall("off");
+    setPinFor(null);
+    forgetStallLink();
+  };
+
+  const checkNextPlayer = async (pin: string) => ((await stallPinMatches(pin)) ? null : "That PIN didn't work. Try again.");
+
+  /** Stall devices: once the team PIN is entered, the next player starts with fresh attempts. */
+  const startNextPlayer = () => {
+    setLocal(nextPlayer());
+    setStallLog(readStallLog());
+    setRun(null);
+    setScreen({ name: "home" });
+    setPinFor(null);
+  };
 
   /**
    * No sign-up: the first time a phone or browser plays for a reward, it gets a nameless guest
@@ -338,8 +412,9 @@ export function GameExperience({
   // ---------------------------------------------------------------- rendering
   const attemptsLeft =
     status?.attemptsAllowed !== undefined && status?.attemptsUsed !== undefined ? Math.max(0, status.attemptsAllowed - status.attemptsUsed) : null;
-  // No database on this site: prizes are won and collected through the phone's own record.
+  // No database on this site: prizes are won and collected through the device's own record.
   const offline = status !== null && !status.configured;
+  const stallOn = offline && stall === "on";
   const prizeLeft = local ? Math.max(0, settings.maxRewardAttempts - local.attemptsUsed) : null;
   const leftFor = (mode: Mode) => (mode === "prize" ? prizeLeft : attemptsLeft);
   const fade = { initial: reduce ? false : { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0 }, exit: reduce ? undefined : { opacity: 0, y: -10 }, transition: { duration: 0.28, ease: [0.22, 1, 0.36, 1] as const } };
@@ -362,6 +437,16 @@ export function GameExperience({
         {screen.name === "home" && (
           <motion.section key="home" {...fade} aria-labelledby="game-home-title" className="grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)]">
             <div>
+              {stallOn && (
+                <div className="mb-8 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-burgundy-800 px-5 py-3 text-cream-100">
+                  <p className="text-[0.95rem] font-extrabold">
+                    <span className="text-gold-300">Stall mode</span> · Prizes given on this device: {prizesGiven(stallLog, local)}
+                  </p>
+                  <Button variant="secondary" size="sm" icon={<RotateCcw />} onClick={() => setPinFor("next")}>
+                    Next player
+                  </Button>
+                </div>
+              )}
               <h2 id="game-home-title" className="display-m text-sticker">
                 Ready to play?
               </h2>
@@ -408,14 +493,16 @@ export function GameExperience({
 
               {offline && !local?.win && (
                 <p className="mt-4 max-w-md text-[1rem] font-bold text-gold-300">
-                  No sign-up needed. Win all {facts.levelsWord} levels, then collect your prize from our team at the stall
-                  {eventDay ? `: ${eventDay}` : ""}.
+                  {stallOn
+                    ? `Win all ${facts.levelsWord} levels and collect your prize from our team, right here.`
+                    : `No sign-up needed. Win all ${facts.levelsWord} levels, then collect your prize from our team at the stall${eventDay ? `: ${eventDay}` : ""}.`}
                 </p>
               )}
 
               {offline && local && !local.win && local.attemptsUsed > 0 && (
                 <p className="mt-4 text-[1rem] font-bold text-cream-100">
-                  Prize attempts used on this phone: {Math.min(local.attemptsUsed, settings.maxRewardAttempts)} of {settings.maxRewardAttempts}
+                  Prize attempts used {stallOn ? "by this player" : "on this device"}: {Math.min(local.attemptsUsed, settings.maxRewardAttempts)} of{" "}
+                  {settings.maxRewardAttempts}
                 </p>
               )}
 
@@ -477,13 +564,15 @@ export function GameExperience({
           <motion.section key="confirm-prize" {...fade} className="mx-auto max-w-xl rounded-[var(--radius-panel)] bg-cream-100 p-7 text-ink md:p-9">
             <h2 className="display-m text-choc-900">Use a prize attempt?</h2>
             <p className="mt-4 text-[1.05rem] leading-relaxed">
-              This will be attempt {Math.min((local?.attemptsUsed ?? 0) + 1, settings.maxRewardAttempts)} of {settings.maxRewardAttempts} on this
-              phone.
+              This will be attempt {Math.min((local?.attemptsUsed ?? 0) + 1, settings.maxRewardAttempts)} of {settings.maxRewardAttempts}{" "}
+              {stallOn ? "for this player" : "on this device"}.
             </p>
             <ul className="mt-4 flex flex-col gap-2 text-[1rem] leading-relaxed">
               <li>• Play the {facts.levelsWord} levels in a row. Lose one and the attempt ends.</li>
               <li>• Once a level starts, finish it. Leaving or refreshing during a level ends the attempt.</li>
-              <li>• Win and you get a live winner card. Show it to our team at the stall to collect your prize.</li>
+              <li>
+                • Win and you get a live winner card. {stallOn ? "Our team hands over your prize right here." : "Show it to our team at the stall to collect your prize."}
+              </li>
               <li>• One prize per person.</li>
             </ul>
             <div className="mt-7 flex flex-col gap-3 sm:flex-row">
@@ -675,10 +764,17 @@ export function GameExperience({
             <p className="mx-auto mt-4 max-w-lg text-[1.15rem] font-semibold leading-relaxed text-cream-100">
               {local.win.claimedAt
                 ? "You have collected your prize. Thank you for playing!"
-                : `Please collect your prize from the TERRA UTSAV team at the stall${eventDay ? ` (${eventDay})` : ""}. Show them this card, live on this phone.`}
+                : stallOn
+                  ? "Please collect your prize from the TERRA UTSAV team, right here at the stall."
+                  : `Please collect your prize from the TERRA UTSAV team at the stall${eventDay ? ` (${eventDay})` : ""}. Show them this card, live on this device.`}
             </p>
             <WinnerCard className="mx-auto mt-8 max-w-xl text-left" win={local.win} prize={couponValueText} onGiven={givePrize} />
-            <div className="mt-8 flex justify-center">
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              {stallOn && local.win.claimedAt && (
+                <Button size="lg" icon={<RotateCcw />} onClick={() => setPinFor("next")}>
+                  Next player
+                </Button>
+              )}
               <Button variant="outline" size="lg" onClick={goHome}>
                 Back to the game
               </Button>
@@ -706,6 +802,10 @@ export function GameExperience({
                 <Button size="lg" icon={<RotateCcw />} onClick={() => setScreen({ name: "confirm" })}>
                   Use another attempt
                 </Button>
+              ) : run.mode === "prize" && stallOn ? (
+                <Button size="lg" icon={<RotateCcw />} onClick={() => setPinFor("next")}>
+                  Next player
+                </Button>
               ) : null}
               <Button variant="outline" size="lg" onClick={goHome}>
                 Back
@@ -731,13 +831,38 @@ export function GameExperience({
           </motion.section>
         )}
       </AnimatePresence>
+
+      {offline && pinFor === "unlock" && (
+        <StallPinDialog
+          title="Turn on stall mode"
+          note="For the TERRA UTSAV team's own laptops and phone at the stall. Players then take turns on this device, and the team starts each new player with this PIN."
+          submitLabel="Turn on"
+          check={checkUnlock}
+          onAccepted={stallTurnedOn}
+          onCancel={stallNotNow}
+        />
+      )}
+      {stallOn && pinFor === "next" && (
+        <StallPinDialog
+          title="Next player"
+          note={
+            local?.win && !local.win.claimedAt
+              ? "This player's prize isn't marked as given yet. Starting the next player clears this player's game on this device."
+              : "This clears the current player's attempts on this device, so the next person can play."
+          }
+          submitLabel="Start next player"
+          check={checkNextPlayer}
+          onAccepted={startNextPlayer}
+          onCancel={() => setPinFor(null)}
+        />
+      )}
     </div>
   );
 }
 
 const REWARD_NOTE = "max-w-xs text-[0.98rem] font-bold text-gold-300 sm:self-center";
 
-/** The prize button when the site has no database: this phone's own record decides what it says. */
+/** The prize button when the site has no database: this device's own record decides what it says. */
 function PrizeButton({ local, open, left, onStart, onShow }: { local: LocalPrize | null; open: boolean; left: number | null; onStart: () => void; onShow: () => void }) {
   if (!local) {
     return (

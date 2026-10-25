@@ -98,3 +98,124 @@ export function spendLocalAttempt(): LocalPrize {
   writeLocalPrize(next);
   return next;
 }
+
+// ---------------------------------------------------------------- stall devices
+// The team's own laptops and phone at the stall are shared by many players. A team member opens
+// /game?stall=1 and enters the team PIN, which the server checks against STALL_PIN (set in Netlify,
+// never in this public code). The device then keeps only a salted hash of the PIN, so "Next player"
+// can ask for it again without the network, plus a tally of the prizes handed out on it.
+// ?stall=0 turns stall mode off again.
+
+const STALL_KEY = "tu-stall-v1";
+const LOG_KEY = "tu-stall-log-v1";
+
+export interface StallWin {
+  code: string;
+  wonAt: string;
+  givenAt: string | null;
+}
+
+/** "on": a stall device. "ask": the address has ?stall=1 but no PIN has been entered here yet. */
+export type StallState = "on" | "ask" | "off";
+
+export type StallUnlock = "ok" | "wrong" | "busy" | "not-set" | "offline";
+
+interface StallLock {
+  salt: string;
+  hash: string;
+}
+
+function readLock(): StallLock | null {
+  try {
+    const v = JSON.parse(storage()?.getItem(STALL_KEY) ?? "null") as Partial<StallLock> | null;
+    return typeof v?.salt === "string" && typeof v.hash === "string" ? { salt: v.salt, hash: v.hash } : null;
+  } catch {
+    return null;
+  }
+}
+
+function toHex(bytes: Uint8Array): string {
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+async function pinHash(salt: string, pin: string): Promise<string> {
+  const digest = await globalThis.crypto.subtle.digest("SHA-256", new TextEncoder().encode(`${salt}:${pin.trim()}`));
+  return toHex(new Uint8Array(digest));
+}
+
+/** Whether this is a stall device, reading ?stall=1 (asks for the PIN) and ?stall=0 (turns it off). */
+export function readStallState(search: string = typeof window === "undefined" ? "" : window.location.search): StallState {
+  const q = new URLSearchParams(search).get("stall");
+  if (q === "0") {
+    try {
+      storage()?.removeItem(STALL_KEY);
+    } catch {
+      /* nothing stored */
+    }
+  }
+  if (readLock()) return "on";
+  return q === "1" ? "ask" : "off";
+}
+
+/** Makes this a stall device once the server accepts the team PIN. */
+export async function unlockStall(pin: string): Promise<StallUnlock> {
+  let res: Response;
+  try {
+    res = await fetch("/api/stall", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ pin }) });
+  } catch {
+    return "offline";
+  }
+  if (res.status === 401) return "wrong";
+  if (res.status === 429) return "busy";
+  if (res.status === 503) return "not-set";
+  if (!res.ok) return "offline";
+  try {
+    const salt = toHex(globalThis.crypto.getRandomValues(new Uint8Array(16)));
+    storage()?.setItem(STALL_KEY, JSON.stringify({ salt, hash: await pinHash(salt, pin) }));
+    return "ok";
+  } catch {
+    return "offline";
+  }
+}
+
+/** Checks the team PIN on a stall device, without the network. */
+export async function stallPinMatches(pin: string): Promise<boolean> {
+  const lock = readLock();
+  if (!lock) return false;
+  try {
+    return (await pinHash(lock.salt, pin)) === lock.hash;
+  } catch {
+    return false;
+  }
+}
+
+/** Every win on this stall device so far, oldest first. */
+export function readStallLog(): StallWin[] {
+  try {
+    const v = JSON.parse(storage()?.getItem(LOG_KEY) ?? "[]") as unknown;
+    if (!Array.isArray(v)) return [];
+    return v.filter((w): w is StallWin => typeof w?.code === "string" && typeof w?.wonAt === "string" && (w.givenAt === null || typeof w.givenAt === "string"));
+  } catch {
+    return [];
+  }
+}
+
+/** Next player on a stall device: files the last player's win (if any) in the tally and starts afresh. */
+export function nextPlayer(): LocalPrize {
+  const cur = readLocalPrize();
+  if (cur.win) {
+    const log = [...readStallLog(), { code: cur.win.code, wonAt: cur.win.wonAt, givenAt: cur.win.claimedAt }];
+    try {
+      storage()?.setItem(LOG_KEY, JSON.stringify(log));
+    } catch {
+      /* the tally is a convenience; the next player can still play */
+    }
+  }
+  writeLocalPrize(EMPTY);
+  return EMPTY;
+}
+
+/** Prizes handed out on this device: the tally plus the current player's, once given. */
+export function prizesGiven(log: StallWin[], current: LocalPrize | null): number {
+  return log.filter((w) => w.givenAt !== null).length + (current?.win?.claimedAt ? 1 : 0);
+}

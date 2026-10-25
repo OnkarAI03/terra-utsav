@@ -96,6 +96,11 @@ export default async function RulesPage() {
                 </li>
                 <li>
                   <Dot />
+                  You can also play on our laptops and phone at the stall. There, each player gets the same {attempts} prize{" "}
+                  {attempts === 1 ? "attempt" : "attempts"}, and our team starts the game for the next player.
+                </li>
+                <li>
+                  <Dot />
                   An attempt is {facts.levelsWord} levels played in a row. Lose a level and that attempt ends. Clear Level {facts.lastLevel} to
                   win.
                 </li>
