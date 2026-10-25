@@ -12,7 +12,7 @@ export const revalidate = 60;
 export const metadata = pageMetadata({
   title: "Menu and Diwali Diyas",
   description:
-    "The TERRA UTSAV Diwali stall menu: Chocolate Bomb and Chat Papdi, plus homemade Diwali diyas to take home.",
+    "The TERRA UTSAV Diwali stall menu: Chocolate Bomb and Aalu Ponge, plus homemade Diwali diyas to take home.",
   path: "/menu",
 });
 

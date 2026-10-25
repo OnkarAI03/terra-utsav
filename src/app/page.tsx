@@ -17,7 +17,7 @@ export const revalidate = 60;
 
 const RIBBON = [
   { text: "Chocolate Bombs" },
-  { text: "Chat Papdi" },
+  { text: "Aalu Ponge" },
   { text: "Homemade Diyas" },
   { text: "शुभ दीपावली", lang: "mr" },
   { text: "60-Second Brick Challenge" },
@@ -28,7 +28,7 @@ const RIBBON = [
 export async function generateMetadata(): Promise<Metadata> {
   const event = await getEventSettings();
   const when = [event.festivalName, event.dateText, event.venue?.split(",")[0]].filter(Boolean).join(" · ");
-  const description = `TERRA UTSAV, our Diwali stall${when ? ` at ${when}` : ""}: Chocolate Bombs, Chat Papdi, homemade diyas, a 60-second wet-brick challenge and Catch Mini, a three-level game with a coupon for winners.`;
+  const description = `TERRA UTSAV, our Diwali stall${when ? ` at ${when}` : ""}: Chocolate Bombs, Aalu Ponge, homemade diyas, a 60-second wet-brick challenge and Catch Mini, a three-level game with a prize for winners.`;
   return {
     ...pageMetadata({ title: "Came for the food, stayed for the chaos", description, path: "/" }),
     title: { absolute: `TERRA UTSAV: food, diyas, games and chaos${event.festivalName ? ` at ${event.festivalName}` : " this Diwali"}` },

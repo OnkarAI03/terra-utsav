@@ -9,7 +9,7 @@ The `/admin` overview shows a live version of this list.
 - [x] Venue: S. B. Patil Institute of Management, Pradhikaran Road, Haveli, Maharashtra 411044 (with Google Maps directions)
 - [x] Stall name: TERRA UTSAV. Mascot: Mini (original; called Koochu Puchu until 20 October 2026)
 - [x] Instagram: https://www.instagram.com/pcet_terra_utsav ("Follow us on Instagram")
-- [x] Attractions: Chocolate Bomb, Chat Papdi, homemade Diwali diyas, 60-second wet-brick challenge, Catch Mini
+- [x] Attractions: Chocolate Bomb, Aalu Ponge, homemade Diwali diyas, 60-second wet-brick challenge, Catch Mini
 
 ## Still needed (organisers or team)
 
@@ -17,7 +17,7 @@ The `/admin` overview shows a live version of this list.
 - [ ] Exact stall spot on the campus (admin > Event > Stall spot)
 
 **Menu and diyas**
-- [ ] Prices for Chocolate Bomb, Chat Papdi and the diyas (admin > Menu)
+- [ ] Prices for Chocolate Bomb, Aalu Ponge and the diyas (admin > Menu)
 - [ ] Real photos of the food and of the homemade diyas
 - [ ] Check the descriptions; add ingredient or allergen information only if it is verified
 - [ ] Confirm the approved taglines are still right ("Crack it. Pour it. Devour it." implies something is poured)

@@ -13,6 +13,6 @@ export const MAIN_NAV: NavItem[] = [
 ];
 
 export const SECONDARY_NAV: NavItem[] = [
-  { href: "/rewards", label: "My coupons" },
+  { href: "/rewards", label: "My prize" },
   { href: "/rules", label: "Rules" },
 ];

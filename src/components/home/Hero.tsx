@@ -85,7 +85,7 @@ export function Hero({ event, game, prize = null }: { event: EventSettings; game
             className="anim-rise order-4 mx-auto mt-6 max-w-[34rem] text-[1.08rem] font-semibold leading-relaxed text-cream-100 md:text-[1.18rem] lg:mx-0"
             style={{ animationDelay: "860ms" }}
           >
-            This Diwali: Chocolate Bombs, Chat Papdi, homemade diyas and a 60-second wet-brick challenge. Plus one mischievous kitten
+            This Diwali: Chocolate Bombs, Aalu Ponge, homemade diyas and a 60-second wet-brick challenge. Plus one mischievous kitten
             you probably won&apos;t catch.
           </p>
 

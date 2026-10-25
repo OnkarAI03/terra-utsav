@@ -53,7 +53,7 @@ beforeAll(async () => {
       select 'real-person', 'Real Person', 'Cook', id, '/photo.webp', false, true from public.team_groups where slug = 'kitchen';
     insert into public.team_members (slug, name, title, photo_url, photo_consent, visible)
       values ('hidden-person', 'Hidden Person', 'Helper', '/hidden.webp', true, false);
-    update public.products set availability = 'hidden' where slug = 'chat-papdi';
+    update public.products set availability = 'hidden' where slug = 'aalu-ponge';
   `);
 });
 

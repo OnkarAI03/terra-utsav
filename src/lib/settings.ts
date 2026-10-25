@@ -108,8 +108,9 @@ export const DEFAULT_EVENT: EventSettings = {
 export const DEFAULT_REWARDS: RewardSettings = {
   rewardsEnabled: true,
   couponLabel: "TERRA UTSAV winner's coupon",
-  // Supplied by the team on 2026-10-18 ("50% off on chocolate ball": the Chocolate Bomb).
-  couponValueText: "50% off a Chocolate Bomb",
+  // No discount: since 2026-10-25 winners simply collect a prize from the team (the 50% off a
+  // Chocolate Bomb supplied on 2026-10-18 was dropped at the team's request).
+  couponValueText: null,
   maxRedemptions: 1,
   expiresAfterHours: null,
   expiresAt: null,

@@ -3,12 +3,12 @@ import Link from "next/link";
 
 const PLANKS = [
   { href: "/menu#chocolate-bomb", label: "Chocolate Bomb", icon: CakeSlice, tilt: -4 },
-  { href: "/menu#chat-papdi", label: "Chat Papdi", icon: Soup, tilt: 3 },
+  { href: "/menu#aalu-ponge", label: "Aalu Ponge", icon: Soup, tilt: 3 },
   { href: "/menu#diyas", label: "Homemade Diyas", icon: Flame, tilt: -2 },
   { href: "/challenge", label: "60-Second Brick Challenge", icon: BrickWall, tilt: 3 },
   { href: "/game", label: "Fun Games", icon: Gamepad2, tilt: -3 },
-  // The coupon rules, not the wallet: the wallet is a sign-in wall for a first-time visitor.
-  { href: "/rules#coupons", label: "Coupons & More!", icon: Ticket, tilt: 2 },
+  // The prize rules: how to win and how to collect the prize from the team.
+  { href: "/rules#coupons", label: "Prizes & More!", icon: Ticket, tilt: 2 },
 ];
 
 /** The wooden signpost from the approved hero. Every plank is a real link. */

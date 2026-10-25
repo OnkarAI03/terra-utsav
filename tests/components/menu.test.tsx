@@ -12,7 +12,7 @@ afterEach(cleanup);
 
 describe("menu configuration", () => {
   it("has the two dishes and the homemade diyas, with no invented prices", () => {
-    expect(DEFAULT_PRODUCTS.map((p) => p.slug)).toEqual(["chocolate-bomb", "chat-papdi", "diwali-diyas"]);
+    expect(DEFAULT_PRODUCTS.map((p) => p.slug)).toEqual(["chocolate-bomb", "aalu-ponge", "diwali-diyas"]);
     expect(DEFAULT_PRODUCTS.every((p) => p.pricePaise === null)).toBe(true);
     expect(DEFAULT_PRODUCTS.find((p) => p.slug === "diwali-diyas")?.category).toBe("diyas");
   });

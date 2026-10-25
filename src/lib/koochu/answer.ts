@@ -17,6 +17,8 @@ export interface KoochuFacts {
     contactEmail: string | null;
   };
   rewards: {
+    /** "local": no database, the phone keeps a winner card and the team hands over the prize. "coupons": server-checked coupons. */
+    mode: "local" | "coupons";
     rewardsEnabled: boolean;
     couponValueText: string | null;
     maxRedemptions: number;
@@ -108,11 +110,11 @@ const PHRASES: [RegExp, Topic, number][] = [
 
 const PRODUCT_WORDS: Record<string, string[]> = {
   "chocolate-bomb": ["chocolate", "choco", "bomb", "bombs"],
-  "chat-papdi": ["chat", "chaat", "papdi", "papri", "chatpapdi"],
+  "aalu-ponge": ["aalu", "aloo", "alu", "ponge", "ponga", "potato", "aaluponge", "alooponge"],
   "diwali-diyas": ["diya", "diyas", "diva", "divas", "lamp", "lamps", "panti", "deep"],
 };
 
-const DEFAULT_CHIPS = ["When and where?", "What's on the menu?", "How do I win a coupon?", "Brick challenge rules"];
+const DEFAULT_CHIPS = ["When and where?", "What's on the menu?", "How do I win a prize?", "Brick challenge rules"];
 
 function normalise(question: string): string[] {
   return question
@@ -221,7 +223,7 @@ function menuReply(f: KoochuFacts, pricesOnly = false): KoochuReply {
       ? "Prices aren't on the website yet. The team will announce them before the Mandi, and they'll show up on the menu page."
       : `Prices: ${sentenceList(items)}.`
     : `At the counter: ${sentenceList(items)}.${anyUnknown ? " Prices will be announced before the Mandi." : ""} Plus the 60-second brick challenge and my game.`;
-  return { topic: pricesOnly ? "price" : "menu", text, links: [linkMenu], chips: ["Tell me about the Chocolate Bomb", "Tell me about the diyas", "How do I win a coupon?"] };
+  return { topic: pricesOnly ? "price" : "menu", text, links: [linkMenu], chips: ["Tell me about the Chocolate Bomb", "Tell me about the diyas", "How do I win a prize?"] };
 }
 
 function memberReply(f: KoochuFacts, tokens: string[]): KoochuReply | null {
@@ -244,7 +246,7 @@ function reply(topic: Topic, f: KoochuFacts, tokens: string[]): KoochuReply {
     case "greeting":
       return {
         topic,
-        text: "Meow! I'm Mini, the TERRA UTSAV kitten. Ask me about the date and place, the menu, my game and its coupons, the brick challenge or the team.",
+        text: "Meow! I'm Mini, the TERRA UTSAV kitten. Ask me about the date and place, the menu, my game and its prizes, the brick challenge or the team.",
         links: [],
         chips: DEFAULT_CHIPS,
       };
@@ -281,9 +283,19 @@ function reply(topic: Topic, f: KoochuFacts, tokens: string[]): KoochuReply {
         topic,
         text: `Catch Mini has ${levels.length} quick levels: ${sentenceList(levels.map((l) => l.name))}. Tap me when I pop out of the Diwali gift boxes, don't tap the snacks, and catch enough before the timer ends. Practice is free and unlimited.`,
         links: [linkGame, { label: "Game rules", href: "/rules#game" }],
-        chips: ["How do I win a coupon?", "Do I need to sign up?"],
+        chips: ["How do I win a prize?", "Do I need to sign up?"],
       };
     case "coupon": {
+      if (f.rewards.mode === "local") {
+        const day = [f.event.dateText, f.event.timeText].filter(Boolean).join(", ");
+        const value = f.rewards.couponValueText ? ` You win: ${f.rewards.couponValueText}.` : "";
+        return {
+          topic,
+          text: `No sign-up: tap Play for a prize and you get ${attempts} prize attempt${attempts === 1 ? "" : "s"} on your phone. Clear all ${levels.length} levels in one attempt and you'll see "Congratulations! You won!" with a winner card. Collect your prize from the TERRA UTSAV team at the stall${day ? ` (${day})` : ""}: show them the card, live on your phone. One prize per person.${value} It's meant to be hard, so practise first.`,
+          links: [linkGame, { label: "My prize", href: "/rewards" }, { label: "Prize rules", href: "/rules#coupons" }],
+          chips: ["Do I need to sign up?", "How do I play?"],
+        };
+      }
       const value = f.rewards.couponValueText ? ` A coupon is worth: ${f.rewards.couponValueText}.` : " What a coupon is worth will be announced by the organisers.";
       const paused = f.rewards.rewardsEnabled ? "" : " Coupons are paused right now.";
       const day = [f.event.dateText, f.event.timeText].filter(Boolean).join(", ");
@@ -298,16 +310,19 @@ function reply(topic: Topic, f: KoochuFacts, tokens: string[]): KoochuReply {
     case "signin":
       return {
         topic,
-        text: "No sign-up and no sign-in: just open the game and play. Your coupon appears on screen and stays in My coupons on that phone. Coupons can be won on event day only, one per person. (Signing in is only for TERRA UTSAV staff.)",
+        text:
+          f.rewards.mode === "local"
+            ? "No sign-up and no sign-in: just open the game and play. If you win, your winner card stays under My prize on that phone. Collect your prize from our team at the stall, one per person. (Signing in is only for TERRA UTSAV staff.)"
+            : "No sign-up and no sign-in: just open the game and play. Your coupon appears on screen and stays in My prize on that phone. Coupons can be won on event day only, one per person. (Signing in is only for TERRA UTSAV staff.)",
         links: [linkGame, linkRules],
-        chips: ["How do I win a coupon?", "Privacy and rules"],
+        chips: ["How do I win a prize?", "Privacy and rules"],
       };
     case "challenge":
       return {
         topic,
         text: `Hold one wet brick in one hand for ${f.challenge.seconds} seconds. A TERRA UTSAV team member explains the rules, supervises and times every attempt, and you can stop at any moment.${f.challenge.rulesApproved ? "" : " (The safety rules are a draft until the organisers approve them.)"}`,
         links: [{ label: "The brick challenge", href: "/challenge" }],
-        chips: ["How do I win a coupon?", "When and where?"],
+        chips: ["How do I win a prize?", "When and where?"],
       };
     case "team": {
       const member = memberReply(f, tokens);
@@ -360,14 +375,14 @@ function reply(topic: Topic, f: KoochuFacts, tokens: string[]): KoochuReply {
         topic,
         text: "There are four mystery eggs hidden on this site. I'm not telling where, but the bottom of every page has hints. Meow.",
         links: [],
-        chips: ["How do I win a coupon?"],
+        chips: ["How do I win a prize?"],
       };
     case "rules":
       return {
         topic,
         text: "The game, coupon, brick challenge and privacy rules are all on the Rules page.",
         links: [linkRules],
-        chips: ["How do I win a coupon?", "Brick challenge rules"],
+        chips: ["How do I win a prize?", "Brick challenge rules"],
       };
     case "payment":
       return {
@@ -383,7 +398,7 @@ function reply(topic: Topic, f: KoochuFacts, tokens: string[]): KoochuReply {
 function fallback(f: KoochuFacts): KoochuReply {
   return {
     topic: "unknown",
-    text: "Hmm, my whiskers can't find that on this website. I know about the date and place, the menu, my game and coupons, the brick challenge and the team. For anything else, ask us on Instagram.",
+    text: "Hmm, my whiskers can't find that on this website. I know about the date and place, the menu, my game and prizes, the brick challenge and the team. For anything else, ask us on Instagram.",
     links: instagramLink(f),
     chips: DEFAULT_CHIPS,
   };
@@ -423,7 +438,7 @@ export function answer(question: string, facts: KoochuFacts): KoochuReply {
       topic: "event",
       text: `${whenText(facts) ?? "The date will be announced soon."} ${whereText(facts)}`,
       links: directions(facts),
-      chips: ["What's on the menu?", "How do I win a coupon?"],
+      chips: ["What's on the menu?", "How do I win a prize?"],
     };
   }
 
@@ -432,7 +447,7 @@ export function answer(question: string, facts: KoochuFacts): KoochuReply {
 
 export const KOOCHU_GREETING: KoochuReply = {
   topic: "greeting",
-  text: "Meow! I'm Mini, the TERRA UTSAV kitten. Ask me anything about the stall: timings, the menu, my game and its coupons, or the brick challenge. I only answer from this website.",
+  text: "Meow! I'm Mini, the TERRA UTSAV kitten. Ask me anything about the stall: timings, the menu, my game and its prizes, or the brick challenge. I only answer from this website.",
   links: [],
   chips: DEFAULT_CHIPS,
 };

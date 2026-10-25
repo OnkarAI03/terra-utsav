@@ -17,9 +17,9 @@ export function gameFacts(settings: Pick<GameSettings, "levels" | "maxRewardAtte
     lastLevel: levels,
     levelsWord: numberWord(levels),
     attemptsWord: numberWord(attempts),
-    /** What winning gets you: "50% off a Chocolate Bomb", or "a coupon" until the value is set. */
-    prize: prize || "a coupon",
-    /** "3 levels · win 50% off a Chocolate Bomb", or "3 levels · 2 attempts · win a coupon" */
-    subline: prize ? `${levelsText} · win ${prize}` : `${levelsText} · ${attempts} attempt${attempts === 1 ? "" : "s"} · win a coupon`,
+    /** What winning gets you: "a prize", unless an admin names a specific one. */
+    prize: prize || "a prize",
+    /** "3 levels · 2 attempts · win a prize", or "3 levels · win <the named prize>" */
+    subline: prize ? `${levelsText} · win ${prize}` : `${levelsText} · ${attempts} attempt${attempts === 1 ? "" : "s"} · win a prize`,
   };
 }

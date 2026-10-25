@@ -1,18 +1,20 @@
 import type { Metadata } from "next";
 import { ArrowRight, Info } from "lucide-react";
 import { CouponTicket, type TicketState } from "@/components/rewards/CouponTicket";
+import { LocalPrizeWallet } from "@/components/rewards/LocalPrizeWallet";
 import { Tilt } from "@/components/ui/Tilt";
 import { ButtonLink } from "@/components/ui/Button";
 import { PageHero } from "@/components/ui/PageHero";
 import { getSession } from "@/lib/auth";
-import { getGameSettings, getRewardSettings } from "@/lib/data/public";
+import { getEventSettings, getGameSettings, getRewardSettings } from "@/lib/data/public";
+import { eventDayText } from "@/lib/game/window";
 import { isSupabaseConfigured } from "@/lib/env";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "My coupons",
-  description: "Your TERRA UTSAV reward coupons.",
+  title: "My prize",
+  description: "Your TERRA UTSAV Catch Mini prize.",
   alternates: { canonical: "/rewards" },
   robots: { index: false, follow: false },
 };
@@ -38,15 +40,15 @@ function ticketState(c: CouponRow): TicketState {
 }
 
 export default async function RewardsPage() {
+  // No database: the winner card lives on the phone that won it (see src/lib/game/prize.ts).
   if (!isSupabaseConfigured()) {
+    const [rewards, event] = await Promise.all([getRewardSettings(), getEventSettings()]);
     return (
       <>
-        <PageHero title="My coupons" intro="Coupons appear here once reward play is switched on for the stall." />
+        <PageHero title="My prize" intro="Win Catch Mini on this phone and your winner card shows up here. No sign-up needed." />
         <section className="bg-cream-200 py-20 text-ink">
           <div className="shell">
-            <p className="max-w-xl text-[1.05rem]">
-              Coupons can be won on event day only. Practise the game in the meantime: the levels are the same.
-            </p>
+            <LocalPrizeWallet prize={rewards.couponValueText} eventDay={eventDayText(event)} />
           </div>
         </section>
       </>
@@ -59,7 +61,7 @@ export default async function RewardsPage() {
   if (!session) {
     return (
       <>
-        <PageHero title="My coupons" intro="Coupons you win show up here, on the phone and browser you played on. No sign-up needed." />
+        <PageHero title="My prize" intro="Coupons you win show up here, on the phone and browser you played on. No sign-up needed." />
         <section className="bg-cream-200 py-20 text-ink">
           <div className="shell">
             <div className="max-w-xl rounded-[var(--radius-panel)] bg-cream-100 p-8">
@@ -96,7 +98,7 @@ export default async function RewardsPage() {
   return (
     <>
       <PageHero
-        title="My coupons"
+        title="My prize"
         intro={
           session.user.is_anonymous || !session.user.email
             ? "Coupons won on this phone. Show one at the TERRA UTSAV stall to use it. One coupon per person."

@@ -29,7 +29,7 @@ describe("public routes render without a database", () => {
     const { default: Page } = await import("@/app/page");
     render(await Page());
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Came for the Food. Stayed for the Chaos.");
-    for (const name of ["Chocolate Bomb", "Chat Papdi", "Homemade Diyas", "60-Second Brick Challenge", "Catch Mini"]) {
+    for (const name of ["Chocolate Bomb", "Aalu Ponge", "Homemade Diyas", "60-Second Brick Challenge", "Catch Mini"]) {
       expect(screen.getAllByText(name).length).toBeGreaterThan(0);
     }
     expect(screen.getAllByText("Tuesday, 27 October 2026").length).toBeGreaterThan(0);
@@ -55,13 +55,13 @@ describe("public routes render without a database", () => {
     expect(screen.getByText(/Draft rules: waiting for organiser approval/)).toBeInTheDocument();
   });
 
-  it("rules: attempts, coupons, privacy", async () => {
+  it("rules: attempts, prizes, privacy (no database, as on the live site)", async () => {
     const { default: Page } = await import("@/app/rules/page");
     render(await Page());
-    expect(screen.getByText(/Each phone or browser gets 2 reward/)).toBeInTheDocument();
-    expect(screen.getByText(/No sign-up needed: just tap Play for a reward\. Coupons can be won on event day only/)).toBeInTheDocument();
-    expect(screen.getByText(/our team redeems only one coupon for each person/)).toBeInTheDocument();
-    expect(screen.getByText(/Practice mode is free and unlimited. It never awards coupons./)).toBeInTheDocument();
+    expect(screen.getByText(/No sign-up needed: just tap Play for a prize\. Each phone gets 2 prize attempts/)).toBeInTheDocument();
+    expect(screen.getByText(/Collect your prize from the TERRA UTSAV team at the stall/)).toBeInTheDocument();
+    expect(screen.getByText(/screenshots and forwarded photos don.t count/)).toBeInTheDocument();
+    expect(screen.getByText(/Practice mode is free and unlimited. It never wins a prize./)).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Your data" })).toBeInTheDocument();
   });
 
@@ -79,10 +79,10 @@ describe("public routes render without a database", () => {
     expect(screen.getByText(/Want your photo changed or removed/)).toBeInTheDocument();
   });
 
-  it("game: practice available, reward play explains sign-in is not switched on", async () => {
+  it("game: practice available, and prize play without the database", async () => {
     const { default: Page } = await import("@/app/game/page");
     render(await Page());
     expect(screen.getByRole("button", { name: "Practise level 1" })).toBeInTheDocument();
-    expect(await screen.findByText(/Reward play isn't switched on yet/)).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "Play for a prize" })).toBeInTheDocument();
   });
 });

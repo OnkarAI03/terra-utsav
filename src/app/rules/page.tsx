@@ -4,6 +4,7 @@ import { PageHero } from "@/components/ui/PageHero";
 import { Reveal } from "@/components/ui/Reveal";
 import { CHALLENGE } from "@/content/challenge";
 import { getEventSettings, getGameSettings, getRewardSettings } from "@/lib/data/public";
+import { isSupabaseConfigured } from "@/lib/env";
 import { formatDateTime } from "@/lib/format";
 import { gameFacts } from "@/lib/game/copy";
 import { eventDayText } from "@/lib/game/window";
@@ -13,7 +14,7 @@ export const revalidate = 60;
 
 export const metadata = pageMetadata({
   title: "Rules",
-  description: "Rules for the TERRA UTSAV stall: the Catch Mini game, reward coupons, the wet-brick challenge and how we use your data.",
+  description: "Rules for the TERRA UTSAV stall: the Catch Mini game, prizes, the wet-brick challenge and how we use your data.",
   path: "/rules",
 });
 
@@ -39,6 +40,8 @@ export default async function RulesPage() {
   const attempts = game.maxRewardAttempts;
   const eventDay = eventDayText(event);
   const facts = gameFacts(game);
+  // Without the database, prizes are won on the phone and collected from the team (src/lib/game/prize.ts).
+  const offline = !isSupabaseConfigured();
   const expiry = rewards.expiresAt
     ? `Coupons expire on ${formatDateTime(rewards.expiresAt)}.`
     : rewards.expiresAfterHours
@@ -55,7 +58,7 @@ export default async function RulesPage() {
             {[
               ["#event", "The event"],
               ["#game", "The game"],
-              ["#coupons", "Coupons"],
+              ["#coupons", offline ? "Prizes" : "Coupons"],
               ["#challenge", "Brick challenge"],
               ["#privacy", "Your data"],
             ].map(([href, label]) => (
@@ -80,92 +83,157 @@ export default async function RulesPage() {
           </Block>
 
           <Block id="game" title="Catch Mini">
-            <ul>
-              <li>
-                <Dot />
-                Practice mode is free and unlimited. It never awards coupons.
-              </li>
-              <li>
-                <Dot />
-                No sign-up needed: just tap Play for a reward. Coupons can be won on event day only
-                {eventDay ? ` (${eventDay})` : ""}. Each phone or browser gets {attempts} reward{" "}
-                {attempts === 1 ? "attempt" : "attempts"}. The organisers may add an extra attempt if something went wrong on our side.
-              </li>
-              <li>
-                <Dot />
-                An attempt is {facts.levelsWord} levels played in order. Fail a level and that attempt ends. Clear Level{" "}
-                {facts.lastLevel} to win.
-              </li>
-              <li>
-                <Dot />
-                You can pause between levels and come back later. Once a level starts it must be finished: leaving, refreshing or
-                closing the page during a level ends that attempt.
-              </li>
-              <li>
-                <Dot />
-                Tapping a snack instead of the kitten costs a heart. Lose all your hearts, or run out of time, and the level is lost.
-              </li>
-              <li>
-                <Dot />
-                Every tap is checked on our server. Results that could not have happened (faster than real time, inhumanly quick
-                reactions, automated tapping) do not count. Bots and scripts may be disqualified.
-              </li>
-              <li>
-                <Dot />
-                It is meant to be hard: we expect roughly 2 or 3 players in 10 to win across their attempts, so practise first.
-              </li>
-            </ul>
-          </Block>
-
-          <Block id="coupons" title="Coupons">
-            <ul>
-              <li>
-                <Dot />
-                Win a reward attempt and your coupon appears on screen. It also stays in{" "}
-                <Link href="/rewards" className="font-extrabold text-maroon-600 underline underline-offset-4">
-                  My coupons
-                </Link>{" "}
-                on the phone and browser you played on.
-              </li>
-              <li>
-                <Dot />
-                What it is worth: {rewards.couponValueText ?? "to be announced by the organisers"}.
-              </li>
-              <li>
-                <Dot />
-                {rewards.maxRedemptions === 1
-                  ? "Each coupon can be redeemed once."
-                  : `Each coupon can be redeemed ${rewards.maxRedemptions} times.`}{" "}
-                A team member redeems it by scanning or typing the code. Keep your code to yourself: a coupon works once, for
-                whoever shows it first.
-              </li>
-              <li>
-                <Dot />
-                <strong>One coupon per person.</strong> Playing again on another phone or browser can win another coupon on screen,
-                but our team redeems only one coupon for each person at the stall.
-              </li>
-              <li>
-                <Dot />
-                {expiry}
-              </li>
-              {rewards.maxCouponsTotal !== null && (
+            {offline ? (
+              <ul>
                 <li>
                   <Dot />
-                  There are {rewards.maxCouponsTotal} coupons in total. When they run out, winners are still celebrated but no new
-                  coupons are issued.
+                  Practice mode is free and unlimited. It never wins a prize.
                 </li>
-              )}
-              <li>
-                <Dot />
-                {rewards.redemptionInstructions}
-              </li>
-            </ul>
-            {!rewards.confirmed && (
-              <p className="rounded-2xl bg-gold-300 px-4 py-3 text-[0.98rem] font-bold">
-                Coupon terms are provisional until the organisers confirm them.
-              </p>
+                <li>
+                  <Dot />
+                  No sign-up needed: just tap Play for a prize. Each phone gets {attempts} prize {attempts === 1 ? "attempt" : "attempts"}.
+                  Prize play is open now and closes when the event ends.
+                </li>
+                <li>
+                  <Dot />
+                  An attempt is {facts.levelsWord} levels played in a row. Lose a level and that attempt ends. Clear Level {facts.lastLevel} to
+                  win.
+                </li>
+                <li>
+                  <Dot />
+                  Once a level starts it must be finished: leaving, refreshing or closing the page during a level ends that attempt.
+                </li>
+                <li>
+                  <Dot />
+                  Tapping a snack instead of the kitten costs a heart. Lose all your hearts, or run out of time, and the level is lost.
+                </li>
+                <li>
+                  <Dot />
+                  It is meant to be hard, so practise first. Our team may ask to see you play before handing over a prize.
+                </li>
+              </ul>
+            ) : (
+              <ul>
+                <li>
+                  <Dot />
+                  Practice mode is free and unlimited. It never awards coupons.
+                </li>
+                <li>
+                  <Dot />
+                  No sign-up needed: just tap Play for a reward. Coupons can be won on event day only
+                  {eventDay ? ` (${eventDay})` : ""}. Each phone or browser gets {attempts} reward{" "}
+                  {attempts === 1 ? "attempt" : "attempts"}. The organisers may add an extra attempt if something went wrong on our side.
+                </li>
+                <li>
+                  <Dot />
+                  An attempt is {facts.levelsWord} levels played in order. Fail a level and that attempt ends. Clear Level{" "}
+                  {facts.lastLevel} to win.
+                </li>
+                <li>
+                  <Dot />
+                  You can pause between levels and come back later. Once a level starts it must be finished: leaving, refreshing or
+                  closing the page during a level ends that attempt.
+                </li>
+                <li>
+                  <Dot />
+                  Tapping a snack instead of the kitten costs a heart. Lose all your hearts, or run out of time, and the level is lost.
+                </li>
+                <li>
+                  <Dot />
+                  Every tap is checked on our server. Results that could not have happened (faster than real time, inhumanly quick
+                  reactions, automated tapping) do not count. Bots and scripts may be disqualified.
+                </li>
+                <li>
+                  <Dot />
+                  It is meant to be hard: we expect roughly 2 or 3 players in 10 to win across their attempts, so practise first.
+                </li>
+              </ul>
             )}
           </Block>
+
+          {offline ? (
+            <Block id="coupons" title="Prizes">
+              <ul>
+                <li>
+                  <Dot />
+                  Win a prize attempt and you see &ldquo;Congratulations! You won!&rdquo; with a winner card. It also stays under{" "}
+                  <Link href="/rewards" className="font-extrabold text-maroon-600 underline underline-offset-4">
+                    My prize
+                  </Link>{" "}
+                  on the phone and browser you played on.
+                </li>
+                <li>
+                  <Dot />
+                  Collect your prize from the TERRA UTSAV team at the stall{eventDay ? ` (${eventDay})` : ""}.
+                  {rewards.couponValueText ? ` What you win: ${rewards.couponValueText}.` : ""}
+                </li>
+                <li>
+                  <Dot />
+                  Show the winner card live on your phone. Its clock keeps ticking, so screenshots and forwarded photos don&apos;t count. A
+                  team member hands over the prize and taps Prize given.
+                </li>
+                <li>
+                  <Dot />
+                  <strong>One prize per person.</strong> Winning again on another phone or browser doesn&apos;t get you a second prize at the
+                  stall.
+                </li>
+                <li>
+                  <Dot />
+                  Clearing your browser&apos;s data deletes the winner card, so collect your prize first.
+                </li>
+              </ul>
+            </Block>
+          ) : (
+            <Block id="coupons" title="Coupons">
+              <ul>
+                <li>
+                  <Dot />
+                  Win a reward attempt and your coupon appears on screen. It also stays in{" "}
+                  <Link href="/rewards" className="font-extrabold text-maroon-600 underline underline-offset-4">
+                    My coupons
+                  </Link>{" "}
+                  on the phone and browser you played on.
+                </li>
+                <li>
+                  <Dot />
+                  What it is worth: {rewards.couponValueText ?? "to be announced by the organisers"}.
+                </li>
+                <li>
+                  <Dot />
+                  {rewards.maxRedemptions === 1
+                    ? "Each coupon can be redeemed once."
+                    : `Each coupon can be redeemed ${rewards.maxRedemptions} times.`}{" "}
+                  A team member redeems it by scanning or typing the code. Keep your code to yourself: a coupon works once, for
+                  whoever shows it first.
+                </li>
+                <li>
+                  <Dot />
+                  <strong>One coupon per person.</strong> Playing again on another phone or browser can win another coupon on screen,
+                  but our team redeems only one coupon for each person at the stall.
+                </li>
+                <li>
+                  <Dot />
+                  {expiry}
+                </li>
+                {rewards.maxCouponsTotal !== null && (
+                  <li>
+                    <Dot />
+                    There are {rewards.maxCouponsTotal} coupons in total. When they run out, winners are still celebrated but no new
+                    coupons are issued.
+                  </li>
+                )}
+                <li>
+                  <Dot />
+                  {rewards.redemptionInstructions}
+                </li>
+              </ul>
+              {!rewards.confirmed && (
+                <p className="rounded-2xl bg-gold-300 px-4 py-3 text-[0.98rem] font-bold">
+                  Coupon terms are provisional until the organisers confirm them.
+                </p>
+              )}
+            </Block>
+          )}
 
           <Block id="challenge" title="The wet-brick challenge">
             <p>
@@ -193,16 +261,26 @@ export default async function RulesPage() {
 
           <Block id="privacy" title="Your data">
             <ul>
-              <li>
-                <Dot />
-                Players don&apos;t sign up. When you play for a reward, this site gives your phone a random player ID and keeps your
-                game attempts and results and any coupon you win. No name, email address or phone number.
-              </li>
-              <li>
-                <Dot />
-                Clearing your browser&apos;s data, or switching browsers, loses that player ID, along with My coupons on that phone.
-                A coupon already won still works if you have the code: write it down or take a screenshot.
-              </li>
+              {offline ? (
+                <li>
+                  <Dot />
+                  Players don&apos;t sign up. Prize play keeps its record (attempts used and any winner card) only on your phone, in this
+                  browser. Nothing about your game is sent to us.
+                </li>
+              ) : (
+                <>
+                  <li>
+                    <Dot />
+                    Players don&apos;t sign up. When you play for a reward, this site gives your phone a random player ID and keeps your
+                    game attempts and results and any coupon you win. No name, email address or phone number.
+                  </li>
+                  <li>
+                    <Dot />
+                    Clearing your browser&apos;s data, or switching browsers, loses that player ID, along with My coupons on that phone.
+                    A coupon already won still works if you have the code: write it down or take a screenshot.
+                  </li>
+                </>
+              )}
               <li>
                 <Dot />
                 Team photos on this site are published only with each person&apos;s consent.

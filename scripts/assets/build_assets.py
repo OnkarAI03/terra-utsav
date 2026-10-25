@@ -359,8 +359,7 @@ def build_food() -> None:
     hp = Image.open(os.path.join(REF, "homepage-approved.webp")).convert("RGB")
     bomb = hp.crop((0, 500, 400, 1000))
     save_webp(upscale(bomb, 2.0), out("food", "chocolate-bomb.webp"), 82)
-    papdi = hp.crop((1130, 560, 1500, 1000))
-    save_webp(upscale(papdi, 2.0), out("food", "chat-papdi.webp"), 82)
+    # Aalu Ponge (images/food/aalu-ponge.webp) is the team's own photo, not built from concept art.
 
 
 def build_logo() -> None:

@@ -1,6 +1,7 @@
 import "server-only";
 import { CHALLENGE } from "@/content/challenge";
 import { getEventSettings, getGameSettings, getProducts, getRewardSettings, getTeam } from "@/lib/data/public";
+import { isSupabaseConfigured } from "@/lib/env";
 import { AVAILABILITY_LABEL, formatPrice } from "@/lib/format";
 import type { KoochuFacts } from "./answer";
 
@@ -24,6 +25,7 @@ export async function loadKoochuFacts(): Promise<KoochuFacts> {
       contactEmail: event.contactEmail,
     },
     rewards: {
+      mode: isSupabaseConfigured() ? "coupons" : "local",
       rewardsEnabled: rewards.rewardsEnabled,
       couponValueText: rewards.couponValueText,
       maxRedemptions: rewards.maxRedemptions,

@@ -12,15 +12,21 @@ import { Button, ButtonLink } from "@/components/ui/Button";
 import { cn } from "@/lib/cn";
 import type { GameSettings, LevelConfig } from "@/lib/game/config";
 import { gameFacts } from "@/lib/game/copy";
+import { localPrizeOpen, markLocalPrizeGiven, readLocalPrize, recordLocalWin, spendLocalAttempt, type LocalPrize } from "@/lib/game/prize";
 import { randomSeed } from "@/lib/game/rng";
 import { sfx } from "@/lib/game/sound";
 import type { RewardPhase } from "@/lib/game/window";
 import { GameBoard, type BoardResult } from "./GameBoard";
 import { ResultKitten } from "./ResultKitten";
 import { loadSprites } from "./sprites";
+import { WinnerCard } from "./WinnerCard";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 
-type Mode = "practice" | "reward";
+/**
+ * "reward" is server-checked play for a coupon (Supabase configured). "prize" is the same three
+ * levels without the database: the phone keeps the record and the team checks a live winner card.
+ */
+type Mode = "practice" | "reward" | "prize";
 
 interface Status {
   configured: boolean;
@@ -60,6 +66,7 @@ type Screen =
   | { name: "submitting" }
   | { name: "level-passed"; catches: number }
   | { name: "won"; coupon: Coupon | null; reward: string | null }
+  | { name: "won-local" }
   | { name: "lost"; reason: string; catches: number }
   | { name: "error"; message: string; retry?: () => void };
 
@@ -104,11 +111,14 @@ export function GameExperience({
   settings,
   eventDay,
   couponValueText,
+  eventEndsAt = null,
 }: {
   settings: GameSettings;
   /** When coupons can be won, e.g. "Tuesday, 27 October 2026, 9 am to 3 pm". */
   eventDay: string | null;
   couponValueText: string | null;
+  /** Prize play without the database closes when the event ends. */
+  eventEndsAt?: string | null;
 }) {
   const reduce = usePrefersReducedMotion();
   const facts = gameFacts(settings, couponValueText);
@@ -117,6 +127,8 @@ export function GameExperience({
   const [screen, setScreen] = useState<Screen>({ name: "home" });
   const [sound, setSound] = useState(false);
   const [practiceLevel, setPracticeLevel] = useState(1);
+  // This phone's prize record, used when the database is not configured.
+  const [local, setLocal] = useState<LocalPrize | null>(null);
   // Once someone plays with the keys, every later level shows the key numbers from the start.
   const [keyboardPlayer, setKeyboardPlayer] = useState(false);
 
@@ -132,6 +144,7 @@ export function GameExperience({
   useEffect(() => {
     void refreshStatus();
     void loadSprites();
+    setLocal(readLocalPrize());
     try {
       setSound(localStorage.getItem("tu-sound") === "on");
     } catch {
@@ -157,6 +170,14 @@ export function GameExperience({
     setRun({ mode: "practice", settings, level });
     setScreen({ name: "level-intro" });
   };
+
+  /** Prize play without the database. The attempt is counted when Level 1 starts. */
+  const startPrize = () => {
+    setRun({ mode: "prize", settings, level: 1, attemptNumber: readLocalPrize().attemptsUsed + 1 });
+    setScreen({ name: "level-intro" });
+  };
+
+  const givePrize = () => setLocal(markLocalPrizeGiven());
 
   /**
    * No sign-up: the first time a phone or browser plays for a reward, it gets a nameless guest
@@ -216,6 +237,7 @@ export function GameExperience({
       }
       seed = r.data.seed;
     } else {
+      if (run.mode === "prize" && run.level === 1) setLocal(spendLocalAttempt());
       seed = randomSeed();
     }
     await loadSprites();
@@ -242,12 +264,16 @@ export function GameExperience({
   const onBoardFinish = useCallback(
     async (result: BoardResult) => {
       if (!run) return;
-      if (run.mode === "practice") {
+      if (run.mode !== "reward") {
         if (result.outcome === "passed" && !result.aborted) {
           if (sound) sfx.levelUp();
           // The last level comes from the live settings (3 by default; admins may choose 1 to 5).
-          if (run.level >= run.settings.levels.length) setScreen({ name: "won", coupon: null, reward: "practice" });
-          else setScreen({ name: "level-passed", catches: result.catches });
+          if (run.level >= run.settings.levels.length) {
+            if (run.mode === "prize") {
+              setLocal(recordLocalWin());
+              setScreen({ name: "won-local" });
+            } else setScreen({ name: "won", coupon: null, reward: "practice" });
+          } else setScreen({ name: "level-passed", catches: result.catches });
         } else {
           if (sound) sfx.lose();
           setScreen({ name: "lost", reason: result.aborted ? "abandoned" : result.outcome, catches: result.catches });
@@ -312,6 +338,10 @@ export function GameExperience({
   // ---------------------------------------------------------------- rendering
   const attemptsLeft =
     status?.attemptsAllowed !== undefined && status?.attemptsUsed !== undefined ? Math.max(0, status.attemptsAllowed - status.attemptsUsed) : null;
+  // No database on this site: prizes are won and collected through the phone's own record.
+  const offline = status !== null && !status.configured;
+  const prizeLeft = local ? Math.max(0, settings.maxRewardAttempts - local.attemptsUsed) : null;
+  const leftFor = (mode: Mode) => (mode === "prize" ? prizeLeft : attemptsLeft);
   const fade = { initial: reduce ? false : { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0 }, exit: reduce ? undefined : { opacity: 0, y: -10 }, transition: { duration: 0.28, ease: [0.22, 1, 0.36, 1] as const } };
 
   return (
@@ -363,8 +393,31 @@ export function GameExperience({
                     Practise level {practiceLevel}
                   </Button>
                 )}
-                <RewardButton status={status} attemptsLeft={attemptsLeft} onStart={() => void playForReward()} />
+                {offline ? (
+                  <PrizeButton
+                    local={local}
+                    open={localPrizeOpen(eventEndsAt)}
+                    left={prizeLeft}
+                    onStart={() => setScreen({ name: "confirm" })}
+                    onShow={() => setScreen({ name: "won-local" })}
+                  />
+                ) : (
+                  <RewardButton status={status} attemptsLeft={attemptsLeft} onStart={() => void playForReward()} />
+                )}
               </div>
+
+              {offline && !local?.win && (
+                <p className="mt-4 max-w-md text-[1rem] font-bold text-gold-300">
+                  No sign-up needed. Win all {facts.levelsWord} levels, then collect your prize from our team at the stall
+                  {eventDay ? `: ${eventDay}` : ""}.
+                </p>
+              )}
+
+              {offline && local && !local.win && local.attemptsUsed > 0 && (
+                <p className="mt-4 text-[1rem] font-bold text-cream-100">
+                  Prize attempts used on this phone: {Math.min(local.attemptsUsed, settings.maxRewardAttempts)} of {settings.maxRewardAttempts}
+                </p>
+              )}
 
               {status?.rewardPhase === "before" && (
                 <p className="mt-4 max-w-md text-[1rem] font-bold text-gold-300">
@@ -403,7 +456,9 @@ export function GameExperience({
                 </li>
                 <li className="flex gap-3">
                   <Trophy aria-hidden className="mt-1 h-5 w-5 shrink-0 text-gold-400" />
-                  Clear Level {facts.lastLevel} in a reward attempt to win {facts.prize}. One coupon per player.
+                  {offline
+                    ? `Clear Level ${facts.lastLevel} in a prize attempt and you win! Collect your prize from our team at the stall. One prize per player.`
+                    : `Clear Level ${facts.lastLevel} in a reward attempt to win ${facts.prize}. One coupon per player.`}
                 </li>
               </ul>
               <p className="mt-4 text-[0.98rem] text-cream-100/90 [@media(pointer:coarse)]:hidden">
@@ -418,7 +473,31 @@ export function GameExperience({
           </motion.section>
         )}
 
-        {screen.name === "confirm" && (
+        {screen.name === "confirm" && offline && (
+          <motion.section key="confirm-prize" {...fade} className="mx-auto max-w-xl rounded-[var(--radius-panel)] bg-cream-100 p-7 text-ink md:p-9">
+            <h2 className="display-m text-choc-900">Use a prize attempt?</h2>
+            <p className="mt-4 text-[1.05rem] leading-relaxed">
+              This will be attempt {Math.min((local?.attemptsUsed ?? 0) + 1, settings.maxRewardAttempts)} of {settings.maxRewardAttempts} on this
+              phone.
+            </p>
+            <ul className="mt-4 flex flex-col gap-2 text-[1rem] leading-relaxed">
+              <li>• Play the {facts.levelsWord} levels in a row. Lose one and the attempt ends.</li>
+              <li>• Once a level starts, finish it. Leaving or refreshing during a level ends the attempt.</li>
+              <li>• Win and you get a live winner card. Show it to our team at the stall to collect your prize.</li>
+              <li>• One prize per person.</li>
+            </ul>
+            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+              <Button size="lg" onClick={startPrize} trailing={<ArrowRight />}>
+                Let&apos;s go
+              </Button>
+              <Button variant="dark" size="lg" onClick={goHome}>
+                Not now
+              </Button>
+            </div>
+          </motion.section>
+        )}
+
+        {screen.name === "confirm" && !offline && (
           <motion.section key="confirm" {...fade} className="mx-auto max-w-xl rounded-[var(--radius-panel)] bg-cream-100 p-7 text-ink md:p-9">
             <h2 className="display-m text-choc-900">Use a reward attempt?</h2>
             <p className="mt-4 text-[1.05rem] leading-relaxed">
@@ -460,7 +539,7 @@ export function GameExperience({
           <motion.section key={`intro-${run.level}`} {...fade} className="mx-auto max-w-2xl text-center">
             <LevelPath current={run.level} levels={run.settings.levels} />
             <p className="mt-8 font-display text-[1.4rem] text-gold-300">
-              {run.mode === "practice" ? "Practice" : `Reward attempt ${run.attemptNumber}`} · Level {cfg.level}
+              {run.mode === "practice" ? "Practice" : `${run.mode === "prize" ? "Prize" : "Reward"} attempt ${run.attemptNumber}`} · Level {cfg.level}
             </p>
             <h2 className="display-l text-sticker mt-2">{cfg.name}</h2>
             <p className="mx-auto mt-4 max-w-md text-[1.1rem] font-semibold leading-relaxed text-cream-100">{cfg.blurb}</p>
@@ -469,7 +548,7 @@ export function GameExperience({
               <Stat label="Hearts" value={String(cfg.lives)} />
               <Stat label="Seconds" value={String(Math.round(cfg.durationMs / 1000))} />
             </dl>
-            {run.mode === "reward" && (
+            {run.mode !== "practice" && (
               <p className="mx-auto mt-5 flex max-w-md items-center justify-center gap-2 text-[0.98rem] font-bold text-cream-100">
                 <Lock aria-hidden className="h-4 w-4 text-gold-400" />
                 Once you start, this level must be finished.
@@ -480,7 +559,7 @@ export function GameExperience({
                 Start level {cfg.level}
               </Button>
               <Button variant="outline" size="lg" onClick={goHome}>
-                {run.mode === "reward" ? "Take a break" : "Back"}
+                {run.mode === "practice" ? "Back" : run.mode === "reward" ? "Take a break" : run.level === 1 ? "Not now" : "Give up"}
               </Button>
             </div>
           </motion.section>
@@ -508,7 +587,7 @@ export function GameExperience({
               settings={run.settings}
               sound={sound}
               reduceMotion={reduce}
-              rewardMode={run.mode === "reward"}
+              rewardMode={run.mode !== "practice"}
               showKeys={keyboardPlayer}
               onKeyboard={() => setKeyboardPlayer(true)}
               onFinish={(r) => void onBoardFinish(r)}
@@ -530,15 +609,18 @@ export function GameExperience({
             <ResultKitten mood="cheer" />
             <h2 className="display-l text-sticker mt-4">Level cleared!</h2>
             <p className="mt-3 text-[1.1rem] font-semibold text-cream-100">
-              {screen.catches} kittens caught. Next up: Level {run.mode === "practice" ? run.level + 1 : run.level}.
+              {screen.catches} kittens caught. Next up: Level {run.mode === "reward" ? run.level : run.level + 1}.
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <Button size="lg" trailing={<ArrowRight />} onClick={() => (run.mode === "practice" ? nextPracticeLevel() : setScreen({ name: "level-intro" }))}>
+              <Button size="lg" trailing={<ArrowRight />} onClick={() => (run.mode === "reward" ? setScreen({ name: "level-intro" }) : nextPracticeLevel())}>
                 Next level
               </Button>
-              <Button variant="outline" size="lg" onClick={goHome}>
-                Take a break
-              </Button>
+              {/* A prize attempt lives only on this page, so it carries straight on to the next level. */}
+              {run.mode !== "prize" && (
+                <Button variant="outline" size="lg" onClick={goHome}>
+                  Take a break
+                </Button>
+              )}
             </div>
           </motion.section>
         )}
@@ -546,7 +628,7 @@ export function GameExperience({
         {screen.name === "won" && (
           <motion.section key="won" {...fade} className="mx-auto max-w-2xl text-center">
             <ResultKitten mood="win" />
-            <h2 className="display-l text-sticker-gold mt-4">You caught Mini!</h2>
+            <h2 className="display-l text-sticker-gold mt-4">{screen.reward === "practice" ? "You caught Mini!" : "Congratulations! You won!"}</h2>
             {screen.reward === "practice" ? (
               <p className="mx-auto mt-4 max-w-md text-[1.1rem] font-semibold text-cream-100">
                 All {facts.levelsWord} levels cleared in practice. Now do it for real and win {facts.prize}.
@@ -554,7 +636,8 @@ export function GameExperience({
             ) : screen.coupon ? (
               <>
                 <p className="mx-auto mt-4 max-w-md text-[1.1rem] font-semibold text-cream-100">
-                  Show this coupon at the TERRA UTSAV stall. It&apos;s also saved under My coupons on this phone. One coupon per person.
+                  Please collect your prize from the TERRA UTSAV team: show them this coupon at the stall. It&apos;s also saved under My
+                  prize on this phone. One prize per person.
                 </p>
                 <CouponTicket
                   className="mx-auto mt-8 max-w-xl text-left [--notch:#3a0f17]"
@@ -575,9 +658,27 @@ export function GameExperience({
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
               {screen.coupon && (
                 <ButtonLink href="/rewards" size="lg" trailing={<ArrowRight />}>
-                  My coupons
+                  My prize
                 </ButtonLink>
               )}
+              <Button variant="outline" size="lg" onClick={goHome}>
+                Back to the game
+              </Button>
+            </div>
+          </motion.section>
+        )}
+
+        {screen.name === "won-local" && local?.win && (
+          <motion.section key="won-local" {...fade} className="mx-auto max-w-2xl text-center">
+            <ResultKitten mood="win" />
+            <h2 className="display-l text-sticker-gold mt-4">Congratulations! You won!</h2>
+            <p className="mx-auto mt-4 max-w-lg text-[1.15rem] font-semibold leading-relaxed text-cream-100">
+              {local.win.claimedAt
+                ? "You have collected your prize. Thank you for playing!"
+                : `Please collect your prize from the TERRA UTSAV team at the stall${eventDay ? ` (${eventDay})` : ""}. Show them this card, live on this phone.`}
+            </p>
+            <WinnerCard className="mx-auto mt-8 max-w-xl text-left" win={local.win} prize={couponValueText} onGiven={givePrize} />
+            <div className="mt-8 flex justify-center">
               <Button variant="outline" size="lg" onClick={goHome}>
                 Back to the game
               </Button>
@@ -592,14 +693,16 @@ export function GameExperience({
             <p className="mt-3 text-[1.1rem] font-semibold text-cream-100">{LOST_REASON[screen.reason] ?? LOST_REASON.failed_time}</p>
             <p className="mt-2 text-[1rem] text-cream-100">
               Level {run.level} · {screen.catches} caught
-              {run.mode === "reward" && attemptsLeft !== null && ` · ${attemptsLeft} reward attempt${attemptsLeft === 1 ? "" : "s"} left`}
+              {run.mode !== "practice" &&
+                leftFor(run.mode) !== null &&
+                ` · ${leftFor(run.mode)} ${run.mode} attempt${leftFor(run.mode) === 1 ? "" : "s"} left`}
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
               {run.mode === "practice" ? (
                 <Button size="lg" icon={<RotateCcw />} onClick={() => setScreen({ name: "level-intro" })}>
                   Try the level again
                 </Button>
-              ) : attemptsLeft ? (
+              ) : leftFor(run.mode) ? (
                 <Button size="lg" icon={<RotateCcw />} onClick={() => setScreen({ name: "confirm" })}>
                   Use another attempt
                 </Button>
@@ -633,6 +736,37 @@ export function GameExperience({
 }
 
 const REWARD_NOTE = "max-w-xs text-[0.98rem] font-bold text-gold-300 sm:self-center";
+
+/** The prize button when the site has no database: this phone's own record decides what it says. */
+function PrizeButton({ local, open, left, onStart, onShow }: { local: LocalPrize | null; open: boolean; left: number | null; onStart: () => void; onShow: () => void }) {
+  if (!local) {
+    return (
+      <Button size="lg" disabled icon={<Trophy />}>
+        Checking…
+      </Button>
+    );
+  }
+  if (local.win) {
+    return (
+      <Button size="lg" icon={<Trophy />} onClick={onShow} trailing={<ArrowRight />}>
+        {local.win.claimedAt ? "My winner card" : "Show my winner card"}
+      </Button>
+    );
+  }
+  if (!open) return <p className={REWARD_NOTE}>Prize play has ended. Thank you for playing!</p>;
+  if (left === 0) {
+    return (
+      <Button size="lg" disabled icon={<Lock />}>
+        No prize attempts left
+      </Button>
+    );
+  }
+  return (
+    <Button size="lg" icon={<Trophy />} onClick={onStart} trailing={<ArrowRight />}>
+      Play for a prize
+    </Button>
+  );
+}
 
 function RewardButton({ status, attemptsLeft, onStart }: { status: Status | null; attemptsLeft: number | null; onStart: () => void }) {
   if (!status) {

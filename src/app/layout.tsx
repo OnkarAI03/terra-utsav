@@ -16,7 +16,7 @@ const nunito = Nunito({ subsets: ["latin"], variable: "--font-nunito", display: 
 const kalam = Kalam({ weight: "700", subsets: ["latin"], variable: "--font-kalam", display: "swap" });
 
 const description =
-  "TERRA UTSAV is our college Diwali stall: Chocolate Bombs, Chat Papdi, homemade Diwali diyas, a 60-second wet-brick challenge and Catch Mini, a three-level game with a coupon for winners.";
+  "TERRA UTSAV is our college Diwali stall: Chocolate Bombs, Aalu Ponge, homemade Diwali diyas, a 60-second wet-brick challenge and Catch Mini, a three-level game with a prize for winners.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl()),

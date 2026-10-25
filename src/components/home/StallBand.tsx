@@ -10,7 +10,7 @@ import type { EventSettings } from "@/lib/settings";
 import { EventFacts } from "./EventFacts";
 
 const REASONS = [
-  { icon: CakeSlice, title: "Delicious Food", body: "Chocolate Bombs and Chat Papdi at the counter." },
+  { icon: CakeSlice, title: "Delicious Food", body: "Chocolate Bombs and Aalu Ponge at the counter." },
   { icon: Flame, title: "Homemade Diyas", body: "Take a little Diwali light home with you." },
   { icon: BrickWall, title: "Fun Challenges", body: "Hold one wet brick in one hand for sixty seconds." },
 ];
@@ -20,7 +20,7 @@ export function StallBand({ event, game, prize = null }: { event: EventSettings;
   const facts = gameFacts(game, prize);
   const reasons = [
     ...REASONS,
-    { icon: Ticket, title: "Exciting Coupons", body: `Clear all ${facts.levelsWord} levels of the game to win ${facts.prize}.` },
+    { icon: Ticket, title: "Exciting Prizes", body: `Clear all ${facts.levelsWord} levels of the game to win ${facts.prize}.` },
   ];
   return (
     <section aria-labelledby="happening-title" className="relative overflow-hidden bg-choc-900 pb-20 pt-20 md:pt-28">

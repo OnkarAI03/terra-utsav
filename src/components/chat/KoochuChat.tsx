@@ -13,9 +13,9 @@ const HIDDEN_ON = ["/game", "/admin", "/staff", "/login", "/auth"];
 
 const GREETING: KoochuReply = {
   topic: "greeting",
-  text: "Meow! I'm Mini, the TERRA UTSAV kitten. Ask me about the stall: timings, the menu, my game and its coupons, or the brick challenge. I only answer from this website.",
+  text: "Meow! I'm Mini, the TERRA UTSAV kitten. Ask me about the stall: timings, the menu, my game and its prizes, or the brick challenge. I only answer from this website.",
   links: [],
-  chips: ["When and where?", "What's on the menu?", "How do I win a coupon?", "Brick challenge rules"],
+  chips: ["When and where?", "What's on the menu?", "How do I win a prize?", "Brick challenge rules"],
 };
 
 const OFFLINE: KoochuReply = {

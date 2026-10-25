@@ -41,7 +41,7 @@ describe("Mini answers from the site", () => {
     const r = ask("What's on the menu?");
     expect(r.topic).toBe("menu");
     expect(r.text).toContain("Chocolate Bomb");
-    expect(r.text).toContain("Chat Papdi");
+    expect(r.text).toContain("Aalu Ponge");
     expect(r.text).toContain("Homemade Diwali Diyas");
     expect(r.text).not.toMatch(/₹|\brs\b/i);
     expect(ask("How much does it cost?").text).toContain("Prices aren't on the website yet");
@@ -50,22 +50,25 @@ describe("Mini answers from the site", () => {
   it("describes a dish by name, even with typos and Hindi", () => {
     expect(ask("tell me about the chocolate bomb").topic).toBe("product:chocolate-bomb");
     expect(ask("chocolat bomb kitne ka hai").topic).toBe("product:chocolate-bomb");
-    expect(ask("chaat papdi?").topic).toBe("product:chat-papdi");
+    expect(ask("aloo ponge?").topic).toBe("product:aalu-ponge");
     const diyas = ask("do you sell diyas");
     expect(diyas.topic).toBe("product:diwali-diyas");
     expect(diyas.text).toContain("On sale on event day");
   });
 
-  it("explains the game and how to win a coupon with the live numbers", () => {
+  it("explains the game and how to win a prize with the live numbers", () => {
     const game = ask("How do I play?");
     expect(game.topic).toBe("game");
     expect(game.text).toContain("3 quick levels");
-    const coupon = ask("how to win a coupon");
+    // No database in tests, as on the live site: prizes come from the team, shown a winner card.
+    const coupon = ask("how to win a prize");
     expect(coupon.topic).toBe("coupon");
-    expect(coupon.text).toContain("2 reward attempts");
+    expect(coupon.text).toContain("2 prize attempts");
     expect(coupon.text).toContain("all 3 levels");
-    expect(coupon.text).toContain("50% off a Chocolate Bomb");
-    expect(coupon.text).toContain("Coupons can be won on event day only (Tuesday, 27 October 2026, 9 am to 3 pm)");
+    expect(coupon.text).toContain("Congratulations! You won!");
+    expect(coupon.text).not.toMatch(/% off|discount/i);
+    expect(coupon.text).toContain("Collect your prize from the TERRA UTSAV team at the stall (Tuesday, 27 October 2026, 9 am to 3 pm)");
+    expect(ask("how to win a coupon").topic).toBe("coupon");
     expect(ask("what do I win?").topic).toBe("coupon");
     expect(coupon.links.map((l) => l.href)).toContain("/rewards");
     expect(ask("catch mini").topic).toBe("game");

@@ -87,8 +87,9 @@ describe("reward play: no sign-up, coupons on event day only, one per person", (
     renderWithStatuses({ configured: true, signedIn: false, rewardPhase: "after" });
     expect(await screen.findByText("Reward play has ended. Thank you for playing!")).toBeInTheDocument();
     cleanup();
+    // Without the database the game offers prize play instead (see local-prize.test.tsx).
     renderWithStatuses({ configured: false, signedIn: false });
-    expect(await screen.findByText("Reward play isn't switched on yet. Practice is open now.")).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "Play for a prize" })).toBeEnabled();
   });
 
   it("lets a player finish an attempt they already started, whatever the time", async () => {

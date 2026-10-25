@@ -3,7 +3,7 @@
 Website for **TERRA UTSAV**, our stall at the **Eco-friendly Diwali Mandi 2026** (Tuesday 27 October 2026, 9 am to 3 pm,
 S. B. Patil Institute of Management, Pradhikaran Road). Mini is our original mascot.
 
-Chocolate Bomb, Chat Papdi, homemade Diwali diyas, the 60-second wet-brick challenge, and **Catch Mini**, a
+Chocolate Bomb, Aalu Ponge, homemade Diwali diyas, the 60-second wet-brick challenge, and **Catch Mini**, a
 three-level game where winners get a coupon.
 
 | Route | What it is |

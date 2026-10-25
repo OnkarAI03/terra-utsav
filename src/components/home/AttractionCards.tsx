@@ -25,7 +25,7 @@ interface Card {
 export function AttractionCards({ products, game, prize = null }: { products: Product[]; game: GameSettings; prize?: string | null }) {
   const facts = gameFacts(game, prize);
   const bomb = products.find((p) => p.slug === "chocolate-bomb");
-  const papdi = products.find((p) => p.slug === "chat-papdi");
+  const ponge = products.find((p) => p.slug === "aalu-ponge");
   const diyas = products.find((p) => p.category === "diyas");
 
   const cards: Card[] = [
@@ -38,12 +38,12 @@ export function AttractionCards({ products, game, prize = null }: { products: Pr
       media: <Image src={bomb?.imageUrl ?? "/images/food/chocolate-bomb.webp"} alt="" fill sizes="160px" className="object-cover" />,
     },
     {
-      key: "papdi",
-      title: papdi?.name ?? "Chat Papdi",
-      tagline: papdi?.tagline ?? "Crunchy. Tangy. Addictive.",
-      href: "/menu#chat-papdi",
+      key: "ponge",
+      title: ponge?.name ?? "Aalu Ponge",
+      tagline: ponge?.tagline ?? "Crispy. Spicy. Loaded.",
+      href: "/menu#aalu-ponge",
       cta: "View item",
-      media: <Image src={papdi?.imageUrl ?? "/images/food/chat-papdi.webp"} alt="" fill sizes="160px" className="object-cover" />,
+      media: <Image src={ponge?.imageUrl ?? "/images/food/aalu-ponge.webp"} alt="" fill sizes="160px" className="object-cover" />,
     },
     {
       key: "diyas",
@@ -68,7 +68,7 @@ export function AttractionCards({ products, game, prize = null }: { products: Pr
     {
       key: "game",
       title: "Catch Mini",
-      tagline: prize ? `${facts.levels} levels. Win ${prize}!` : `${facts.levels} levels. ${facts.attempts} attempts. Win a coupon!`,
+      tagline: prize ? `${facts.levels} levels. Win ${prize}!` : `${facts.levels} levels. ${facts.attempts} attempts. Win a prize!`,
       href: "/game",
       cta: "Play now",
       media: (
