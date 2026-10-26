@@ -107,7 +107,8 @@ export function KoochuChat() {
 
   const close = useCallback(() => {
     setOpen(false);
-    launcher.current?.focus();
+    // On phones the launcher is hidden while the chat is open, so focus it once it shows again.
+    requestAnimationFrame(() => launcher.current?.focus());
   }, []);
 
   // Focus the box on a mouse or trackpad; on a phone, don't throw the keyboard up over the chips:

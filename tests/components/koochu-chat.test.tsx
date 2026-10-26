@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { installDomMocks } from "../helpers/dom";
 
@@ -43,6 +43,8 @@ describe("Mini chat", () => {
 
     fireEvent.keyDown(window, { key: "Escape" });
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    // Focus goes back to the launcher (after a frame: on phones it is hidden while the chat is open).
+    await waitFor(() => expect(screen.getByRole("button", { name: "Ask Mini" })).toHaveFocus());
   });
 
   it("says so when it cannot reach its notes", async () => {
