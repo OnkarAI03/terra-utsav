@@ -13,7 +13,7 @@ export function Splash() {
       <div className="splash-art">
         <picture>
           <source media="(min-aspect-ratio: 3/4)" srcSet="/images/splash/splash-wide.webp" width={1672} height={941} />
-          <img src="/images/splash/splash-tall.webp" alt="" width={941} height={1882} fetchPriority="high" decoding="async" className="splash-img" />
+          <img src="/images/splash/splash-tall.webp" alt="" width={941} height={1672} fetchPriority="high" decoding="async" className="splash-img" />
         </picture>
         {/* Sits exactly over the paw bar printed in the art (positions in globals.css). */}
         <div className="splash-bar">

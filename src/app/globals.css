@@ -892,10 +892,9 @@
 /* Splash (components/site/Splash.tsx): the loading card at the start of a visit, the team's art
    filling the screen edge to edge, with its printed paw bar brought to life: five paws light up
    one by one, then it fades (about 3 s in all).
-   - Tall screens (phones) get the tall art at 1:2: the team's 9:16 art with a soft, darkened
-     continuation of its own top and bottom, so a 19.5:9 phone crops only a little off the sides
-     and the slogan and banner stay whole. Wider screens (tablets, laptops; 3:4 and up, matching
-     the <source> in Splash.tsx and the preloads in layout.tsx) get the wide art at 16:9.
+   - Tall screens (phones) get the tall art (9:16); phones taller than that crop a little off its
+     sides. Wider screens (tablets, laptops; 3:4 and up, matching the <source> in Splash.tsx and
+     the preloads in layout.tsx) get the wide art (16:9).
    - The art box covers the screen (overflowing it evenly), so the bar's positions, measured as a
      share of the art, stay on the printed bar. On extra-wide windows the wide art loses a little
      more at the top than at the bottom, keeping the paw bar and its caption in view.
@@ -922,9 +921,9 @@
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  aspect-ratio: 1 / 2;
-  width: max(100vw, 50vh);
-  width: max(100vw, 50dvh);
+  aspect-ratio: 941 / 1672;
+  width: max(100vw, calc(100vh * 941 / 1672));
+  width: max(100vw, calc(100dvh * 941 / 1672));
 }
 .splash-img {
   position: absolute;
@@ -935,9 +934,9 @@
 .splash-bar {
   position: absolute;
   left: calc(28.16% - 2px);
-  top: calc(70.46% - 2px);
+  top: calc(73.03% - 2px);
   width: calc(43.68% + 4px);
-  height: calc(2.39% + 4px);
+  height: calc(2.69% + 4px);
   display: flex;
   align-items: center;
   justify-content: space-evenly;
