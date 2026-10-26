@@ -110,7 +110,7 @@ const PHRASES: [RegExp, Topic, number][] = [
 
 const PRODUCT_WORDS: Record<string, string[]> = {
   "chocolate-bomb": ["chocolate", "choco", "bomb", "bombs"],
-  "aalu-ponge": ["aalu", "aloo", "alu", "ponge", "ponga", "potato", "aaluponge", "alooponge"],
+  "aloo-ponga": ["aloo", "aalu", "alu", "ponga", "ponge", "potato", "alooponga", "aaluponge", "alooponge"],
   "diwali-diyas": ["diya", "diyas", "diva", "divas", "lamp", "lamps", "panti", "deep"],
 };
 

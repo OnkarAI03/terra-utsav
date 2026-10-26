@@ -29,7 +29,7 @@ describe("public routes render without a database", () => {
     const { default: Page } = await import("@/app/page");
     render(await Page());
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Came for the Food. Stayed for the Chaos.");
-    for (const name of ["Chocolate Bomb", "Aalu Ponge", "Homemade Diyas", "60-Second Brick Challenge", "Catch Mini"]) {
+    for (const name of ["Chocolate Bomb", "Aloo Ponga", "Homemade Diyas", "60-Second Brick Challenge", "Catch Mini"]) {
       expect(screen.getAllByText(name).length).toBeGreaterThan(0);
     }
     expect(screen.getAllByText("Tuesday, 27 October 2026").length).toBeGreaterThan(0);

@@ -27,7 +27,7 @@ are at the end of this file, ready for when credits are available.
 | `images/scenes/koochu-paw.webp` | 696×1040 | Homepage game section | Reference art (approved homepage), kitten-only crop, 2× upscale | Usable. Same note |
 | `images/hero/festival-bokeh.webp` | 1280×853 | Hero background | Reference art blurred far past legibility | Good |
 | `images/food/chocolate-bomb.webp` | 800×1000 | Menu and homepage | Reference art crop, 2× upscale | **Replace** with a real photo of the dish. While it is marked illustrative, the footer says some food pictures are illustrations |
-| `images/food/aalu-ponge.webp` | 1375×1144 | Menu and homepage | Supplied by the team on 2026-10-25 | Marked illustrative until the team confirms it is the stall's own photo |
+| `images/food/aloo-ponga.webp` | 1375×1144 | Menu and homepage | Supplied by the team on 2026-10-25 | Marked illustrative until the team confirms it is the stall's own photo |
 | `images/game/run-1.webp`, `run-2.webp` | ~215×200, transparent | Dashing kitten in the game (2-frame run) | Asset board A, cut out, 2.4× upscale | Usable at game size. Replace with a high-res run cycle |
 | `images/game/decoy-*.webp` (cupcake, chilli, nacho, chocolate) | ~115–166 px wide | Game decoys | Asset board A, cut out, upscaled | Good at game size |
 | `images/mascot/koochu-oops.webp` | 271×315 | 404 page | Asset board A pose, cut out, 2.2× upscale | Usable small. Replace with a high-res render. (The excited and trophy poses were retired: their cut-outs leaked into the white fur. The game's result screens use `koochu-idle.webp` with a hop animation and a trophy drawn in code.) |
@@ -55,7 +55,7 @@ are at the end of this file, ready for when credits are available.
 
 | Asset | Where it goes | How |
 |---|---|---|
-| Real photos of Chocolate Bomb and Aalu Ponge | Menu, homepage | /admin/menu, upload; untick "illustrative" |
+| Real photos of Chocolate Bomb and Aloo Ponga | Menu, homepage | /admin/menu, upload; untick "illustrative" |
 | Real photos of the homemade diyas | Menu, diyas section | /admin/menu |
 | Mentor designations, and a consent check for the 4 mentor photos | Team page | /admin/team. Names and photos are in, shown as "Mentor" |
 | Personal Mini renders (optional) | Team page | /admin/team "personal mascot art"; otherwise the role outfit is drawn |

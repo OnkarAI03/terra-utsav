@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "TERRA UTSAV",
     short_name: "TERRA UTSAV",
-    description: "Our Diwali stall: Chocolate Bombs, Aalu Ponge, homemade diyas, the brick challenge and Catch Mini.",
+    description: "Our Diwali stall: Chocolate Bombs, Aloo Ponga, homemade diyas, the brick challenge and Catch Mini.",
     start_url: "/",
     display: "standalone",
     background_color: "#3a0f17",

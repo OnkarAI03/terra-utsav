@@ -8,9 +8,10 @@ import type { GameSettings } from "@/lib/game/config";
 import { gameFacts } from "@/lib/game/copy";
 import type { EventSettings } from "@/lib/settings";
 import { EventFacts } from "./EventFacts";
+import { LiveCountdown } from "./LiveCountdown";
 
 const REASONS = [
-  { icon: CakeSlice, title: "Delicious Food", body: "Chocolate Bombs and Aalu Ponge at the counter." },
+  { icon: CakeSlice, title: "Delicious Food", body: "Chocolate Bombs and Aloo Ponga at the counter." },
   { icon: Flame, title: "Homemade Diyas", body: "Take a little Diwali light home with you." },
   { icon: BrickWall, title: "Fun Challenges", body: "Hold one wet brick in one hand for sixty seconds." },
 ];
@@ -71,6 +72,7 @@ export function StallBand({ event, game, prize = null }: { event: EventSettings;
                   {" "}<br />
                   <span className="text-gold-300">TERRA UTSAV</span>
                 </h2>
+                <LiveCountdown startsAt={event.startsAt} endsAt={event.endsAt} variant="board" className="mt-6" />
                 <EventFacts event={event} className="mt-6" />
                 <div className="mt-7 flex flex-wrap items-center gap-3">
                   {event.mapUrl ? (

@@ -28,21 +28,21 @@ export const DEFAULT_PRODUCTS: Product[] = [
     sortOrder: 1,
   },
   {
-    // Name, photo and description supplied by the team on 2026-10-25 (replaces Chat Papdi).
-    id: "default-aalu-ponge",
-    slug: "aalu-ponge",
-    name: "Aalu Ponge",
+    // Name, photo and description supplied by the team on 2026-10-25 (replaces Chat Papdi); spelt Aloo Ponga since 2026-10-26.
+    id: "default-aloo-ponga",
+    slug: "aloo-ponga",
+    name: "Aloo Ponga",
     category: "food",
     tagline: "Crispy. Spicy. Loaded.",
     description:
-      "Crispy, spicy & absolutely loaded with flavour — this Aalu Ponge is the kind of street food you'll keep craving! 🤤🥔 Perfectly crispy outside, soft & flavourful inside.",
+      "Crispy, spicy & absolutely loaded with flavour — this Aloo Ponga is the kind of street food you'll keep craving! 🤤🥔 Perfectly crispy outside, soft & flavourful inside.",
     pricePaise: null,
     priceNote: null,
     availability: "coming_soon",
     featured: false,
     featuredLabel: null,
-    imageUrl: "/images/food/aalu-ponge.webp",
-    imageAlt: "Aalu Ponge rolls topped with crunchy sev and fresh coriander",
+    imageUrl: "/images/food/aloo-ponga.webp",
+    imageAlt: "Aloo Ponga rolls topped with crunchy sev and fresh coriander",
     imageIsIllustrative: true,
     sortOrder: 2,
   },

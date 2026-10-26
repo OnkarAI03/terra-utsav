@@ -25,7 +25,7 @@ interface Card {
 export function AttractionCards({ products, game, prize = null }: { products: Product[]; game: GameSettings; prize?: string | null }) {
   const facts = gameFacts(game, prize);
   const bomb = products.find((p) => p.slug === "chocolate-bomb");
-  const ponge = products.find((p) => p.slug === "aalu-ponge");
+  const ponga = products.find((p) => p.slug === "aloo-ponga");
   const diyas = products.find((p) => p.category === "diyas");
 
   const cards: Card[] = [
@@ -38,12 +38,12 @@ export function AttractionCards({ products, game, prize = null }: { products: Pr
       media: <Image src={bomb?.imageUrl ?? "/images/food/chocolate-bomb.webp"} alt="" fill sizes="160px" className="object-cover" />,
     },
     {
-      key: "ponge",
-      title: ponge?.name ?? "Aalu Ponge",
-      tagline: ponge?.tagline ?? "Crispy. Spicy. Loaded.",
-      href: "/menu#aalu-ponge",
+      key: "ponga",
+      title: ponga?.name ?? "Aloo Ponga",
+      tagline: ponga?.tagline ?? "Crispy. Spicy. Loaded.",
+      href: "/menu#aloo-ponga",
       cta: "View item",
-      media: <Image src={ponge?.imageUrl ?? "/images/food/aalu-ponge.webp"} alt="" fill sizes="160px" className="object-cover" />,
+      media: <Image src={ponga?.imageUrl ?? "/images/food/aloo-ponga.webp"} alt="" fill sizes="160px" className="object-cover" />,
     },
     {
       key: "diyas",

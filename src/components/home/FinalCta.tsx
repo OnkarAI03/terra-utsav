@@ -1,5 +1,6 @@
 import { ArrowRight, MapPin } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { DiyaArt } from "@/components/art/DiyaArt";
 import { FestivalLights } from "@/components/art/FestivalLights";
 import { InstagramLink } from "@/components/brand/InstagramLink";
@@ -29,6 +30,12 @@ export function FinalCta({ instagramUrl }: { instagramUrl: string | null }) {
               Play the game
             </ButtonLink>
           </div>
+          <p className="mt-6 text-[1.05rem] font-bold text-cream-100">
+            Been to the stall?{" "}
+            <Link href="/feedback" className="underline decoration-gold-400 decoration-2 underline-offset-4 hover:text-gold-300">
+              Rate your visit and take a Diwali selfie
+            </Link>
+          </p>
           {instagramUrl && (
             <div className="mt-6">
               <InstagramLink url={instagramUrl} />

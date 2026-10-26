@@ -10,6 +10,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/game", priority: 0.9, freq: "weekly" },
     { path: "/challenge", priority: 0.8, freq: "weekly" },
     { path: "/rules", priority: 0.5, freq: "weekly" },
+    { path: "/feedback", priority: 0.6, freq: "weekly" },
   ];
   return pages.map((p) => ({ url: `${base}${p.path}`, lastModified: now, changeFrequency: p.freq, priority: p.priority }));
 }

@@ -41,7 +41,7 @@ describe("Mini answers from the site", () => {
     const r = ask("What's on the menu?");
     expect(r.topic).toBe("menu");
     expect(r.text).toContain("Chocolate Bomb");
-    expect(r.text).toContain("Aalu Ponge");
+    expect(r.text).toContain("Aloo Ponga");
     expect(r.text).toContain("Homemade Diwali Diyas");
     expect(r.text).not.toMatch(/₹|\brs\b/i);
     expect(ask("How much does it cost?").text).toContain("Prices aren't on the website yet");
@@ -50,7 +50,7 @@ describe("Mini answers from the site", () => {
   it("describes a dish by name, even with typos and Hindi", () => {
     expect(ask("tell me about the chocolate bomb").topic).toBe("product:chocolate-bomb");
     expect(ask("chocolat bomb kitne ka hai").topic).toBe("product:chocolate-bomb");
-    expect(ask("aloo ponge?").topic).toBe("product:aalu-ponge");
+    expect(ask("aloo ponge?").topic).toBe("product:aloo-ponga");
     const diyas = ask("do you sell diyas");
     expect(diyas.topic).toBe("product:diwali-diyas");
     expect(diyas.text).toContain("On sale on event day");

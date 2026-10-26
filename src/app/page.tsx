@@ -6,6 +6,7 @@ import { FinalCta } from "@/components/home/FinalCta";
 import { FoodHighlights } from "@/components/home/FoodHighlights";
 import { GameTeaser } from "@/components/home/GameTeaser";
 import { Hero } from "@/components/home/Hero";
+import { NameStory } from "@/components/home/NameStory";
 import { StallBand } from "@/components/home/StallBand";
 import { DripDivider } from "@/components/ui/DripDivider";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -17,7 +18,7 @@ export const revalidate = 3600;
 
 const RIBBON = [
   { text: "Chocolate Bombs" },
-  { text: "Aalu Ponge" },
+  { text: "Aloo Ponga" },
   { text: "Homemade Diyas" },
   { text: "शुभ दीपावली", lang: "mr" },
   { text: "60-Second Brick Challenge" },
@@ -28,7 +29,7 @@ const RIBBON = [
 export async function generateMetadata(): Promise<Metadata> {
   const event = await getEventSettings();
   const when = [event.festivalName, event.dateText, event.venue?.split(",")[0]].filter(Boolean).join(" · ");
-  const description = `TERRA UTSAV, our Diwali stall${when ? ` at ${when}` : ""}: Chocolate Bombs, Aalu Ponge, homemade diyas, a 60-second wet-brick challenge and Catch Mini, a three-level game with a prize for winners.`;
+  const description = `TERRA UTSAV, our Diwali stall${when ? ` at ${when}` : ""}: Chocolate Bombs, Aloo Ponga, homemade diyas, a 60-second wet-brick challenge and Catch Mini, a three-level game with a prize for winners.`;
   return {
     ...pageMetadata({ title: "Came for the food, stayed for the chaos", description, path: "/" }),
     title: { absolute: `TERRA UTSAV: food, diyas, games and chaos${event.festivalName ? ` at ${event.festivalName}` : " this Diwali"}` },
@@ -52,6 +53,7 @@ export default async function HomePage() {
           <FestiveRibbon items={RIBBON} />
         </div>
       </div>
+      <NameStory />
       <StallBand event={event} game={game} prize={prize} />
       <DripDivider from="var(--color-choc-900)" to="var(--color-cream-200)" />
       <FoodHighlights products={products.filter((p) => p.category === "food")} />

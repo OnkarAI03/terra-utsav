@@ -7,10 +7,13 @@ export function RangoliArt({ className }: { className?: string }) {
       const a = (360 / n) * i + offset;
       return <ellipse key={`${r}-${i}`} cx="0" cy={-r} rx={rx} ry={ry} fill={fill} transform={`rotate(${a})`} />;
     });
+  // Rounded to 0.01: the server and the browser disagree in the last digits of sin and cos, and React
+  // reports any difference as a hydration mismatch.
+  const at = (v: number) => Math.round(v * 100) / 100;
   const dots = (n: number, r: number, size: number, fill: string, offset = 0) =>
     Array.from({ length: n }, (_, i) => {
       const a = ((360 / n) * i + offset) * (Math.PI / 180);
-      return <circle key={`d${r}-${i}`} cx={Math.sin(a) * r} cy={-Math.cos(a) * r} r={size} fill={fill} />;
+      return <circle key={`d${r}-${i}`} cx={at(Math.sin(a) * r)} cy={at(-Math.cos(a) * r)} r={size} fill={fill} />;
     });
 
   return (

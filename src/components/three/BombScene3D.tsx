@@ -10,7 +10,8 @@ const load = () => import("./scenes/bomb");
 function Poster() {
   return (
     <div className="relative mx-auto h-full w-[78%] overflow-hidden rounded-[28px] shadow-[var(--shadow-lift)]" style={{ rotate: "-3deg" }}>
-      <Image src="/images/food/chocolate-bomb.webp" alt="" fill sizes="(min-width: 1024px) 320px, 70vw" className="object-cover" />
+      {/* The menu page's first big picture, so it loads first. */}
+      <Image src="/images/food/chocolate-bomb.webp" alt="" fill priority sizes="(min-width: 1024px) 320px, 70vw" className="object-cover" />
     </div>
   );
 }

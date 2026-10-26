@@ -12,6 +12,7 @@ import { gameFacts } from "@/lib/game/copy";
 import type { EventSettings } from "@/lib/settings";
 import { HeroKandils } from "@/components/three/HeroKandils";
 import { HeroArt } from "./HeroArt";
+import { LiveCountdown } from "./LiveCountdown";
 import { Signpost } from "./Signpost";
 
 /**
@@ -85,7 +86,7 @@ export function Hero({ event, game, prize = null }: { event: EventSettings; game
             className="anim-rise order-4 mx-auto mt-6 max-w-[34rem] text-[1.08rem] font-semibold leading-relaxed text-cream-100 md:text-[1.18rem] lg:mx-0"
             style={{ animationDelay: "860ms" }}
           >
-            This Diwali: Chocolate Bombs, Aalu Ponge, homemade diyas and a 60-second wet-brick challenge. Plus one mischievous kitten
+            This Diwali: Chocolate Bombs, Aloo Ponga, homemade diyas and a 60-second wet-brick challenge. Plus one mischievous kitten
             you probably won&apos;t catch.
           </p>
 
@@ -106,6 +107,7 @@ export function Hero({ event, game, prize = null }: { event: EventSettings; game
               className="anim-rise order-2 mx-auto mt-5 inline-flex max-w-full flex-col items-start gap-1.5 rounded-[18px] bg-cream-100 px-4 py-3 text-left text-[0.98rem] font-extrabold text-ink shadow-[0_4px_0_var(--color-cream-300)] lg:mx-0"
               style={{ animationDelay: "380ms" }}
             >
+              <LiveCountdown startsAt={event.startsAt} endsAt={event.endsAt} />
               {event.dateText && (
                 <span className="inline-flex items-center gap-2">
                   <CalendarDays aria-hidden className="h-4 w-4 shrink-0 text-maroon-600" />

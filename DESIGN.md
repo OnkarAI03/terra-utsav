@@ -23,7 +23,7 @@ the homepage follows:
    2 attempts · win a coupon") and a cream secondary pill ("Explore Menu"). Right: a wooden
    signpost with planks linking to the attractions. "Scroll to explore" below.
 3. A cream card strip overlapping the hero's bottom edge with four attractions (Chocolate Bomb,
-   Aalu Ponge, 60-Second Brick Challenge, Catch Mini), each with an image, a title, a
+   Aloo Ponga, 60-Second Brick Challenge, Catch Mini), each with an image, a title, a
    three-word tagline and a dark pill button.
 4. A chocolate-drip divider into a dark band: Mini peeking up beside a paper note "What's
    happening at our stall?", four round outlined icon badges (Delicious Food, Fun Challenges,

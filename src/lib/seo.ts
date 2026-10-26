@@ -29,7 +29,7 @@ export function websiteJsonLd() {
     "@type": "WebSite",
     name: SITE_NAME,
     url: siteUrl(),
-    description: "TERRA UTSAV, a student Diwali stall with Chocolate Bombs, Aalu Ponge, homemade diyas, a wet-brick challenge and the Catch Mini game.",
+    description: "TERRA UTSAV, a student Diwali stall with Chocolate Bombs, Aloo Ponga, homemade diyas, a wet-brick challenge and the Catch Mini game.",
   };
 }
 
@@ -44,7 +44,7 @@ export function eventJsonLd(event: EventSettings) {
     "@context": "https://schema.org",
     "@type": "Event",
     name: event.festivalName ? `${SITE_NAME} at ${event.festivalName}` : SITE_NAME,
-    description: "Diwali stall with Chocolate Bombs, Aalu Ponge, homemade diyas, a 60-second wet-brick challenge and the Catch Mini game.",
+    description: "Diwali stall with Chocolate Bombs, Aloo Ponga, homemade diyas, a 60-second wet-brick challenge and the Catch Mini game.",
     startDate: event.startsAt,
     ...(event.endsAt ? { endDate: event.endsAt } : {}),
     eventStatus: "https://schema.org/EventScheduled",

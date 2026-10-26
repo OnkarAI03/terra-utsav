@@ -889,6 +889,115 @@
   animation: tu-nudge 360ms var(--ease-out) both;
 }
 
+/* Splash (components/site/Splash.tsx): the loading card at the start of a visit, the team's art
+   (tall on phones, wide on laptops) shown whole over a blurred copy of itself, with its printed
+   paw bar brought to life: five paws light up one by one, then it fades (about 3 s in all). Plain
+   CSS, so it never waits on a script; the head script skips it for the rest of the visit and on a
+   tap or Esc; reduced motion never shows it. The bar positions are measured from the art. */
+.splash {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: var(--color-night);
+  animation: tu-splash-out 450ms var(--ease-out) 2900ms forwards;
+}
+.splash-backdrop {
+  position: absolute;
+  inset: -48px;
+  background: url("/images/splash/splash-tall.webp") center / cover no-repeat;
+  filter: blur(30px) brightness(0.5);
+}
+.splash-art {
+  position: relative;
+  aspect-ratio: 941 / 1672;
+  width: min(100vw, calc(100dvh * 941 / 1672));
+  animation: tu-splash-in 500ms var(--ease-out) both;
+}
+.splash-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.splash-bar {
+  position: absolute;
+  left: calc(28.16% - 2px);
+  top: calc(73.03% - 2px);
+  width: calc(43.68% + 4px);
+  height: calc(2.69% + 4px);
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  padding: 0 3%;
+  border: 2px solid var(--color-gold-400);
+  border-radius: 999px;
+  background: linear-gradient(180deg, #4a121c 0%, #2a0a10 100%);
+  box-shadow: 0 0 14px rgb(255 168 70 / 0.35);
+}
+.splash-paw {
+  display: block;
+  height: 62%;
+  aspect-ratio: 1;
+  color: #ffe6c4;
+  opacity: 0.28;
+  filter: drop-shadow(0 0 4px rgb(255 150 50 / 0.9));
+  animation: tu-paw-on 420ms var(--ease-out) both;
+}
+@media (orientation: landscape) {
+  .splash-backdrop {
+    background-image: url("/images/splash/splash-wide.webp");
+  }
+  .splash-art {
+    aspect-ratio: 1672 / 941;
+    width: min(100vw, calc(100dvh * 1672 / 941));
+  }
+  .splash-bar {
+    left: calc(36.18% - 2px);
+    top: calc(81.83% - 2px);
+    width: calc(27.51% + 4px);
+    height: calc(5.1% + 4px);
+  }
+}
+@keyframes tu-splash-in {
+  from {
+    opacity: 0;
+    transform: scale(0.985);
+  }
+}
+@keyframes tu-paw-on {
+  0% {
+    opacity: 0.28;
+    transform: scale(1);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.3);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes tu-splash-out {
+  to {
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(1.03);
+  }
+}
+html.splash-seen .splash,
+html.splash-done .splash {
+  display: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .splash {
+    display: none;
+  }
+}
+
 /* 3D tilt (components/ui/Tilt.tsx): marked layers float towards the viewer while a card leans. */
 .tilt [data-depth="mid"] {
   transform: translateZ(14px);

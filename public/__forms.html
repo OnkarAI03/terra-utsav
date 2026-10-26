@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="robots" content="noindex" />
+    <title>TERRA UTSAV forms</title>
+  </head>
+  <body>
+    <!--
+      Netlify Forms reads this file at deploy time to learn the form and its fields. Visitors never
+      see it: the real form is the one on /feedback (src/components/feedback/FeedbackForm.tsx),
+      which posts here. Keep the fields in step with that form.
+    -->
+    <form name="feedback" data-netlify="true" netlify-honeypot="bot-field" hidden>
+      <input type="hidden" name="form-name" value="feedback" />
+      <input name="bot-field" />
+      <input name="rating" />
+      <input name="loved" />
+      <textarea name="message"></textarea>
+      <input name="name" />
+      <input name="device" />
+    </form>
+  </body>
+</html>

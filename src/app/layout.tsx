@@ -4,6 +4,7 @@ import { KoochuChat } from "@/components/chat/KoochuChat";
 import { EggLayer } from "@/components/eggs/EggLayer";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { SiteHeader } from "@/components/site/SiteHeader";
+import { Splash } from "@/components/site/Splash";
 import { MotionProvider } from "@/components/ui/MotionProvider";
 import { PauseOffscreen } from "@/components/ui/PauseOffscreen";
 import { allowIndexing, siteUrl, SITE_NAME } from "@/lib/env";
@@ -15,7 +16,7 @@ const nunito = Nunito({ subsets: ["latin"], variable: "--font-nunito", display: 
 const kalam = Kalam({ weight: "700", subsets: ["latin"], variable: "--font-kalam", display: "swap" });
 
 const description =
-  "TERRA UTSAV is our college Diwali stall: Chocolate Bombs, Aalu Ponge, homemade Diwali diyas, a 60-second wet-brick challenge and Catch Mini, a three-level game with a prize for winners.";
+  "TERRA UTSAV is our college Diwali stall: Chocolate Bombs, Aloo Ponga, homemade Diwali diyas, a 60-second wet-brick challenge and Catch Mini, a three-level game with a prize for winners.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl()),
@@ -53,11 +54,15 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <head>
         {/* Runs while the page is parsed, before React starts: see src/lib/head-script.ts. */}
         <script dangerouslySetInnerHTML={{ __html: HEAD_SCRIPT }} />
+        {/* The splash art (components/site/Splash.tsx): only the picture this screen shows. */}
+        <link rel="preload" as="image" href="/images/splash/splash-tall.webp" media="(orientation: portrait)" fetchPriority="high" />
+        <link rel="preload" as="image" href="/images/splash/splash-wide.webp" media="(orientation: landscape)" fetchPriority="high" />
       </head>
       <body className="min-h-dvh-safe flex flex-col">
         <a href="#main" className="skip-link">
           Skip to content
         </a>
+        <Splash />
         <MotionProvider>
           <SiteHeader />
           <main id="main" className="flex-1">

@@ -3,7 +3,7 @@ import Link from "next/link";
 
 const PLANKS = [
   { href: "/menu#chocolate-bomb", label: "Chocolate Bomb", icon: CakeSlice, tilt: -4 },
-  { href: "/menu#aalu-ponge", label: "Aalu Ponge", icon: Soup, tilt: 3 },
+  { href: "/menu#aloo-ponga", label: "Aloo Ponga", icon: Soup, tilt: 3 },
   { href: "/menu#diyas", label: "Homemade Diyas", icon: Flame, tilt: -2 },
   { href: "/challenge", label: "60-Second Brick Challenge", icon: BrickWall, tilt: 3 },
   { href: "/game", label: "Fun Games", icon: Gamepad2, tilt: -3 },
