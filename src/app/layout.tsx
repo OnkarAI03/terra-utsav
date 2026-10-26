@@ -55,8 +55,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         {/* Runs while the page is parsed, before React starts: see src/lib/head-script.ts. */}
         <script dangerouslySetInnerHTML={{ __html: HEAD_SCRIPT }} />
         {/* The splash art (components/site/Splash.tsx): only the picture this screen shows. */}
-        <link rel="preload" as="image" href="/images/splash/splash-tall.webp" media="(orientation: portrait)" fetchPriority="high" />
-        <link rel="preload" as="image" href="/images/splash/splash-wide.webp" media="(orientation: landscape)" fetchPriority="high" />
+        <link rel="preload" as="image" href="/images/splash/splash-tall.webp" media="not all and (min-aspect-ratio: 3/4)" fetchPriority="high" />
+        <link rel="preload" as="image" href="/images/splash/splash-wide.webp" media="(min-aspect-ratio: 3/4)" fetchPriority="high" />
       </head>
       <body className="min-h-dvh-safe flex flex-col">
         <a href="#main" className="skip-link">

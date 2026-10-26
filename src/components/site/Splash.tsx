@@ -1,8 +1,8 @@
 const PAWS = [0, 1, 2, 3, 4];
 
 /**
- * The loading card at the start of a visit: the team's splash art (tall on phones, wide on laptops)
- * with its paw bar brought to life, five paws lighting up one by one (about 3 seconds in all).
+ * The loading card at the start of a visit: the team's splash art (tall on phones, wide on tablets and laptops),
+ * filling the screen, with its paw bar brought to life, five paws lighting up one by one (about 3 seconds in all).
  * Plain HTML and CSS (`.splash` in globals.css), so it shows before any script runs and leaves by
  * itself. The head script hides it for the rest of the visit and on a tap or Esc, and reduced
  * motion never shows it. Decorative, so screen readers skip it.
@@ -10,11 +10,10 @@ const PAWS = [0, 1, 2, 3, 4];
 export function Splash() {
   return (
     <div id="splash" aria-hidden className="splash">
-      <div className="splash-backdrop" />
       <div className="splash-art">
         <picture>
-          <source media="(orientation: landscape)" srcSet="/images/splash/splash-wide.webp" width={1672} height={941} />
-          <img src="/images/splash/splash-tall.webp" alt="" width={941} height={1672} fetchPriority="high" className="splash-img" />
+          <source media="(min-aspect-ratio: 3/4)" srcSet="/images/splash/splash-wide.webp" width={1672} height={941} />
+          <img src="/images/splash/splash-tall.webp" alt="" width={941} height={1882} fetchPriority="high" decoding="async" className="splash-img" />
         </picture>
         {/* Sits exactly over the paw bar printed in the art (positions in globals.css). */}
         <div className="splash-bar">

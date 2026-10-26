@@ -890,44 +890,54 @@
 }
 
 /* Splash (components/site/Splash.tsx): the loading card at the start of a visit, the team's art
-   (tall on phones, wide on laptops) shown whole over a blurred copy of itself, with its printed
-   paw bar brought to life: five paws light up one by one, then it fades (about 3 s in all). Plain
-   CSS, so it never waits on a script; the head script skips it for the rest of the visit and on a
-   tap or Esc; reduced motion never shows it. The bar positions are measured from the art. */
+   filling the screen edge to edge, with its printed paw bar brought to life: five paws light up
+   one by one, then it fades (about 3 s in all).
+   - Tall screens (phones) get the tall art at 1:2: the team's 9:16 art with a soft, darkened
+     continuation of its own top and bottom, so a 19.5:9 phone crops only a little off the sides
+     and the slogan and banner stay whole. Wider screens (tablets, laptops; 3:4 and up, matching
+     the <source> in Splash.tsx and the preloads in layout.tsx) get the wide art at 16:9.
+   - The art box covers the screen (overflowing it evenly), so the bar's positions, measured as a
+     share of the art, stay on the printed bar. On extra-wide windows the wide art loses a little
+     more at the top than at the bottom, keeping the paw bar and its caption in view.
+   - A tiny blurred copy of the art (inline, under half a kilobyte) fills the screen at once while
+     the art loads. Only opacity animates, so it stays smooth while the page loads underneath.
+   Plain CSS, so it never waits on a script; the head script skips it for the rest of the visit
+   and on a tap or Esc; reduced motion never shows it. */
 .splash {
   position: fixed;
   inset: 0;
   z-index: 200;
-  display: grid;
-  place-items: center;
   overflow: hidden;
-  background: var(--color-night);
-  animation: tu-splash-out 450ms var(--ease-out) 2900ms forwards;
-}
-.splash-backdrop {
-  position: absolute;
-  inset: -48px;
-  background: url("/images/splash/splash-tall.webp") center / cover no-repeat;
-  filter: blur(30px) brightness(0.5);
+  background: var(--color-night) url("data:image/webp;base64,UklGRgYBAABXRUJQVlA4IPoAAAAwBwCdASoYADAAPtFao0yoJSMiKqwBABoJYgCdMoMpDrQBYe86IsO7JbtHRkRj33ZsRQyEyLRpOGJ05OL9k7z0mAAA/uzlQl0LRez/iaMKg/u2O0NCIfZra/bGrsDJyzGI8pGC/vi332FlUdDYR4Sm71+Mk6sN/PSPGiOLeucwh30f/2Y2ScIpYEgojKnbgBUnf/LqKl0mxaZrUznCddDCrb9G+xi7IT3Gn8LWDofNEBeNzblwuaPJJg/7PvYSGLmklF4Kex5lyvezZBcmO4gRPKyS2+qNDAfUXtL9I6fB2AfzT9Lj4FXT48UBZe2OvOEwsW9XCFa9wAAA") center / cover no-repeat;
+  will-change: opacity;
+  /* The fade animates opacity alone so it runs on the compositor (an animation that also changes
+     visibility cannot), and a separate step hides the splash once the fade is done. */
+  animation:
+    tu-splash-out 450ms var(--ease-out) 2900ms forwards,
+    tu-splash-gone 1ms linear 3350ms forwards;
 }
 .splash-art {
-  position: relative;
-  aspect-ratio: 941 / 1672;
-  width: min(100vw, calc(100dvh * 941 / 1672));
-  animation: tu-splash-in 500ms var(--ease-out) both;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  aspect-ratio: 1 / 2;
+  width: max(100vw, 50vh);
+  width: max(100vw, 50dvh);
 }
 .splash-img {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
+  animation: tu-fade-in 350ms ease-out both;
 }
 .splash-bar {
   position: absolute;
   left: calc(28.16% - 2px);
-  top: calc(73.03% - 2px);
+  top: calc(70.46% - 2px);
   width: calc(43.68% + 4px);
-  height: calc(2.69% + 4px);
+  height: calc(2.39% + 4px);
   display: flex;
   align-items: center;
   justify-content: space-evenly;
@@ -942,17 +952,22 @@
   height: 62%;
   aspect-ratio: 1;
   color: #ffe6c4;
-  opacity: 0.28;
+  opacity: 0.25;
   filter: drop-shadow(0 0 4px rgb(255 150 50 / 0.9));
-  animation: tu-paw-on 420ms var(--ease-out) both;
+  will-change: opacity;
+  animation: tu-paw-on 320ms ease-out both;
 }
-@media (orientation: landscape) {
-  .splash-backdrop {
-    background-image: url("/images/splash/splash-wide.webp");
+@media (min-aspect-ratio: 3/4) {
+  .splash {
+    background-image: url("data:image/webp;base64,UklGRgABAABXRUJQVlA4IPQAAABQBwCdASoqABgAPtFcqE4oJSQiKrgKAQAaCWIAnTM9xShAATrfTHFsdq/DnRMll85iSahjcLL8FMrOZMDxv8Cs5VYgAP7sQoqozDV4TJjmba0GdpPe5nFxW0Hy2W8OE6qzoIwD1cPh7GJJ1S6Ld3DJrxsRZX4nWJOx87GuYX6zhDaUeE8we7DWI+dQbI/HVnCwezmyhRjHqPAnbOo9i4Gc2Dy67cy5+rSHgNmde+UfVA3fvpwydE8m3Fy1bnXW3Rxp5SypvU0xYriWcYtRhjQZNDg4mlC2UD4MEpk4CUJC6B4Bn0nlr2KdSxx7YZM/hkFVQAAA");
+    background-position: 50% 60%;
   }
   .splash-art {
+    top: 60%;
+    transform: translate(-50%, -60%);
     aspect-ratio: 1672 / 941;
-    width: min(100vw, calc(100dvh * 1672 / 941));
+    width: max(100vw, calc(100vh * 1672 / 941));
+    width: max(100vw, calc(100dvh * 1672 / 941));
   }
   .splash-bar {
     left: calc(36.18% - 2px);
@@ -961,31 +976,27 @@
     height: calc(5.1% + 4px);
   }
 }
-@keyframes tu-splash-in {
+@keyframes tu-fade-in {
   from {
     opacity: 0;
-    transform: scale(0.985);
   }
 }
 @keyframes tu-paw-on {
-  0% {
-    opacity: 0.28;
-    transform: scale(1);
+  from {
+    opacity: 0.25;
   }
-  60% {
+  to {
     opacity: 1;
-    transform: scale(1.3);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
   }
 }
 @keyframes tu-splash-out {
   to {
     opacity: 0;
+  }
+}
+@keyframes tu-splash-gone {
+  to {
     visibility: hidden;
-    transform: scale(1.03);
   }
 }
 html.splash-seen .splash,
