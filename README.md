@@ -65,8 +65,8 @@ Useful scripts:
   only downloaded when a scene comes near the screen, and it renders only while visible. Reduced motion, data saver,
   low-memory or low-core phones and browsers without WebGL 2 keep the drawings. The kandils run on screens 1024px and
   wider.
-- **Smooth scrolling** (Lenis) on public pages with a mouse or trackpad. Touch, the game, staff, admin and sign-in keep
-  native scrolling; so does reduced motion.
+- **Scrolling** is the browser's own, so it stays smooth while the page is busy (a smooth-scroll library made it stall
+  whenever the page was working). Same-page links glide to their section; reduced motion jumps instead.
 - **Mystery eggs**: four hidden surprises (hints in the footer). They are for fun only and never touch the game,
   coupons or the database; progress is kept in the visitor's browser.
 

@@ -169,8 +169,7 @@ export function KoochuChat() {
           role="dialog"
           aria-modal="false"
           aria-labelledby={titleId}
-          data-lenis-prevent
-          className="koochu-panel fixed inset-x-2 bottom-2 top-[calc(var(--header-h)+8px)] z-[48] flex flex-col overflow-hidden rounded-[26px] bg-burgundy-950 text-cream-100 shadow-[var(--shadow-lift)] ring-2 ring-gold-400/40 sm:inset-x-auto sm:right-4 sm:top-auto sm:bottom-[92px] sm:h-[min(600px,calc(100dvh-130px))] sm:w-[400px]"
+          className="koochu-panel fixed overscroll-contain inset-x-2 bottom-2 top-[calc(var(--header-h)+8px)] z-[48] flex flex-col overflow-hidden rounded-[26px] bg-burgundy-950 text-cream-100 shadow-[var(--shadow-lift)] ring-2 ring-gold-400/40 sm:inset-x-auto sm:right-4 sm:top-auto sm:bottom-[92px] sm:h-[min(600px,calc(100dvh-130px))] sm:w-[400px]"
         >
           <div className="flex items-center gap-3 bg-maroon-600 px-4 py-3">
             <span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full bg-cream-100 ring-2 ring-gold-300">

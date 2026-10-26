@@ -93,7 +93,17 @@
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
     scroll-padding-top: calc(var(--header-h) + 16px);
+    /* Inner scroll areas (the chat) inherit these colours. */
     scrollbar-color: var(--color-maroon-600) var(--color-night);
+    /* The page itself scrolls without a visible bar: wheel, touchpad, touch and keys all still work. */
+    scrollbar-width: none;
+    /* The browser's own scrolling: it runs off the main thread, so it stays smooth while the page is
+       busy (a JavaScript smooth-scroll library froze with it). Same-page links glide to their section;
+       reduced motion turns this off below. Next.js jumps straight to the top on page changes. */
+    scroll-behavior: smooth;
+  }
+  html::-webkit-scrollbar {
+    display: none;
   }
 
   body {
@@ -877,21 +887,6 @@
 .koochu-nudge {
   transform-origin: 90% 100%;
   animation: tu-nudge 360ms var(--ease-out) both;
-}
-
-/* Smooth scrolling (components/ui/SmoothScroll.tsx, Lenis): the rules Lenis needs. */
-html.lenis,
-html.lenis body {
-  height: auto;
-}
-.lenis:not(.lenis-autoToggle).lenis-stopped {
-  overflow: clip;
-}
-.lenis [data-lenis-prevent] {
-  overscroll-behavior: contain;
-}
-.lenis.lenis-smooth iframe {
-  pointer-events: none;
 }
 
 /* 3D tilt (components/ui/Tilt.tsx): marked layers float towards the viewer while a card leans. */

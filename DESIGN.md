@@ -183,9 +183,9 @@ the paw. Always shown on its own cream ground (never recoloured or cut out on da
   under the pointer. **Embers** drift up through the hero (CSS, linear).
 - **Tilt:** attraction cards, team cards and coupons lean towards the pointer in 3D (mouse only),
   with the card image floating forward.
-- **Smooth scroll:** Lenis on public pages with a mouse or trackpad (lerp 0.1, its own frame loop);
-  anchors stop below the header. Sections people jump to fade in place without the 24px rise, so the
-  scroll lands exactly.
+- **Scroll:** the browser's own (CSS `scroll-behavior: smooth` for same-page links), never a script, so
+  it stays smooth while the page works. Anchors stop below the header. Sections people jump to fade in
+  place without the 24px rise, so the scroll lands exactly. No visible page scrollbar.
 - **Scroll costs nothing extra:** no scroll handlers read the page position. The header turns solid
   through an observer, and the hero art's drift is a scroll-driven CSS animation (browsers without
   scroll timelines keep it still). The decorative loops (string lights, diya flames, kandils, embers,
