@@ -994,7 +994,10 @@
     opacity: 0;
   }
 }
+/* Hidden at both ends: Chrome does not apply a lone `to { visibility: hidden }` that starts after a
+   delay this long, which would leave the faded splash over the page, catching taps. */
 @keyframes tu-splash-gone {
+  from,
   to {
     visibility: hidden;
   }
