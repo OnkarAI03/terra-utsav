@@ -10,7 +10,7 @@ import { getEventSettings, getTeam } from "@/lib/data/public";
 import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 
-export const revalidate = 60;
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   ...pageMetadata({

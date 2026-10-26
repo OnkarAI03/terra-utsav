@@ -7,7 +7,7 @@ import { Reveal } from "@/components/ui/Reveal";
 import { getProducts } from "@/lib/data/public";
 import { pageMetadata } from "@/lib/seo";
 
-export const revalidate = 60;
+export const revalidate = 3600;
 
 export const metadata = pageMetadata({
   title: "Menu and Diwali Diyas",

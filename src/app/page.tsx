@@ -13,7 +13,7 @@ import { getEventSettings, getGameSettings, getProducts, getRewardSettings } fro
 import { eventJsonLd, pageMetadata, websiteJsonLd } from "@/lib/seo";
 import type { Metadata } from "next";
 
-export const revalidate = 60;
+export const revalidate = 3600;
 
 const RIBBON = [
   { text: "Chocolate Bombs" },

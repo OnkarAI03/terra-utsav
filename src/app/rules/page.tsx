@@ -10,7 +10,7 @@ import { gameFacts } from "@/lib/game/copy";
 import { eventDayText } from "@/lib/game/window";
 import { pageMetadata } from "@/lib/seo";
 
-export const revalidate = 60;
+export const revalidate = 3600;
 
 export const metadata = pageMetadata({
   title: "Rules",

@@ -10,8 +10,9 @@ import { MASCOT_VARIANTS, type MascotVariant, type Product, type TeamData, type 
 /**
  * Public content. Reads from Supabase when it is configured and falls back to the defaults in
  * src/content and src/lib when it is not (or when the database cannot be reached), so the site
- * always renders. Pages using these functions revalidate every 60 seconds and admin saves
- * revalidate them immediately.
+ * always renders. Admin saves refresh the pages using these functions immediately; otherwise they
+ * refresh hourly, so Netlify's servers near the visitor can keep a copy (with a one-minute refresh
+ * almost every visit fetched the page from far away, about a second's wait).
  */
 
 async function readSetting(key: "event" | "rewards" | "game"): Promise<unknown | undefined> {
