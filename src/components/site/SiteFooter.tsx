@@ -73,7 +73,7 @@ export async function SiteFooter() {
           <EggCounter />
         </div>
 
-        {/* pb-24 keeps the last line clear of the chat button (fixed bottom left) at the very end of the page. */}
+        {/* pb-24 keeps the last line clear of the chat button (fixed bottom right) at the very end of the page. */}
         <div className="flex flex-col gap-2 pb-24 pt-4 text-[0.88rem] text-cream-100/85 md:flex-row md:justify-between">
           <p>© {year} TERRA UTSAV. Happy Diwali! Mini is our original mascot.</p>
           {illustrative.length > 0 && (

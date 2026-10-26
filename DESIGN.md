@@ -122,8 +122,8 @@ shadow below. Used only on display sizes.
 - **Chocolate drip divider:** inline SVG path between dark and cream sections.
 - **Icon badge:** 64–88px circle, 2px gold-500 outline, cream line icon (lucide, 1.75 stroke).
 - **Coupon ticket:** cream ticket with notched sides, code in Lilita One, QR on the right.
-- **Mini chat:** a round cream button with the kitten's face and a maroon ring, fixed bottom left
-  (56px, 64px from `sm`; Netlify's free-plan badge holds the bottom right), above the page and below the menu. It opens a panel (full height on phones, a
+- **Mini chat:** a round cream button with the kitten's face and a maroon ring, fixed bottom right
+  (56px, 64px from `sm`), above the page and below the menu. It opens a panel (full height on phones, a
   card on larger screens) with a burgundy header, cream answer bubbles, outlined question chips and
   a cream input. On the homepage a paper note ("Ask me anything!") appears once after 9 s. Not shown
   on the game, sign-in, staff or admin pages, where the bottom corner is needed.

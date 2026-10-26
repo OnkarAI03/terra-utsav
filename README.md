@@ -19,7 +19,7 @@ three-level game where winners get a coupon.
 | `/staff/redeem` | Staff console: scan or type a code, verify, redeem once, record brick results |
 | `/admin` | Admin dashboard: stats, event, menu, team, game tuning, rewards, roles, coupons, audit log |
 
-**Mini, the chat helper**: the kitten button at the bottom left of the site's pages (not the game or sign-in) answers questions about the
+**Mini, the chat helper**: the kitten button at the bottom right of the site's pages (not the game or sign-in) answers questions about the
 stall (date and place, menu, the game and its coupon, the brick challenge, the team and mentors) from the site's own
 content. See section 4.
 

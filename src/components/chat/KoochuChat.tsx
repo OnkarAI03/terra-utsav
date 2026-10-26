@@ -170,7 +170,7 @@ export function KoochuChat() {
           aria-modal="false"
           aria-labelledby={titleId}
           data-lenis-prevent
-          className="koochu-panel fixed inset-x-2 bottom-2 top-[calc(var(--header-h)+8px)] z-[48] flex flex-col overflow-hidden rounded-[26px] bg-burgundy-950 text-cream-100 shadow-[var(--shadow-lift)] ring-2 ring-gold-400/40 sm:inset-x-auto sm:left-4 sm:top-auto sm:bottom-[92px] sm:h-[min(600px,calc(100dvh-130px))] sm:w-[400px]"
+          className="koochu-panel fixed inset-x-2 bottom-2 top-[calc(var(--header-h)+8px)] z-[48] flex flex-col overflow-hidden rounded-[26px] bg-burgundy-950 text-cream-100 shadow-[var(--shadow-lift)] ring-2 ring-gold-400/40 sm:inset-x-auto sm:right-4 sm:top-auto sm:bottom-[92px] sm:h-[min(600px,calc(100dvh-130px))] sm:w-[400px]"
         >
           <div className="flex items-center gap-3 bg-maroon-600 px-4 py-3">
             <span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full bg-cream-100 ring-2 ring-gold-300">
@@ -275,7 +275,7 @@ export function KoochuChat() {
       )}
 
       {nudge && !open && !waitForScroll && (
-        <p aria-hidden className="koochu-nudge paper-note hand fixed bottom-[96px] left-5 z-[45] px-4 py-2.5 text-[1.05rem] uppercase sm:left-6" style={{ rotate: "4deg" }}>
+        <p aria-hidden className="koochu-nudge paper-note hand fixed bottom-[96px] right-5 z-[45] px-4 py-2.5 text-[1.05rem] uppercase sm:right-6" style={{ rotate: "-4deg" }}>
           Ask me anything!
         </p>
       )}
@@ -289,14 +289,13 @@ export function KoochuChat() {
         aria-label={open ? "Close chat" : "Ask Mini"}
         inert={waitForScroll && !open ? true : undefined}
         className={cn(
-          // Bottom left: Netlify's free-plan badge takes the bottom right corner.
-          "group fixed bottom-[max(16px,env(safe-area-inset-bottom))] left-[max(16px,env(safe-area-inset-left))] z-[45] grid place-items-center rounded-full transition-[opacity,transform] duration-200 ease-out active:scale-95 sm:left-6",
+          "group fixed bottom-[max(16px,env(safe-area-inset-bottom))] right-[max(16px,env(safe-area-inset-right))] z-[45] grid place-items-center rounded-full transition-[opacity,transform] duration-200 ease-out active:scale-95 sm:right-6",
           open && "max-sm:hidden",
           waitForScroll && !open && "pointer-events-none translate-y-3 opacity-0",
         )}
       >
         {/* Positioned outside the button's box, so only the round kitten is clickable. */}
-        <span aria-hidden className="pointer-events-none absolute left-full top-1/2 ml-2 hidden -translate-y-1/2 whitespace-nowrap rounded-full bg-cream-100 px-3 py-1.5 font-display text-[0.95rem] uppercase text-ink opacity-0 shadow-[0_4px_0_var(--color-cream-300)] transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100 sm:block">
+        <span aria-hidden className="pointer-events-none absolute right-full top-1/2 mr-2 hidden -translate-y-1/2 whitespace-nowrap rounded-full bg-cream-100 px-3 py-1.5 font-display text-[0.95rem] uppercase text-ink opacity-0 shadow-[0_4px_0_var(--color-cream-300)] transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100 sm:block">
           {open ? "Close chat" : "Ask Mini"}
         </span>
         <span className="relative grid h-14 w-14 place-items-center overflow-hidden rounded-full bg-cream-100 shadow-[var(--shadow-lift)] ring-[3px] ring-maroon-600 sm:h-16 sm:w-16">
