@@ -899,8 +899,9 @@
    - The art box covers the screen (overflowing it evenly), so the bar's positions, measured as a
      share of the art, stay on the printed bar. On extra-wide windows the wide art loses a little
      more at the top than at the bottom, keeping the paw bar and its caption in view.
-   - A tiny blurred copy of the art (inline, under half a kilobyte) fills the screen at once while
-     the art loads. Only opacity animates, so it stays smooth while the page loads underneath.
+   - The art shows as it is, with no placeholder or fade-in: until it arrives the screen is the dark
+     ground with the paw bar. The paws are the only thing that moves before the fade-out, and only
+     opacity animates, so it stays smooth while the page loads underneath.
    Plain CSS, so it never waits on a script; the head script skips it for the rest of the visit
    and on a tap or Esc; reduced motion never shows it. */
 .splash {
@@ -908,7 +909,7 @@
   inset: 0;
   z-index: 200;
   overflow: hidden;
-  background: var(--color-night) url("data:image/webp;base64,UklGRgYBAABXRUJQVlA4IPoAAAAwBwCdASoYADAAPtFao0yoJSMiKqwBABoJYgCdMoMpDrQBYe86IsO7JbtHRkRj33ZsRQyEyLRpOGJ05OL9k7z0mAAA/uzlQl0LRez/iaMKg/u2O0NCIfZra/bGrsDJyzGI8pGC/vi332FlUdDYR4Sm71+Mk6sN/PSPGiOLeucwh30f/2Y2ScIpYEgojKnbgBUnf/LqKl0mxaZrUznCddDCrb9G+xi7IT3Gn8LWDofNEBeNzblwuaPJJg/7PvYSGLmklF4Kex5lyvezZBcmO4gRPKyS2+qNDAfUXtL9I6fB2AfzT9Lj4FXT48UBZe2OvOEwsW9XCFa9wAAA") center / cover no-repeat;
+  background: var(--color-night);
   will-change: opacity;
   /* The fade animates opacity alone so it runs on the compositor (an animation that also changes
      visibility cannot), and a separate step hides the splash once the fade is done. */
@@ -930,7 +931,6 @@
   inset: 0;
   width: 100%;
   height: 100%;
-  animation: tu-fade-in 350ms ease-out both;
 }
 .splash-bar {
   position: absolute;
@@ -958,10 +958,6 @@
   animation: tu-paw-on 320ms ease-out both;
 }
 @media (min-aspect-ratio: 3/4) {
-  .splash {
-    background-image: url("data:image/webp;base64,UklGRgABAABXRUJQVlA4IPQAAABQBwCdASoqABgAPtFcqE4oJSQiKrgKAQAaCWIAnTM9xShAATrfTHFsdq/DnRMll85iSahjcLL8FMrOZMDxv8Cs5VYgAP7sQoqozDV4TJjmba0GdpPe5nFxW0Hy2W8OE6qzoIwD1cPh7GJJ1S6Ld3DJrxsRZX4nWJOx87GuYX6zhDaUeE8we7DWI+dQbI/HVnCwezmyhRjHqPAnbOo9i4Gc2Dy67cy5+rSHgNmde+UfVA3fvpwydE8m3Fy1bnXW3Rxp5SypvU0xYriWcYtRhjQZNDg4mlC2UD4MEpk4CUJC6B4Bn0nlr2KdSxx7YZM/hkFVQAAA");
-    background-position: 50% 60%;
-  }
   .splash-art {
     top: 60%;
     transform: translate(-50%, -60%);
@@ -974,11 +970,6 @@
     top: calc(81.83% - 2px);
     width: calc(27.51% + 4px);
     height: calc(5.1% + 4px);
-  }
-}
-@keyframes tu-fade-in {
-  from {
-    opacity: 0;
   }
 }
 @keyframes tu-paw-on {
