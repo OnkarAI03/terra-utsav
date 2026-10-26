@@ -29,6 +29,11 @@ describe("navigation", () => {
     expect(screen.getByRole("link", { name: "Meet the Team" })).toHaveAttribute("href", "/team");
   });
 
+  it("has a Feedback & Selfie tab in the main navigation", () => {
+    render(<NavLinks items={MAIN_NAV} />);
+    expect(screen.getByRole("link", { name: "Feedback & Selfie" })).toHaveAttribute("href", "/feedback");
+  });
+
   it("opens and closes the mobile menu with the button and Escape", () => {
     render(<MobileMenu items={MAIN_NAV} />);
     const button = screen.getByRole("button", { name: "Open menu" });
