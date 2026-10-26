@@ -76,18 +76,3 @@ export interface TeamData {
   mentorsArePreview: boolean;
   studentsArePreview: boolean;
 }
-
-export type CouponStatus = "valid" | "redeemed" | "expired" | "void" | "invalid" | "rate_limited";
-
-export interface WalletCoupon {
-  id: string;
-  code: string;
-  label: string;
-  valueText: string | null;
-  status: "issued" | "redeemed" | "void";
-  issuedAt: string;
-  expiresAt: string | null;
-  lastRedeemedAt: string | null;
-  maxRedemptions: number;
-  redemptionCount: number;
-}

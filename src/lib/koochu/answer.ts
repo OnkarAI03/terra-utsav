@@ -444,10 +444,3 @@ export function answer(question: string, facts: KoochuFacts): KoochuReply {
 
   return reply(best[0], facts, tokens);
 }
-
-export const KOOCHU_GREETING: KoochuReply = {
-  topic: "greeting",
-  text: "Meow! I'm Mini, the TERRA UTSAV kitten. Ask me anything about the stall: timings, the menu, my game and its prizes, or the brick challenge. I only answer from this website.",
-  links: [],
-  chips: DEFAULT_CHIPS,
-};

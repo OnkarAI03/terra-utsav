@@ -273,7 +273,3 @@ export function resolveLevel(
     lastTapAt: ordered.length ? Math.max(0, ordered[ordered.length - 1].t) : 0,
   };
 }
-
-export function catsInSchedule(schedule: Spawn[]): number {
-  return schedule.filter((s) => s.kind === "cat").length;
-}

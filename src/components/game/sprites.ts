@@ -1,7 +1,5 @@
 "use client";
 
-import type { DecoyType } from "@/lib/game/engine";
-
 export const SPRITE_SRC = {
   peek: "/images/game/koochu-peek.webp",
   run1: "/images/game/run-1.webp",
@@ -38,10 +36,3 @@ export function loadSprites(): Promise<Sprites> {
   });
   return cache;
 }
-
-export const DECOY_LABEL: Record<DecoyType, string> = {
-  cupcake: "cupcake",
-  chilli: "chilli",
-  nacho: "nacho chip",
-  chocolate: "chocolate bar",
-};
