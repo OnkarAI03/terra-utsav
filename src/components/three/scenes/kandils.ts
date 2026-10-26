@@ -234,7 +234,6 @@ export function mount(canvas: HTMLCanvasElement, { onFirstFrame }: MountOptions)
   return {
     setActive: stage.setActive,
     resize: stage.resize,
-    advance: stage.advance,
     dispose() {
       window.removeEventListener("pointermove", onMove);
       stage.dispose();

@@ -1,5 +1,6 @@
 import {
   ACESFilmicToneMapping,
+  HalfFloatType,
   type Material,
   type Mesh,
   type Object3D,
@@ -9,6 +10,7 @@ import {
   SRGBColorSpace,
   type Texture,
   WebGLRenderer,
+  WebGLRenderTarget,
 } from "three";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 
@@ -17,8 +19,6 @@ export interface SceneHandle {
   setActive(active: boolean): void;
   resize(width: number, height: number): void;
   dispose(): void;
-  /** Step the scene forward by `seconds` at 60 fps and draw once. For deterministic visual checks. */
-  advance?(seconds: number): void;
 }
 
 export interface MountOptions {
@@ -29,14 +29,36 @@ export interface MountOptions {
 export type FrameFn = (dt: number, t: number) => void;
 
 /**
+ * The soft studio lighting the glossy scenes reflect. PMREMGenerator renders it synchronously, so
+ * its heaviest shaders (the room's standard materials) are first compiled in the background with
+ * the settings PMREM renders them with: into a linear render target, without tone mapping.
+ */
+async function buildEnvironment(renderer: WebGLRenderer): Promise<Texture> {
+  const room = new RoomEnvironment();
+  const target = new WebGLRenderTarget(1, 1, { type: HalfFloatType });
+  renderer.setRenderTarget(target);
+  const ready = renderer.compileAsync(room, new PerspectiveCamera(90, 1, 0.1, 100));
+  renderer.setRenderTarget(null);
+  await ready.catch(() => undefined);
+  target.dispose();
+  const pmrem = new PMREMGenerator(renderer);
+  const texture = pmrem.fromScene(room, 0.04).texture;
+  pmrem.dispose();
+  return texture;
+}
+
+/**
  * A renderer, scene, camera and a render loop that only runs while the canvas is on screen.
- * Time is clamped so a tab coming back from the background does not jump.
+ * Time is clamped so a tab coming back from the background does not jump. The shaders compile in
+ * the background before the first frame (KHR_parallel_shader_compile, used by compileAsync):
+ * compiling them on first draw froze the page for up to half a second while it scrolled, most of
+ * all on Windows. The drawn poster stays up until then.
  */
 export function createStage(
   canvas: HTMLCanvasElement,
   { fov = 35, dprMax = 2, environment = false, onFirstFrame }: { fov?: number; dprMax?: number; environment?: boolean; onFirstFrame?: () => void },
 ) {
-  const renderer = new WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: "high-performance" });
+  const renderer = new WebGLRenderer({ canvas, antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, dprMax));
   renderer.outputColorSpace = SRGBColorSpace;
   renderer.toneMapping = ACESFilmicToneMapping;
@@ -46,12 +68,6 @@ export function createStage(
   const camera = new PerspectiveCamera(fov, 1, 0.1, 5000);
 
   let envTexture: Texture | null = null;
-  if (environment) {
-    const pmrem = new PMREMGenerator(renderer);
-    envTexture = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
-    scene.environment = envTexture;
-    pmrem.dispose();
-  }
 
   const frames: FrameFn[] = [];
   const resizers: ((w: number, h: number) => void)[] = [];
@@ -62,8 +78,36 @@ export function createStage(
   let announced = false;
   let width = 0;
   let height = 0;
+  let compile: "waiting" | "running" | "done" = "waiting";
+  let disposed = false;
+
+  // Before the first frame: the lighting (it changes the shaders), then every shader in the scene.
+  const prepare = async () => {
+    if (environment) {
+      const texture = await buildEnvironment(renderer);
+      if (disposed) {
+        texture.dispose();
+        return;
+      }
+      envTexture = texture;
+      scene.environment = texture;
+    }
+    await renderer.compileAsync(scene, camera);
+  };
 
   const draw = () => {
+    if (compile !== "done") {
+      if (compile === "waiting") {
+        compile = "running";
+        prepare()
+          .catch(() => undefined)
+          .then(() => {
+            compile = "done";
+            if (!disposed && !active) draw();
+          });
+      }
+      return;
+    }
     renderer.render(scene, camera);
     if (!announced) {
       announced = true;
@@ -106,14 +150,6 @@ export function createStage(
         cancelAnimationFrame(raf);
       }
     },
-    advance(seconds: number) {
-      const step = 1 / 60;
-      for (let done = 0; done < seconds; done += step) {
-        elapsed += step;
-        for (const f of frames) f(step, elapsed);
-      }
-      draw();
-    },
     resize(w: number, h: number) {
       if (!w || !h || (w === width && h === height)) return;
       width = w;
@@ -125,6 +161,7 @@ export function createStage(
       if (!active) draw();
     },
     dispose() {
+      disposed = true;
       cancelAnimationFrame(raf);
       disposeTree(scene);
       envTexture?.dispose();
@@ -133,8 +170,6 @@ export function createStage(
     },
   };
 }
-
-export type Stage = ReturnType<typeof createStage>;
 
 /** Frees every geometry, material and texture under `root`. */
 export function disposeTree(root: Object3D) {

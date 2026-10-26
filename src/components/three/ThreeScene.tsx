@@ -7,13 +7,17 @@ import { canRender3D, whenIdle } from "./support";
 
 export type SceneLoader = () => Promise<{ mount: (canvas: HTMLCanvasElement, options: MountOptions) => SceneHandle }>;
 
+// Scenes start one at a time, each once the page is idle, so building one never lands on another,
+// on the page's own start-up or in the middle of a scroll.
+let startQueue: Promise<void> = Promise.resolve();
+
 /**
  * A live three.js scene with a drawn poster underneath.
  *
  * - The poster is the complete artwork. Visitors who get no 3D (reduced motion, data saver, very
  *   low memory, no WebGL 2, or a screen narrower than `minWidth`) only ever see the poster.
- * - three.js is fetched only when the scene comes near the viewport (`defer` also waits for the
- *   page to finish loading and go idle, for scenes on the first screen).
+ * - three.js is fetched when the scene is within about a screen and a half of the viewport, once
+ *   the page has finished loading and the browser is idle, one scene at a time.
  * - The scene renders only while it is on screen and the tab is visible; the canvas fades in over
  *   the poster after its first frame.
  * - `load` must be a stable function defined at module level.
@@ -25,7 +29,6 @@ export function ThreeScene({
   canvasClassName,
   interactive = false,
   minWidth = 0,
-  defer = false,
   label,
   children,
 }: {
@@ -35,7 +38,6 @@ export function ThreeScene({
   canvasClassName?: string;
   interactive?: boolean;
   minWidth?: number;
-  defer?: boolean;
   /** One stable description of the picture, whether the drawing or the live scene is showing. */
   label?: string;
   /** Overlays, e.g. a hint. Style with `group-data-[three=live]/three:` to show them only over the live scene. */
@@ -55,19 +57,22 @@ export function ThreeScene({
     let onScreen = false;
     const sync = () => handle?.setActive(onScreen && !document.hidden);
 
-    const start = async () => {
-      try {
-        if (defer) await whenIdle();
-        const mod = await load();
-        if (cancelled) return;
-        handle = mod.mount(cv, { onFirstFrame: () => !cancelled && setReady(true) });
-        const box = el.getBoundingClientRect();
-        handle.resize(box.width, box.height);
-        sync();
-      } catch {
-        // No 3D for this visitor: the poster is already the full artwork.
-        handle = null;
-      }
+    const start = () => {
+      startQueue = startQueue.then(async () => {
+        try {
+          await whenIdle();
+          if (cancelled) return;
+          const mod = await load();
+          if (cancelled) return;
+          handle = mod.mount(cv, { onFirstFrame: () => !cancelled && setReady(true) });
+          const box = el.getBoundingClientRect();
+          handle.resize(box.width, box.height);
+          sync();
+        } catch {
+          // No 3D for this visitor: the poster is already the full artwork.
+          handle = null;
+        }
+      });
     };
 
     const near = new IntersectionObserver(
@@ -77,7 +82,7 @@ export function ThreeScene({
           void start();
         }
       },
-      { rootMargin: "320px 0px" },
+      { rootMargin: "1200px 0px" },
     );
     const seen = new IntersectionObserver((entries) => {
       onScreen = entries[entries.length - 1]?.isIntersecting ?? false;
@@ -108,7 +113,7 @@ export function ThreeScene({
       document.removeEventListener("visibilitychange", sync);
       handle?.dispose();
     };
-  }, [load, minWidth, defer]);
+  }, [load, minWidth]);
 
   return (
     // cn() only joins classes, so add `relative` only when the caller has not positioned the wrapper.

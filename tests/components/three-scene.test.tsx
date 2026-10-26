@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { act, cleanup, render, screen } from "@testing-library/react";
+import { act, cleanup, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ThreeScene } from "@/components/three/ThreeScene";
 import type { MountOptions } from "@/components/three/stage";
@@ -76,8 +76,9 @@ describe("ThreeScene", () => {
     await act(async () => {
       MockIntersectionObserver.triggerAll(true);
     });
-    expect(load).toHaveBeenCalledTimes(1);
-    expect(handle.setActive).toHaveBeenCalledWith(true);
+    // Scenes start once the browser is idle, one at a time.
+    await waitFor(() => expect(load).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(handle.setActive).toHaveBeenCalledWith(true));
     expect(state(container)).toBe("poster");
 
     act(() => firstFrame());
